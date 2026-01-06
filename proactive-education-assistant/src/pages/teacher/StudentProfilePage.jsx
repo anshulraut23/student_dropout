@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { students } from "../data/students";
-import RiskBadge from "../components/RiskBadge";
+import { students } from "../../data/students";
+import RiskBadge from "../../components/RiskBadge";
 import {
   FaArrowLeft,
   FaUser,

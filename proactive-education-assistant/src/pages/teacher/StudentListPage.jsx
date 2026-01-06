@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { students as initialStudents } from "../data/students";
-import { useTeacher } from "../context/TeacherContext";
-import RiskBadge from "../components/RiskBadge";
+import { students as initialStudents } from "../../data/students";
+import { useTeacher } from "../../context/TeacherContext";
+import RiskBadge from "../../components/RiskBadge";
 import {
   FaList,
   FaUserPlus,
@@ -210,7 +210,7 @@ export default function StudentListPage() {
 
         <div className="flex gap-6">
           {/* Left: Vertical Tabs */}
-          <div className="w-full md:w-48 flex-shrink-0">
+          <div className="w-full md:w-48 shrink-0">
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -503,9 +503,9 @@ export default function StudentListPage() {
                       }`}
                     >
                       {importStatus === "success" ? (
-                        <FaCheck className="text-green-600 mt-0.5 flex-shrink-0" />
+                        <FaCheck className="text-green-600 mt-0.5 shrink-0" />
                       ) : (
-                        <FaExclamationTriangle className="text-red-600 mt-0.5 flex-shrink-0" />
+                        <FaExclamationTriangle className="text-red-600 mt-0.5 shrink-0" />
                       )}
                       <p
                         className={`text-sm ${

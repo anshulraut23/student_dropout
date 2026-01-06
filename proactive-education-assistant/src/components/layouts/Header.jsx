@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { FaGraduationCap, FaBars, FaTimes } from 'react-icons/fa';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { FaGraduationCap, FaBars, FaTimes, FaUserCircle } from 'react-icons/fa';
+import { useTeacher } from '../../context/TeacherContext';
 import LoginModal from '../auth/login.jsx';
 import RegisterModal from '../auth/register.jsx';
 
@@ -9,7 +10,24 @@ function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [authType, setAuthType] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { teacher } = useTeacher();
+
+  // Check login status
+  useEffect(() => {
+    const checkLoginStatus = () => {
+      setIsLoggedIn(!!localStorage.getItem("loggedIn"));
+    };
+    
+    checkLoginStatus();
+    window.addEventListener("localStorageUpdate", checkLoginStatus);
+    
+    return () => {
+      window.removeEventListener("localStorageUpdate", checkLoginStatus);
+    };
+  }, []);
 
   // Navigation items
   const navItems = [
@@ -88,26 +106,39 @@ function Header() {
 
             {/* Right: Auth Buttons (Desktop) */}
             <div className="hidden md:flex items-center gap-3">
-              <button
-                onClick={() => {
-                  setAuthType('login');
-                  setOpen(true);
-                }}
-                className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700
-                           border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => {
-                  setAuthType('register');
-                  setOpen(true);
-                }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600
-                           rounded-md hover:bg-blue-700 transition-colors shadow-sm"
-              >
-                Sign Up
-              </button>
+              {isLoggedIn ? (
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
+                  title="View Profile"
+                >
+                  <FaUserCircle className="text-2xl" />
+                  <span className="text-sm font-medium">{teacher?.name?.split(' ')[0] || 'Profile'}</span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setAuthType('login');
+                      setOpen(true);
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700
+                               border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAuthType('register');
+                      setOpen(true);
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600
+                               rounded-md hover:bg-blue-700 transition-colors shadow-sm"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
             </div>
 
             {/* Mobile Menu Button */}
@@ -148,28 +179,43 @@ function Header() {
 
             {/* Mobile Auth Buttons */}
             <div className="pt-4 border-t border-gray-200 space-y-2">
-              <button
-                onClick={() => {
-                  setAuthType('login');
-                  setOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700
-                           border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
-              >
-                Login
-              </button>
-              <button
-                onClick={() => {
-                  setAuthType('register');
-                  setOpen(true);
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600
-                           rounded-md hover:bg-blue-700 transition-colors"
-              >
-                Sign Up
-              </button>
+              {isLoggedIn ? (
+                <button
+                  onClick={() => {
+                    navigate('/profile');
+                    setMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <FaUserCircle className="text-xl" />
+                  <span className="font-medium">{teacher?.name || 'My Profile'}</span>
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => {
+                      setAuthType('login');
+                      setOpen(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700
+                               border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAuthType('register');
+                      setOpen(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600
+                               rounded-md hover:bg-blue-700 transition-colors"
+                  >
+                    Sign Up
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

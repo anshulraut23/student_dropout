@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
-import { students } from "../data/students";
-import StatCard from "../components/StatCard";
-import RiskBadge from "../components/RiskBadge";
+import { students } from "../../data/students";
+import StatCard from "../../components/StatCard";
+import RiskBadge from "../../components/RiskBadge";
 import {
   FaUsers,
   FaExclamationTriangle,

@@ -10,7 +10,13 @@ export default function LoginPage() {
   const handleLogin = () => {
     localStorage.setItem("loggedIn", "true");
     localStorage.setItem("userRole", role);
-    navigate("/dashboard");
+    
+    // Redirect based on role
+    if (role === "coordinator") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   return (

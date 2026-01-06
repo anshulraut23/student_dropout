@@ -69,13 +69,28 @@ function Modal({ isOpen, onClose, onSwitchToRegister }) {
     // Login successful
     if (role === "teacher") {
       loginTeacher(teacher);
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userRole", "teacher");
+      // Trigger custom event for route update
+      window.dispatchEvent(new Event("localStorageUpdate"));
+      setEmail("");
+      setPassword("");
+      setRole("teacher");
+      onClose();
+      setTimeout(() => navigate("/dashboard"), 100);
+    } else if (role === "coordinator") {
+      // Admin login
+      localStorage.setItem("loggedIn", "true");
+      localStorage.setItem("userRole", "admin");
+      localStorage.setItem("adminData", JSON.stringify(teacher));
+      // Trigger custom event for route update
+      window.dispatchEvent(new Event("localStorageUpdate"));
+      setEmail("");
+      setPassword("");
+      setRole("teacher");
+      onClose();
+      setTimeout(() => navigate("/admin/dashboard"), 100);
     }
-    
-    setEmail("");
-    setPassword("");
-    setRole("teacher");
-    onClose();
-    navigate("/dashboard");
   };
   
   return (
@@ -90,7 +105,7 @@ function Modal({ isOpen, onClose, onSwitchToRegister }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex flex-col items-center mb-4">
+        <div className="flex col items-center mb-4">
           <div className="w-14 h-14 bg-linear-to-br from-blue-500 to-teal-500 rounded-full flex items-center justify-center mb-3">
             <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
@@ -116,11 +131,11 @@ function Modal({ isOpen, onClose, onSwitchToRegister }) {
             }`}>
               <div className="flex items-start gap-2">
                 {pendingApproval ? (
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
                   </svg>
                 ) : (
-                  <svg className="w-4 h-4 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <svg className="w-4 h-4 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                   </svg>
                 )}
@@ -217,9 +232,11 @@ function Modal({ isOpen, onClose, onSwitchToRegister }) {
             </svg>
             Works offline after first login.
           </p>
-          <p className="text-xs text-center text-gray-400 italic">
-            Test: teacher1@school.org (1 class) or teacher2@school.org (2 classes) - Password: 123
-          </p>
+          <div className="text-xs text-center text-gray-400 space-y-0.5">
+            <p className="font-semibold text-gray-500">Demo Credentials:</p>
+            <p>Teacher: <span className="text-blue-600">teacher1@school.org</span> or <span className="text-blue-600">teacher2@school.org</span></p>
+            <p>Admin: <span className="text-purple-600">admin</span> / Password: <span className="font-mono">123</span></p>
+          </div>
         </div>
 
         {/* Switch to Register */}

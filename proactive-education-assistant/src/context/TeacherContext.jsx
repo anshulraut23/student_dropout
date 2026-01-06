@@ -44,6 +44,10 @@ export const TeacherProvider = ({ children }) => {
     setSelectedClass(null);
     localStorage.removeItem('teacherData');
     localStorage.removeItem('loggedIn');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('adminData');
+    // Trigger custom event for route update
+    window.dispatchEvent(new Event("localStorageUpdate"));
   };
 
   const value = {
