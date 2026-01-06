@@ -4,6 +4,8 @@ import { FaGraduationCap, FaBars, FaTimes, FaUserCircle } from 'react-icons/fa';
 import { useTeacher } from '../../context/TeacherContext';
 import LoginModal from '../auth/login.jsx';
 import RegisterModal from '../auth/register.jsx';
+import { useTranslation } from 'react-i18next';
+import LanguageSelector from '../LanguageSelector.jsx';
 
 function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -14,6 +16,7 @@ function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { teacher } = useTeacher();
+  const { t } = useTranslation();
 
   // Check login status
   useEffect(() => {
@@ -31,11 +34,10 @@ function Header() {
 
   // Navigation items
   const navItems = [
-    { path: '/', label: 'Dashboard' },
-    { path: '/students', label: 'Students' },
-
-    { path: '/about', label: 'About' },
-    { path: '/contact', label: 'Contact' },
+    { path: isLoggedIn ? '/dashboard' : '/', label: t('nav.dashboard') },
+    { path: '/students', label: t('nav.students') },
+    { path: '/about', label: t('nav.about') },
+    { path: '/contact', label: t('nav.contact') },
   ];
 
   // Handle scroll effect
@@ -73,13 +75,13 @@ function Header() {
               </div>
               <div className="hidden sm:block">
                 <h1 className="text-xl font-bold text-gray-800 leading-tight group-hover:text-blue-600 transition-colors">
-                  Proactive Education Assistant
+                  {t('app.brand_full')}
                 </h1>
-                <p className="text-xs text-gray-500">Early Dropout Prevention System</p>
+                <p className="text-xs text-gray-500">{t('app.tagline')}</p>
               </div>
               <div className="sm:hidden">
                 <h1 className="text-lg font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
-                  EduPro
+                  {t('app.brand_short')}
                 </h1>
               </div>
             </Link>
@@ -110,10 +112,10 @@ function Header() {
                 <button
                   onClick={() => navigate('/profile')}
                   className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all"
-                  title="View Profile"
+                  title={t('auth.profile')}
                 >
                   <FaUserCircle className="text-2xl" />
-                  <span className="text-sm font-medium">{teacher?.name?.split(' ')[0] || 'Profile'}</span>
+                  <span className="text-sm font-medium">{teacher?.name?.split(' ')[0] || t('auth.profile')}</span>
                 </button>
               ) : (
                 <>
@@ -125,7 +127,7 @@ function Header() {
                     className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700
                                border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
                   >
-                    Login
+                    {t('auth.login')}
                   </button>
                   <button
                     onClick={() => {
@@ -135,17 +137,18 @@ function Header() {
                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600
                                rounded-md hover:bg-blue-700 transition-colors shadow-sm"
                   >
-                    Sign Up
+                    {t('auth.signup')}
                   </button>
                 </>
               )}
+              <LanguageSelector />
             </div>
 
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
-              aria-label="Toggle menu"
+              aria-label={t('aria.toggle_menu')}
             >
               {mobileMenuOpen ? <FaTimes size={24} /> : <FaBars size={24} />}
             </button>
@@ -188,7 +191,7 @@ function Header() {
                   className="w-full flex items-center justify-center gap-2 px-4 py-3 text-gray-700 bg-gray-50 rounded-md hover:bg-gray-100 transition-colors"
                 >
                   <FaUserCircle className="text-xl" />
-                  <span className="font-medium">{teacher?.name || 'My Profile'}</span>
+                  <span className="font-medium">{teacher?.name || t('auth.my_profile')}</span>
                 </button>
               ) : (
                 <>
@@ -201,7 +204,7 @@ function Header() {
                     className="w-full px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700
                                border border-blue-600 rounded-md hover:bg-blue-50 transition-colors"
                   >
-                    Login
+                    {t('auth.login')}
                   </button>
                   <button
                     onClick={() => {
@@ -212,10 +215,13 @@ function Header() {
                     className="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600
                                rounded-md hover:bg-blue-700 transition-colors"
                   >
-                    Sign Up
+                    {t('auth.signup')}
                   </button>
                 </>
               )}
+              <div className="pt-2">
+                <LanguageSelector className="w-full" />
+              </div>
             </div>
           </div>
         </div>

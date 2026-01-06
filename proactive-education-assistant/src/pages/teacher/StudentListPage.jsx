@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { students as initialStudents } from "../../data/students";
 import { useTeacher } from "../../context/TeacherContext";
 import RiskBadge from "../../components/RiskBadge";
+import { useTranslation } from "react-i18next";
 import {
   FaList,
   FaUserPlus,
@@ -19,6 +20,7 @@ import {
 
 export default function StudentListPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { teacher, selectedClass, setSelectedClass, hasMultipleClasses } = useTeacher();
   const [activeTab, setActiveTab] = useState("list");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -32,11 +34,11 @@ export default function StudentListPage() {
 
   // Tabs configuration
   const tabs = [
-    { id: "list", label: "List Students", icon: FaList },
-    { id: "add", label: "Add Student", icon: FaUserPlus },
-    { id: "import", label: "Import Students", icon: FaFileImport },
-    { id: "attendance", label: "Attendance Upload", icon: FaCalendarCheck },
-    { id: "marks", label: "Marks Upload", icon: FaBook },
+    { id: "list", label: t('students.tab_list'), icon: FaList },
+    { id: "add", label: t('students.tab_add'), icon: FaUserPlus },
+    { id: "import", label: t('students.tab_import'), icon: FaFileImport },
+    { id: "attendance", label: t('students.tab_attendance'), icon: FaCalendarCheck },
+    { id: "marks", label: t('students.tab_marks'), icon: FaBook },
   ];
 
   // Get unique grades
@@ -172,8 +174,8 @@ export default function StudentListPage() {
       <div className="max-w-7xl mx-auto">
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Student Management</h1>
-          <p className="text-gray-600">Manage all student-related activities in one place</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('students.page_title_management')}</h1>
+          <p className="text-gray-600">{t('students.page_subtitle_management')}</p>
         </div>
 
         {/* Class Selector (only shown if teacher has multiple classes) */}
@@ -183,7 +185,7 @@ export default function StudentListPage() {
               <FaChalkboardTeacher className="text-blue-600 text-xl" />
               <div className="flex-1">
                 <label htmlFor="classSelect" className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Class
+                  {t('students.select_class')}
                 </label>
                 <select
                   id="classSelect"
@@ -191,7 +193,7 @@ export default function StudentListPage() {
                   onChange={(e) => setSelectedClass(e.target.value)}
                   className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
-                  <option value="">All Classes</option>
+                  <option value="">{t('students.all_classes')}</option>
                   {teacher.assignedClasses.map((cls) => (
                     <option key={cls} value={cls}>
                       {cls}
@@ -201,7 +203,7 @@ export default function StudentListPage() {
               </div>
               {selectedClass && (
                 <div className="text-sm text-gray-600">
-                  Showing students from <span className="font-semibold text-blue-600">{selectedClass}</span>
+                  {t('students.showing_from')} <span className="font-semibold text-blue-600">{selectedClass}</span>
                 </div>
               )}
             </div>
@@ -216,7 +218,7 @@ export default function StudentListPage() {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden w-full mb-4 flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200"
             >
-              <span className="font-medium text-gray-700">Tabs</span>
+              <span className="font-medium text-gray-700">{t('students.tabs')}</span>
               <FaBars />
             </button>
 
@@ -264,32 +266,32 @@ export default function StudentListPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Risk Level
+                        {t('students.risk_level')}
                       </label>
                       <select
                         value={riskFilter}
                         onChange={(e) => setRiskFilter(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="all">All Students</option>
-                        <option value="high">High Risk</option>
-                        <option value="medium">Medium Risk</option>
-                        <option value="low">Low Risk</option>
+                        <option value="all">{t('students.filter_all')}</option>
+                        <option value="high">{t('students.filter_high')}</option>
+                        <option value="medium">{t('students.filter_medium')}</option>
+                        <option value="low">{t('students.filter_low')}</option>
                       </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Class
+                        {t('students.class')}
                       </label>
                       <select
                         value={gradeFilter}
                         onChange={(e) => setGradeFilter(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="all">All Grades</option>
+                        <option value="all">{t('students.all_grades')}</option>
                         {uniqueGrades.map((grade) => (
                           <option key={grade} value={grade}>
-                            Class {grade}
+                            {t('students.class')} {grade}
                           </option>
                         ))}
                       </select>
@@ -305,19 +307,19 @@ export default function StudentListPage() {
                         <thead className="bg-gray-50 border-b border-gray-200">
                           <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
-                              Student Name
+                              {t('students.student_name')}
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
-                              Class
+                              {t('students.class')}
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
-                              Attendance
+                              {t('students.attendance')}
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
-                              Risk Status
+                              {t('students.risk_status')}
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
-                              Action
+                              {t('students.action')}
                             </th>
                           </tr>
                         </thead>
@@ -340,7 +342,7 @@ export default function StudentListPage() {
                                   className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                                 >
                                   <FaEye className="text-xs" />
-                                  View
+                                  {t('students.view')}
                                 </button>
                               </td>
                             </tr>
@@ -350,7 +352,7 @@ export default function StudentListPage() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <p className="text-gray-500">No students found.</p>
+                      <p className="text-gray-500">{t('students.no_students')}</p>
                     </div>
                   )}
                 </div>
@@ -374,13 +376,13 @@ export default function StudentListPage() {
                           onClick={() => navigate(`/students/${student.id}`)}
                           className="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-medium"
                         >
-                          View Profile
+                          {t('students.view_profile')}
                         </button>
                       </div>
                     ))
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">No students found.</p>
+                      <p className="text-gray-500">{t('students.no_students')}</p>
                     </div>
                   )}
                 </div>
@@ -390,11 +392,11 @@ export default function StudentListPage() {
             {/* Tab 2: Add Student */}
             {activeTab === "add" && (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Add New Student</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">{t('students.add_new_student')}</h2>
                 <form onSubmit={handleAddStudent} className="space-y-4 max-w-md">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Student Name *
+                      {t('students.student_name')} *
                     </label>
                     <input
                       type="text"

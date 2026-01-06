@@ -1,6 +1,8 @@
 import { FaGraduationCap, FaHeart, FaEnvelope, FaPhone, FaGithub, FaLinkedin } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 
 function Footer() {
+  const { t } = useTranslation();
   return (
     <footer className="bg-linear-to-r from-gray-800 to-gray-900 text-gray-300 mt-auto">
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -9,36 +11,35 @@ function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <FaGraduationCap className="text-teal-400 text-xl" />
-              <h3 className="text-white font-semibold text-lg">Proactive Education Assistant</h3>
+              <h3 className="text-white font-semibold text-lg">{t('app.brand_full')}</h3>
             </div>
             <p className="text-sm text-gray-400 leading-relaxed">
-              Empowering educators and NGO workers to identify at-risk students early and
-              prevent school dropouts through data-driven insights.
+              {t('landing.subheadline')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h4 className="text-white font-semibold mb-3">Quick Links</h4>
+            <h4 className="text-white font-semibold mb-3">{t('footer.quick_links')}</h4>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="/" className="hover:text-teal-400 transition-colors">Dashboard</a>
+                <a href="/" className="hover:text-teal-400 transition-colors">{t('footer.dashboard')}</a>
               </li>
               <li>
-                <a href="/students" className="hover:text-teal-400 transition-colors">Student List</a>
+                <a href="/students" className="hover:text-teal-400 transition-colors">{t('footer.student_list')}</a>
               </li>
               <li>
-                <a href="/help" className="hover:text-teal-400 transition-colors">Help & Support</a>
+                <a href="/help" className="hover:text-teal-400 transition-colors">{t('footer.help_support')}</a>
               </li>
               <li>
-                <a href="/about" className="hover:text-teal-400 transition-colors">About Us</a>
+                <a href="/about" className="hover:text-teal-400 transition-colors">{t('footer.about_us')}</a>
               </li>
             </ul>
           </div>
 
           {/* Contact Info */}
           <div>
-            <h4 className="text-white font-semibold mb-3">Contact Us</h4>
+            <h4 className="text-white font-semibold mb-3">{t('footer.contact_us')}</h4>
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <FaEnvelope className="text-teal-400" />
@@ -67,10 +68,10 @@ function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 mt-8 pt-6 text-center">
           <p className="text-sm text-gray-400 flex items-center justify-center gap-1 flex-wrap">
-            <span>© 2026 Proactive Education Assistant.</span>
+            <span>{t('footer.copyright_short')}</span>
             <span className="hidden sm:inline">•</span>
             <span className="flex items-center gap-1">
-              Built with <FaHeart className="text-red-500 text-xs" /> for educators and students
+              <FaHeart className="text-red-500 text-xs" /> {t('footer.built_with_love')}
             </span>
           </p>
         </div>

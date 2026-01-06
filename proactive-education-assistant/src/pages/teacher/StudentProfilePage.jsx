@@ -15,10 +15,14 @@ import {
   FaBrain,
   FaComments,
 } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { translateText } from "../../utils/googleTranslate";
 
 export default function StudentProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
 
   // Find student from mock data
   const student = students.find((s) => s.id === parseInt(id));
@@ -29,15 +33,15 @@ export default function StudentProfilePage() {
       <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
         <div className="text-center">
           <FaUser className="mx-auto text-6xl text-gray-300 mb-4" />
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">Student Not Found</h1>
-          <p className="text-gray-600 mb-6">The student you're looking for doesn't exist.</p>
+          <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('teacher.student_not_found')}</h1>
+          <p className="text-gray-600 mb-6">{t('teacher.student_not_found_desc')}</p>
           <button
             onClick={() => navigate("/students")}
             className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white
                        rounded-lg hover:bg-blue-700 transition-colors"
           >
             <FaArrowLeft />
-            Back to Students
+            {t('teacher.back_to_students')}
           </button>
         </div>
       </div>
@@ -46,6 +50,22 @@ export default function StudentProfilePage() {
 
   // Mock data for this student
   const riskExplanation = getRiskExplanation(student);
+  const [riskText, setRiskText] = useState(riskExplanation);
+
+  useEffect(() => {
+    let isMounted = true;
+    const run = async () => {
+      const lng = i18n.language || 'en';
+      if (lng !== 'en') {
+        const translated = await translateText(riskExplanation, lng, 'en');
+        if (isMounted) setRiskText(translated);
+      } else {
+        if (isMounted) setRiskText(riskExplanation);
+      }
+    };
+    run();
+    return () => { isMounted = false; };
+  }, [riskExplanation, i18n.language]);
   const attendanceTrend = getAttendanceTrend(student);
   const academicPerformance = getAcademicPerformance(student);
   const suggestedInterventions = getSuggestedInterventions(student);
@@ -61,10 +81,10 @@ export default function StudentProfilePage() {
                        font-medium mb-4 transition-colors"
           >
             <FaArrowLeft />
-            Back to Students
+            {t('teacher.back_to_students')}
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Student Profile</h1>
-          <p className="text-gray-600">Detailed risk analysis and engagement overview</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('teacher.student_profile_title')}</h1>
+          <p className="text-gray-600">{t('teacher.student_profile_subtitle')}</p>
         </div>
 
         {/* 2️⃣ Student Basic Information Card */}
@@ -83,7 +103,7 @@ export default function StudentProfilePage() {
             <div className="flex flex-col gap-2">
               <RiskBadge level={student.riskLevel} />
               <div className="text-sm text-gray-600">
-                Attendance: <span className="font-semibold text-gray-900">{student.attendance}%</span>
+                {t('teacher.attendance_label')}: <span className="font-semibold text-gray-900">{student.attendance}%</span>
               </div>
             </div>
           </div>
@@ -111,9 +131,9 @@ export default function StudentProfilePage() {
             />
             <div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
-                Risk Analysis & Explanation
+                {t('teacher.risk_analysis_title')}
               </h3>
-              <p className="text-gray-800 leading-relaxed">{riskExplanation}</p>
+              <p className="text-gray-800 leading-relaxed">{riskText}</p>
             </div>
           </div>
         </div>
@@ -123,7 +143,7 @@ export default function StudentProfilePage() {
           <div className="flex items-center gap-2 mb-4">
             <FaCalendarCheck className="text-blue-600 text-xl" />
             <h3 className="text-lg font-semibold text-gray-900">
-              Attendance Trend (Last 8 Periods)
+              {t('teacher.attendance_trend_title')}
             </h3>
           </div>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
@@ -134,7 +154,7 @@ export default function StudentProfilePage() {
                     day.present ? "bg-green-500" : "bg-red-500"
                   }`}
                 >
-                  {day.present ? "P" : "A"}
+                  {day.present ? t('teacher.present_short') : t('teacher.absent_short')}
                 </div>
                 <p className="text-xs text-gray-600 mt-1">{day.label}</p>
               </div>
@@ -143,11 +163,11 @@ export default function StudentProfilePage() {
           <div className="mt-4 flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-500 rounded"></div>
-              <span className="text-gray-700">Present</span>
+              <span className="text-gray-700">{t('teacher.present')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-red-500 rounded"></div>
-              <span className="text-gray-700">Absent</span>
+              <span className="text-gray-700">{t('teacher.absent')}</span>
             </div>
           </div>
         </div>
@@ -157,7 +177,7 @@ export default function StudentProfilePage() {
           <div className="flex items-center gap-2 mb-4">
             <FaChartLine className="text-teal-600 text-xl" />
             <h3 className="text-lg font-semibold text-gray-900">
-              Academic Performance Overview
+              {t('teacher.academic_overview_title')}
             </h3>
           </div>
           <div className="space-y-4">
@@ -191,7 +211,7 @@ export default function StudentProfilePage() {
           <div className="flex items-center gap-2 mb-4">
             <FaLightbulb className="text-yellow-600 text-xl" />
             <h3 className="text-lg font-semibold text-gray-900">
-              Suggested Interventions
+              {t('teacher.suggested_interventions_title')}
             </h3>
           </div>
           <div className="space-y-3">
@@ -216,7 +236,7 @@ export default function StudentProfilePage() {
                       : "bg-green-100 text-green-700"
                   }`}
                 >
-                  {intervention.priority}
+                  {t(`teacher.priority_${intervention.priority.toLowerCase()}`)}
                 </span>
               </div>
             ))}
@@ -225,34 +245,34 @@ export default function StudentProfilePage() {
 
         {/* 7️⃣ Action Buttons */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('teacher.quick_actions')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
-              onClick={() => alert("Coming soon: Add Attendance")}
+              onClick={() => alert(t('teacher.coming_soon_add_attendance'))}
               className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600
                          text-white rounded-lg hover:bg-green-700 transition-colors
                          font-medium"
             >
               <FaCalendarCheck />
-              Add Attendance
+              {t('teacher.add_attendance')}
             </button>
             <button
-              onClick={() => alert("Coming soon: Add Academic Score")}
+              onClick={() => alert(t('teacher.coming_soon_add_score'))}
               className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600
                          text-white rounded-lg hover:bg-blue-700 transition-colors
                          font-medium"
             >
               <FaBook />
-              Add Academic Score
+              {t('teacher.add_academic_score')}
             </button>
             <button
-              onClick={() => alert("Coming soon: Add Behaviour Observation")}
+              onClick={() => alert(t('teacher.coming_soon_add_behaviour'))}
               className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600
                          text-white rounded-lg hover:bg-purple-700 transition-colors
                          font-medium"
             >
               <FaComments />
-              Add Behaviour
+              {t('teacher.add_behaviour')}
             </button>
           </div>
         </div>
