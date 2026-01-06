@@ -30,11 +30,11 @@ export default function StudentProfilePage() {
   // If student not found
   if (!student) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
         <div className="text-center">
-          <FaUser className="mx-auto text-6xl text-gray-300 mb-4" />
-          <h1 className="text-2xl font-bold text-gray-800 mb-2">{t('teacher.student_not_found')}</h1>
-          <p className="text-gray-600 mb-6">{t('teacher.student_not_found_desc')}</p>
+          <FaUser className="mx-auto text-6xl text-gray-300 dark:text-gray-600 mb-4" />
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">{t('teacher.student_not_found')}</h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">{t('teacher.student_not_found_desc')}</p>
           <button
             onClick={() => navigate("/students")}
             className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white
@@ -71,7 +71,7 @@ export default function StudentProfilePage() {
   const suggestedInterventions = getSuggestedInterventions(student);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         {/* 1️⃣ Page Header */}
         <div className="mb-6">
@@ -83,12 +83,12 @@ export default function StudentProfilePage() {
             <FaArrowLeft />
             {t('teacher.back_to_students')}
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('teacher.student_profile_title')}</h1>
-          <p className="text-gray-600">{t('teacher.student_profile_subtitle')}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('teacher.student_profile_title')}</h1>
+          <p className="text-gray-600 dark:text-gray-300">{t('teacher.student_profile_subtitle')}</p>
         </div>
 
         {/* 2️⃣ Student Basic Information Card */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-teal-500 rounded-full
@@ -96,14 +96,14 @@ export default function StudentProfilePage() {
                 {student.name.charAt(0)}
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">{student.name}</h2>
-                <p className="text-gray-600">{student.class}</p>
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{student.name}</h2>
+                <p className="text-gray-600 dark:text-gray-300">{student.class}</p>
               </div>
             </div>
             <div className="flex flex-col gap-2">
               <RiskBadge level={student.riskLevel} />
-              <div className="text-sm text-gray-600">
-                {t('teacher.attendance_label')}: <span className="font-semibold text-gray-900">{student.attendance}%</span>
+              <div className="text-sm text-gray-600 dark:text-gray-300">
+                {t('teacher.attendance_label')}: <span className="font-semibold text-gray-900 dark:text-white">{student.attendance}%</span>
               </div>
             </div>
           </div>
@@ -113,10 +113,10 @@ export default function StudentProfilePage() {
         <div
           className={`rounded-lg shadow-md border-l-4 p-6 mb-6 ${
             student.riskLevel === "high"
-              ? "bg-red-50 border-red-500"
+              ? "bg-red-50 dark:bg-red-900/20 border-red-500"
               : student.riskLevel === "medium"
-              ? "bg-yellow-50 border-yellow-500"
-              : "bg-green-50 border-green-500"
+              ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500"
+              : "bg-green-50 dark:bg-green-900/20 border-green-500"
           }`}
         >
           <div className="flex items-start gap-3 mb-4">
@@ -130,19 +130,19 @@ export default function StudentProfilePage() {
               }`}
             />
             <div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
                 {t('teacher.risk_analysis_title')}
               </h3>
-              <p className="text-gray-800 leading-relaxed">{riskText}</p>
+              <p className="text-gray-800 dark:text-gray-200 leading-relaxed">{riskText}</p>
             </div>
           </div>
         </div>
 
         {/* 4️⃣ Attendance Trend Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <FaCalendarCheck className="text-blue-600 text-xl" />
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {t('teacher.attendance_trend_title')}
             </h3>
           </div>
@@ -156,27 +156,27 @@ export default function StudentProfilePage() {
                 >
                   {day.present ? t('teacher.present_short') : t('teacher.absent_short')}
                 </div>
-                <p className="text-xs text-gray-600 mt-1">{day.label}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{day.label}</p>
               </div>
             ))}
           </div>
           <div className="mt-4 flex items-center gap-4 text-sm">
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-green-500 rounded"></div>
-              <span className="text-gray-700">{t('teacher.present')}</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('teacher.present')}</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="w-4 h-4 bg-red-500 rounded"></div>
-              <span className="text-gray-700">{t('teacher.absent')}</span>
+              <span className="text-gray-700 dark:text-gray-300">{t('teacher.absent')}</span>
             </div>
           </div>
         </div>
 
         {/* 5️⃣ Academic Performance Trend */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <FaChartLine className="text-teal-600 text-xl" />
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {t('teacher.academic_overview_title')}
             </h3>
           </div>
@@ -184,12 +184,12 @@ export default function StudentProfilePage() {
             {academicPerformance.map((subject, index) => (
               <div key={index}>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">{subject.name}</span>
-                  <span className="text-sm font-semibold text-gray-900">
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{subject.name}</span>
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
                     {subject.score}%
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all ${
                       subject.score >= 75
@@ -207,10 +207,10 @@ export default function StudentProfilePage() {
         </div>
 
         {/* 6️⃣ Suggested Interventions Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <FaLightbulb className="text-yellow-600 text-xl" />
-            <h3 className="text-lg font-semibold text-gray-900">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {t('teacher.suggested_interventions_title')}
             </h3>
           </div>
@@ -218,22 +218,22 @@ export default function StudentProfilePage() {
             {suggestedInterventions.map((intervention, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200"
+                className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700"
               >
                 <intervention.icon className="text-blue-600 text-xl mt-0.5 flex shrink-0" />
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 mb-1">
+                  <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
                     {intervention.title}
                   </h4>
-                  <p className="text-sm text-gray-700">{intervention.description}</p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300">{intervention.description}</p>
                 </div>
                 <span
                   className={`px-2 py-1 rounded text-xs font-medium ${
                     intervention.priority === "High"
-                      ? "bg-red-100 text-red-700"
+                      ? "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-200"
                       : intervention.priority === "Medium"
-                      ? "bg-yellow-100 text-yellow-700"
-                      : "bg-green-100 text-green-700"
+                      ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-200"
+                      : "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-200"
                   }`}
                 >
                   {t(`teacher.priority_${intervention.priority.toLowerCase()}`)}
@@ -244,8 +244,8 @@ export default function StudentProfilePage() {
         </div>
 
         {/* 7️⃣ Action Buttons */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('teacher.quick_actions')}</h3>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('teacher.quick_actions')}</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               onClick={() => alert(t('teacher.coming_soon_add_attendance'))}

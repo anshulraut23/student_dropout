@@ -1,16 +1,18 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaBook, FaChartLine, FaBell, FaUsers, FaLightbulb, FaShieldAlt, FaMobile, FaArrowRight, FaCheckCircle } from "react-icons/fa";
+import { FaBook, FaChartLine, FaBell, FaUsers, FaLightbulb, FaShieldAlt, FaMobile, FaArrowRight, FaCheckCircle, FaSun, FaMoon } from "react-icons/fa";
 import LoginModal from "../components/auth/login";
 import RegisterModal from "../components/auth/register";
 import { useTranslation, Trans } from "react-i18next";
 import LanguageSelector from "../components/LanguageSelector";
+import { useTheme } from "../context/ThemeContext";
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const { t } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
 
   const features = [
     { icon: FaChartLine, titleKey: "landing.feature_risk_title", descKey: "landing.feature_risk_desc" },
@@ -38,9 +40,9 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* Header/Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
@@ -48,23 +50,31 @@ export default function LandingPage() {
               <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
                 <FaBook className="text-white text-lg" />
               </div>
-              <span className="text-xl font-bold text-gray-900">
+              <span className="text-xl font-bold text-gray-900 dark:text-white">
                 {t('landing.brand_name')}
               </span>
             </div>
 
             {/* Action Buttons */}
             <div className="flex items-center gap-3">
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? <FaMoon size={18} /> : <FaSun size={18} />}
+              </button>
               <LanguageSelector />
               <button
                 onClick={() => setShowLogin(true)}
-                className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
               >
                 {t('auth.sign_in')}
               </button>
               <button
                 onClick={() => setShowRegister(true)}
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium transition-colors shadow-sm"
+                className="px-5 py-2 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-medium transition-colors shadow-sm"
               >
                 {t('auth.get_started')}
               </button>
@@ -74,59 +84,59 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-blue-50 to-white">
+      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-blue-50 dark:from-gray-800 to-white dark:to-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Hero Content */}
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
                 <FaCheckCircle />
                 <span>{t('landing.trusted_badge')}</span>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
                 <Trans i18nKey="landing.headline">
-                  Prevent Student Dropouts <span className="text-blue-600">Before They Happen</span>
+                  Prevent Student Dropouts <span className="text-blue-600 dark:text-blue-400">Before They Happen</span>
                 </Trans>
               </h1>
               
-              <p className="text-xl text-gray-600 leading-relaxed">
+              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
                 {t('landing.subheadline')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={() => setShowRegister(true)}
-                  className="px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  className="px-8 py-4 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-semibold text-lg transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                 >
                   {t('landing.start_trial')}
                   <FaArrowRight />
                 </button>
                 <button
                   onClick={() => setShowLogin(true)}
-                  className="px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-lg hover:bg-blue-50 font-semibold text-lg transition-colors flex items-center justify-center gap-2"
+                  className="px-8 py-4 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-2 border-blue-600 dark:border-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 font-semibold text-lg transition-colors flex items-center justify-center gap-2"
                 >
                   {t('landing.view_demo')}
                 </button>
               </div>
 
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 {t('landing.no_cc')}
               </p>
             </div>
 
             {/* Right: Hero Image/Illustration */}
             <div className="relative">
-              <div className="bg-white rounded-2xl shadow-2xl p-6 border border-gray-100">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 border border-gray-100 dark:border-gray-700">
                 {/* Mock Dashboard Preview */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-3 pb-4 border-b border-gray-200">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <FaChartLine className="text-blue-600 text-xl" />
+                  <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
+                      <FaChartLine className="text-blue-600 dark:text-blue-400 text-xl" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{t('landing.risk_dashboard')}</h3>
-                      <p className="text-sm text-gray-500">{t('landing.live_student_monitoring')}</p>
+                      <h3 className="font-semibold text-gray-900 dark:text-white">{t('landing.risk_dashboard')}</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{t('landing.live_student_monitoring')}</p>
                     </div>
                   </div>
 
@@ -178,13 +188,13 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 bg-blue-600">
+      <section className="py-12 bg-blue-600 dark:bg-blue-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <div className="text-4xl font-bold text-white mb-2">{stat.number}</div>
-                <div className="text-blue-100">{t(stat.labelKey)}</div>
+                <div className="text-blue-100 dark:text-blue-200">{t(stat.labelKey)}</div>
               </div>
             ))}
           </div>
@@ -192,13 +202,13 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               {t('landing.features_title')}
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               {t('landing.features_subtitle')}
             </p>
           </div>
@@ -207,12 +217,12 @@ export default function LandingPage() {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <div key={index} className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                  <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                    <Icon className="text-blue-600 text-xl" />
+                <div key={index} className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center mb-4">
+                    <Icon className="text-blue-600 dark:text-blue-400 text-xl" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{t(feature.titleKey)}</h3>
-                  <p className="text-gray-600">{t(feature.descKey)}</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t(feature.titleKey)}</h3>
+                  <p className="text-gray-600 dark:text-gray-300">{t(feature.descKey)}</p>
                 </div>
               );
             })}
@@ -221,61 +231,61 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
                 {t('landing.benefits_title')}
               </h2>
-              <p className="text-lg text-gray-600 mb-8">
+              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
                 {t('landing.benefits_subtitle')}
               </p>
               
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start gap-3">
-                    <FaCheckCircle className="text-green-500 text-xl mt-1 shrink-0" />
-                    <span className="text-gray-700">{benefit}</span>
+                    <FaCheckCircle className="text-green-500 dark:text-green-400 text-xl mt-1 shrink-0" />
+                    <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
                   </div>
                 ))}
               </div>
 
               <button
                 onClick={() => setShowRegister(true)}
-                className="mt-8 px-8 py-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg transition-colors shadow-lg hover:shadow-xl inline-flex items-center gap-2"
+                className="mt-8 px-8 py-4 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-semibold text-lg transition-colors shadow-lg hover:shadow-xl inline-flex items-center gap-2"
               >
                 {t('landing.get_started_now')}
                 <FaArrowRight />
               </button>
             </div>
 
-            <div className="bg-linear-to-br from-blue-50 to-teal-50 rounded-2xl p-8">
-              <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-gray-200">
-                  <h3 className="font-semibold text-gray-900">{t('landing.student_name_sample')}</h3>
-                  <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">
+            <div className="bg-linear-to-br from-blue-50 dark:from-blue-900/30 to-teal-50 dark:to-teal-900/30 rounded-2xl p-8">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
+                  <h3 className="font-semibold text-gray-900 dark:text-white">{t('landing.student_name_sample')}</h3>
+                  <span className="px-3 py-1 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-full text-sm font-medium">
                     {t('landing.high_risk')}
                   </span>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <div className="text-sm text-gray-600 mb-1">{t('landing.attendance_trend')}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">{t('landing.attendance_trend')}</div>
                     <div className="flex items-end gap-1 h-16">
                       {[85, 78, 72, 68, 62].map((val, i) => (
-                        <div key={i} className="flex-1 bg-red-400 rounded-t" style={{ height: `${val}%` }}></div>
+                        <div key={i} className="flex-1 bg-red-400 dark:bg-red-500 rounded-t" style={{ height: `${val}%` }}></div>
                       ))}
                     </div>
-                    <div className="text-xs text-red-600 font-medium mt-1">{t('landing.declining_trend')}</div>
+                    <div className="text-xs text-red-600 dark:text-red-400 font-medium mt-1">{t('landing.declining_trend')}</div>
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
                     <div className="flex items-start gap-2">
-                      <FaLightbulb className="text-yellow-600 mt-1" />
+                      <FaLightbulb className="text-yellow-600 dark:text-yellow-400 mt-1" />
                       <div>
-                        <div className="font-semibold text-yellow-900 text-sm mb-1">{t('landing.recommended_actions')}</div>
-                        <ul className="text-xs text-yellow-800 space-y-1">
+                        <div className="font-semibold text-yellow-900 dark:text-yellow-300 text-sm mb-1">{t('landing.recommended_actions')}</div>
+                        <ul className="text-xs text-yellow-800 dark:text-yellow-200 space-y-1">
                           <li>• {t('landing.action_parent_meeting')}</li>
                           <li>• {t('landing.action_family_issues')}</li>
                           <li>• {t('landing.action_peer_buddy')}</li>
@@ -291,18 +301,18 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-linear-to-r from-blue-600 to-teal-600">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-linear-to-r from-blue-600 to-teal-600 dark:from-blue-700 dark:to-teal-700">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
             {t('landing.cta_title')}
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-blue-100 dark:text-blue-200 mb-8">
             {t('landing.cta_subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
               onClick={() => setShowRegister(true)}
-              className="px-8 py-4 bg-white text-blue-600 rounded-lg hover:bg-gray-100 font-semibold text-lg transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2"
+              className="px-8 py-4 bg-white dark:bg-gray-100 text-blue-600 dark:text-blue-700 rounded-lg hover:bg-gray-100 dark:hover:bg-white font-semibold text-lg transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2"
             >
               {t('landing.start_trial')}
               <FaArrowRight />
@@ -314,7 +324,7 @@ export default function LandingPage() {
               {t('auth.sign_in')}
             </button>
           </div>
-          <p className="text-sm text-blue-100 mt-6">
+          <p className="text-sm text-blue-100 dark:text-blue-200 mt-6">
             <Trans i18nKey="landing.cta_questions">
               Questions? Contact us at <a href="mailto:support@proactiveeducation.org" className="underline hover:text-white">support@proactiveeducation.org</a>
             </Trans>
@@ -323,7 +333,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-12 px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gray-900 dark:bg-gray-950 text-gray-400 dark:text-gray-500 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
@@ -331,7 +341,7 @@ export default function LandingPage() {
                 <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
                   <FaBook className="text-white text-sm" />
                 </div>
-                <span className="text-white font-semibold">{t('landing.brand_name')}</span>
+                <span className="text-white dark:text-gray-200 font-semibold">{t('landing.brand_name')}</span>
               </div>
               <p className="text-sm">
                 {t('landing.subheadline')}
@@ -339,37 +349,37 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <h4 className="text-white font-semibold mb-4">{t('footer.product')}</h4>
+              <h4 className="text-white dark:text-gray-200 font-semibold mb-4">{t('footer.product')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.features')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.pricing')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.case_studies')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.demo')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.features')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.pricing')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.case_studies')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.demo')}</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-white font-semibold mb-4">{t('footer.resources')}</h4>
+              <h4 className="text-white dark:text-gray-200 font-semibold mb-4">{t('footer.resources')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.documentation')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.help_center')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.training')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.blog')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.documentation')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.help_center')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.training')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.blog')}</a></li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-white font-semibold mb-4">{t('footer.company')}</h4>
+              <h4 className="text-white dark:text-gray-200 font-semibold mb-4">{t('footer.company')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.about_us')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('nav.contact')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.privacy_policy')}</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">{t('footer.terms_of_service')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.about_us')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('nav.contact')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.privacy_policy')}</a></li>
+                <li><a href="#" className="hover:text-white dark:hover:text-gray-200 transition-colors">{t('footer.terms_of_service')}</a></li>
               </ul>
             </div>
           </div>
 
-          <div className="border-t border-gray-800 pt-8 text-center text-sm">
+          <div className="border-t border-gray-800 dark:border-gray-900 pt-8 text-center text-sm">
             <p>{t('landing.copyright_full')}</p>
           </div>
         </div>

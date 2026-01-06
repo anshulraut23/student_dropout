@@ -223,14 +223,14 @@ export default function DashboardPage() {
     .slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* 1️⃣ Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
             {t("dashboard.title")}
           </h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             {t("dashboard.subtitle")}
           </p>
         </div>
@@ -268,15 +268,15 @@ export default function DashboardPage() {
         </div>
 
         {/* 3️⃣ High-Risk Students */}
-        <div className="bg-white rounded-lg shadow-md border-2 border-red-200 mb-6">
-          <div className="bg-red-50 px-6 py-4 border-b border-red-200">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md border-2 border-red-200 dark:border-red-800 mb-6">
+          <div className="bg-red-50 dark:bg-red-900/30 px-6 py-4 border-b border-red-200 dark:border-red-800">
             <div className="flex items-center gap-3">
-              <FaExclamationTriangle className="text-red-600 text-xl" />
+              <FaExclamationTriangle className="text-red-600 dark:text-red-400 text-xl" />
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                   {t("dashboard.high_risk_section_title")}
                 </h2>
-                <p className="text-sm text-gray-700">
+                <p className="text-sm text-gray-700 dark:text-gray-300">
                   {t("dashboard.high_risk_section_subtitle")}
                 </p>
               </div>
@@ -284,22 +284,22 @@ export default function DashboardPage() {
           </div>
 
           {highRiskStudents.length > 0 ? (
-            <div className="divide-y divide-gray-200">
+            <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {highRiskStudents.map((student) => (
                 <div
                   key={student.id}
-                  className="px-6 py-4 hover:bg-red-50 transition-colors"
+                  className="px-6 py-4 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                 >
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                         {student.name}
                       </h3>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">
                           {student.class}
                         </span>
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-gray-500 dark:text-gray-400">
                           {t("dashboard.attendance")}: {student.attendance}%
                         </span>
                       </div>
@@ -308,8 +308,8 @@ export default function DashboardPage() {
                       <RiskBadge level={student.riskLevel} />
                       <button
                         onClick={() => navigate(`/students/${student.id}`)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-red-600
-                                   text-white rounded-lg hover:bg-red-700 transition-colors
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 dark:bg-red-700
+                                   text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-800 transition-colors
                                    font-medium text-sm"
                       >
                         <FaEye />
@@ -324,8 +324,8 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="px-6 py-8 text-center">
-              <FaCheckCircle className="mx-auto text-4xl text-green-500 mb-3" />
-              <p className="text-gray-600">
+              <FaCheckCircle className="mx-auto text-4xl text-green-500 dark:text-green-400 mb-3" />
+              <p className="text-gray-600 dark:text-gray-400">
                 {t("dashboard.no_high_risk")}
               </p>
             </div>
@@ -333,20 +333,20 @@ export default function DashboardPage() {
         </div>
 
         {/* 4️⃣ Primary Action */}
-        <div className="bg-gradient-to-r from-blue-500 to-teal-500 rounded-lg shadow-lg p-6 mb-6">
+        <div className="bg-gradient-to-r from-blue-500 to-teal-500 dark:from-blue-600 dark:to-teal-600 rounded-lg shadow-lg p-6 mb-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="text-white">
               <h3 className="text-xl font-bold mb-1">
                 {t("dashboard.view_all_title")}
               </h3>
-              <p className="text-blue-100 text-sm">
+              <p className="text-blue-100 dark:text-blue-200 text-sm">
                 {t("dashboard.view_all_subtitle")}
               </p>
             </div>
             <button
               onClick={() => navigate("/students")}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-blue-600
-                         rounded-lg hover:bg-blue-50 transition-colors font-semibold
+              className="inline-flex items-center gap-2 px-6 py-3 bg-white dark:bg-gray-100 text-blue-600 dark:text-blue-700
+                         rounded-lg hover:bg-blue-50 dark:hover:bg-white transition-colors font-semibold
                          shadow-md hover:shadow-lg"
             >
               {t("dashboard.view_all_students")}
@@ -356,20 +356,20 @@ export default function DashboardPage() {
         </div>
 
         {/* 5️⃣ Offline / Sync Status */}
-        <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
+        <div className="bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <div className="flex items-start gap-3">
             {isOnline ? (
-              <FaWifi className="text-blue-600 text-xl mt-0.5" />
+              <FaWifi className="text-blue-600 dark:text-blue-400 text-xl mt-0.5" />
             ) : (
-              <FaInfoCircle className="text-gray-500 text-xl mt-0.5" />
+              <FaInfoCircle className="text-gray-500 dark:text-gray-400 text-xl mt-0.5" />
             )}
             <div className="flex-1">
-              <h4 className="font-semibold text-gray-900 mb-1">
+              <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
                 {isOnline
                   ? t("dashboard.online")
                   : t("dashboard.offline")}
               </h4>
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
                 {isOnline
                   ? t("dashboard.online_desc")
                   : t("dashboard.offline_desc")}

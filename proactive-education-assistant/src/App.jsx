@@ -4,10 +4,12 @@ import AppRoutes from "./routes/AppRoutes";
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <TeacherProvider>
-        <AppRoutes />
-      </TeacherProvider>
-    </BrowserRouter>
+    <div className="min-h-screen bg-white dark:bg-gray-900 transition-colors duration-200">
+      <BrowserRouter>
+        <TeacherProvider>
+          <AppRoutes />
+        </TeacherProvider>
+      </BrowserRouter>
+    </div>
   );
 }

@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-darkmode-bg: #111827;
+  --color-darkmode-card: #1f2937;
+}

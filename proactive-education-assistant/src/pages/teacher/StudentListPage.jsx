@@ -164,34 +164,34 @@ export default function StudentListPage() {
 
   // Get row background color
   const getRowBgColor = (riskLevel) => {
-    if (riskLevel === "high") return "bg-red-50 hover:bg-red-100";
-    if (riskLevel === "medium") return "bg-yellow-50 hover:bg-yellow-100";
-    return "bg-white hover:bg-gray-50";
+    if (riskLevel === "high") return "bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30";
+    if (riskLevel === "medium") return "bg-yellow-50 dark:bg-yellow-900/20 hover:bg-yellow-100 dark:hover:bg-yellow-900/30";
+    return "bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700";
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Page Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t('students.page_title_management')}</h1>
-          <p className="text-gray-600">{t('students.page_subtitle_management')}</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('students.page_title_management')}</h1>
+          <p className="text-gray-600 dark:text-gray-300">{t('students.page_subtitle_management')}</p>
         </div>
 
         {/* Class Selector (only shown if teacher has multiple classes) */}
         {hasMultipleClasses && teacher?.assignedClasses && (
-          <div className="mb-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
             <div className="flex items-center gap-3">
-              <FaChalkboardTeacher className="text-blue-600 text-xl" />
+              <FaChalkboardTeacher className="text-blue-600 dark:text-blue-400 text-xl" />
               <div className="flex-1">
-                <label htmlFor="classSelect" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="classSelect" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   {t('students.select_class')}
                 </label>
                 <select
                   id="classSelect"
                   value={selectedClass || ""}
                   onChange={(e) => setSelectedClass(e.target.value)}
-                  className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full md:w-64 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">{t('students.all_classes')}</option>
                   {teacher.assignedClasses.map((cls) => (
@@ -202,8 +202,8 @@ export default function StudentListPage() {
                 </select>
               </div>
               {selectedClass && (
-                <div className="text-sm text-gray-600">
-                  {t('students.showing_from')} <span className="font-semibold text-blue-600">{selectedClass}</span>
+                <div className="text-sm text-gray-600 dark:text-gray-300">
+                  {t('students.showing_from')} <span className="font-semibold text-blue-600 dark:text-blue-400">{selectedClass}</span>
                 </div>
               )}
             </div>
@@ -216,15 +216,15 @@ export default function StudentListPage() {
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden w-full mb-4 flex items-center justify-between px-4 py-2 bg-white rounded-lg border border-gray-200"
+              className="md:hidden w-full mb-4 flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg border border-gray-200 dark:border-gray-700"
             >
-              <span className="font-medium text-gray-700">{t('students.tabs')}</span>
+              <span className="font-medium">{t('students.tabs')}</span>
               <FaBars />
             </button>
 
             {/* Tabs Panel */}
             <div
-              className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden ${
+              className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden ${
                 !mobileMenuOpen ? "hidden md:block" : ""
               }`}
             >
@@ -243,8 +243,8 @@ export default function StudentListPage() {
                       }}
                       className={`flex items-center gap-3 px-4 py-3 border-l-4 transition-colors text-left ${
                         isActive
-                          ? "border-l-blue-600 bg-blue-50 text-blue-700 font-medium"
-                          : "border-l-transparent text-gray-700 hover:bg-gray-50"
+                          ? "border-l-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
+                          : "border-l-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
                       }`}
                     >
                       <Icon className="text-lg" />
@@ -262,16 +262,16 @@ export default function StudentListPage() {
             {activeTab === "list" && (
               <div className="space-y-4">
                 {/* Filters */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('students.risk_level')}
                       </label>
                       <select
                         value={riskFilter}
                         onChange={(e) => setRiskFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="all">{t('students.filter_all')}</option>
                         <option value="high">{t('students.filter_high')}</option>
@@ -280,13 +280,13 @@ export default function StudentListPage() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {t('students.class')}
                       </label>
                       <select
                         value={gradeFilter}
                         onChange={(e) => setGradeFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="all">{t('students.all_grades')}</option>
                         {uniqueGrades.map((grade) => (
@@ -300,37 +300,37 @@ export default function StudentListPage() {
                 </div>
 
                 {/* Table View (Desktop) */}
-                <div className="hidden md:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
                   {filteredStudents.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-200">
+                        <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
                           <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
                               {t('students.student_name')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
                               {t('students.class')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
                               {t('students.attendance')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
                               {t('students.risk_status')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase">
+                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
                               {t('students.action')}
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-200">
+                        <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
                           {filteredStudents.map((student) => (
                             <tr key={student.id} className={getRowBgColor(student.riskLevel)}>
-                              <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                              <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                                 {student.name}
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-700">{student.class}</td>
-                              <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                              <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">{student.class}</td>
+                              <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
                                 {student.attendance}%
                               </td>
                               <td className="px-6 py-4 text-sm">
@@ -352,7 +352,7 @@ export default function StudentListPage() {
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <p className="text-gray-500">{t('students.no_students')}</p>
+                      <p className="text-gray-500 dark:text-gray-400">{t('students.no_students')}</p>
                     </div>
                   )}
                 </div>
@@ -363,13 +363,13 @@ export default function StudentListPage() {
                     filteredStudents.map((student) => (
                       <div
                         key={student.id}
-                        className="bg-white rounded-lg shadow-sm border border-gray-200 p-4"
+                        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4"
                       >
                         <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-semibold text-gray-900">{student.name}</h3>
+                          <h3 className="font-semibold text-gray-900 dark:text-white">{student.name}</h3>
                           <RiskBadge level={student.riskLevel} />
                         </div>
-                        <p className="text-sm text-gray-600 mb-3">
+                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
                           {student.class} • Attendance: {student.attendance}%
                         </p>
                         <button
@@ -382,7 +382,7 @@ export default function StudentListPage() {
                     ))
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">{t('students.no_students')}</p>
+                      <p className="text-gray-500 dark:text-gray-400">{t('students.no_students')}</p>
                     </div>
                   )}
                 </div>
@@ -391,11 +391,11 @@ export default function StudentListPage() {
 
             {/* Tab 2: Add Student */}
             {activeTab === "add" && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">{t('students.add_new_student')}</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">{t('students.add_new_student')}</h2>
                 <form onSubmit={handleAddStudent} className="space-y-4 max-w-md">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       {t('students.student_name')} *
                     </label>
                     <input
@@ -403,17 +403,17 @@ export default function StudentListPage() {
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       placeholder="Enter student name"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Class / Grade *
                     </label>
                     <select
                       value={formData.grade}
                       onChange={(e) => setFormData({ ...formData, grade: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">Select a grade</option>
                       {[6, 7, 8, 9, 10, 11, 12].map((grade) => (
@@ -448,13 +448,13 @@ export default function StudentListPage() {
 
             {/* Tab 3: Import Students */}
             {activeTab === "import" && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Import Students</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Import Students</h2>
                 <div className="space-y-4 max-w-2xl">
                   {/* Class Context Info */}
                   {selectedClass && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <p className="text-sm text-blue-900">
+                    <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-3">
+                      <p className="text-sm text-blue-900 dark:text-blue-200">
                         <span className="font-semibold">Note:</span> Imported students will be added to{" "}
                         <span className="font-bold">{selectedClass}</span>
                       </p>
@@ -462,9 +462,9 @@ export default function StudentListPage() {
                   )}
                   
                   {/* Instructions */}
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <h3 className="font-semibold text-blue-900 mb-2">Instructions:</h3>
-                    <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                  <div className="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                    <h3 className="font-semibold text-blue-900 dark:text-blue-200 mb-2">Instructions:</h3>
+                    <ul className="text-sm text-blue-800 dark:text-blue-100 space-y-1 list-disc list-inside">
                       <li>Column order does not matter</li>
                       <li>Headers must include "Name" and "Class/Grade"</li>
                       <li>Valid grades: 1-12</li>
@@ -476,7 +476,7 @@ export default function StudentListPage() {
                   {/* Download Template */}
                   <button
                     onClick={downloadTemplate}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
                   >
                     <FaDownload />
                     Download Sample Template
@@ -484,14 +484,14 @@ export default function StudentListPage() {
 
                   {/* File Upload */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Choose File
                     </label>
                     <input
                       type="file"
                       accept=".csv,.xlsx"
                       onChange={handleFileImport}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
@@ -500,8 +500,8 @@ export default function StudentListPage() {
                     <div
                       className={`p-4 rounded-lg flex items-start gap-3 ${
                         importStatus === "success"
-                          ? "bg-green-50 border border-green-200"
-                          : "bg-red-50 border border-red-200"
+                          ? "bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700"
+                          : "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700"
                       }`}
                     >
                       {importStatus === "success" ? (
@@ -512,8 +512,8 @@ export default function StudentListPage() {
                       <p
                         className={`text-sm ${
                           importStatus === "success"
-                            ? "text-green-700"
-                            : "text-red-700"
+                            ? "text-green-700 dark:text-green-200"
+                            : "text-red-700 dark:text-red-200"
                         }`}
                       >
                         {importMessage}
@@ -526,12 +526,12 @@ export default function StudentListPage() {
 
             {/* Tab 4: Attendance Upload (Placeholder) */}
             {activeTab === "attendance" && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Attendance Upload</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Attendance Upload</h2>
                 <div className="text-center py-12">
-                  <FaCalendarCheck className="mx-auto text-5xl text-gray-300 mb-4" />
-                  <p className="text-gray-600">This feature is coming soon.</p>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <FaCalendarCheck className="mx-auto text-5xl text-gray-300 dark:text-gray-600 mb-4" />
+                  <p className="text-gray-600 dark:text-gray-300">This feature is coming soon.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                     You'll be able to upload attendance records in bulk.
                   </p>
                 </div>
@@ -540,12 +540,12 @@ export default function StudentListPage() {
 
             {/* Tab 5: Marks Upload (Placeholder) */}
             {activeTab === "marks" && (
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Marks Upload</h2>
+              <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Marks Upload</h2>
                 <div className="text-center py-12">
-                  <FaBook className="mx-auto text-5xl text-gray-300 mb-4" />
-                  <p className="text-gray-600">This feature is coming soon.</p>
-                  <p className="text-sm text-gray-500 mt-2">
+                  <FaBook className="mx-auto text-5xl text-gray-300 dark:text-gray-600 mb-4" />
+                  <p className="text-gray-600 dark:text-gray-300">This feature is coming soon.</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                     You'll be able to upload academic marks in bulk.
                   </p>
                 </div>
