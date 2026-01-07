@@ -9,7 +9,7 @@ export async function translateText(text, targetLang, sourceLang = 'en') {
   const key = makeCacheKey(text, targetLang, sourceLang);
   if (cache.has(key)) return cache.get(key);
 
-  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(
+  const url = `htt  ps://translate.googleapis.com/translate_a/single?client=gtx&sl=${encodeURIComponent(
     sourceLang
   )}&tl=${encodeURIComponent(targetLang)}&dt=t&q=${encodeURIComponent(text)}`;
 

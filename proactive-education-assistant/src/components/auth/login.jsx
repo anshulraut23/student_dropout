@@ -39,7 +39,7 @@ const MOCK_TEACHERS = {
   },
 };
 
-function Modal({ isOpen, onClose, onSwitchToRegister }) {
+function Modal({ isOpen, onClose, onSwitchToRegister, onLoginSuccess }) {
   if (!isOpen) return null;
   
   const [email, setEmail] = useState("");
@@ -81,7 +81,11 @@ function Modal({ isOpen, onClose, onSwitchToRegister }) {
       setPassword("");
       setRole("teacher");
       onClose();
-      setTimeout(() => navigate("/dashboard"), 100);
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        setTimeout(() => navigate("/dashboard"), 100);
+      }
     } else if (role === "coordinator") {
       // Admin login
       localStorage.setItem("loggedIn", "true");
@@ -93,7 +97,11 @@ function Modal({ isOpen, onClose, onSwitchToRegister }) {
       setPassword("");
       setRole("teacher");
       onClose();
-      setTimeout(() => navigate("/admin/dashboard"), 100);
+      if (onLoginSuccess) {
+        onLoginSuccess();
+      } else {
+        setTimeout(() => navigate("/admin/dashboard"), 100);
+      }
     }
   };
   

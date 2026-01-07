@@ -11,6 +11,7 @@ export default function LandingPage() {
   const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  const [loginRedirectPath, setLoginRedirectPath] = useState(null);
   const { t } = useTranslation();
   const { theme, toggleTheme } = useTheme();
 
@@ -40,14 +41,21 @@ export default function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gray-900 overflow-x-hidden">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-400/5 rounded-full animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-400/5 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-400/5 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
+      </div>
+
       {/* Header/Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm animate-in fade-in-0 slide-in-from-top-2 duration-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
+            <div className="flex items-center gap-2 animate-in fade-in-0 slide-in-from-left-4 duration-500" style={{animationDelay: '0.2s'}}>
+              <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center animate-in zoom-in-95 duration-300" style={{animationDelay: '0.4s'}}>
                 <FaBook className="text-white text-lg" />
               </div>
               <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -56,10 +64,10 @@ export default function LandingPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 animate-in fade-in-0 slide-in-from-right-4 duration-500" style={{animationDelay: '0.3s'}}>
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-105"
                 title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
                 aria-label="Toggle theme"
               >
@@ -68,13 +76,13 @@ export default function LandingPage() {
               <LanguageSelector />
               <button
                 onClick={() => setShowLogin(true)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white font-medium transition-colors"
+                className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white font-medium transition-all duration-200 hover:scale-105"
               >
                 {t('auth.sign_in')}
               </button>
               <button
                 onClick={() => setShowRegister(true)}
-                className="px-5 py-2 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-medium transition-colors shadow-sm"
+                className="px-5 py-2 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 {t('auth.get_started')}
               </button>
@@ -89,45 +97,51 @@ export default function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Hero Content */}
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium animate-in fade-in-0 slide-in-from-left-4 duration-700">
                 <FaCheckCircle />
                 <span>{t('landing.trusted_badge')}</span>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight animate-in fade-in-0 slide-in-from-left-4 duration-700" style={{ animationDelay: '0.2s' }}>
                 <Trans i18nKey="landing.headline">
                   Prevent Student Dropouts <span className="text-blue-600 dark:text-blue-400">Before They Happen</span>
                 </Trans>
               </h1>
               
-              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
+              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed animate-in fade-in-0 slide-in-from-left-4 duration-700" style={{ animationDelay: '0.4s' }}>
                 {t('landing.subheadline')}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: '0.6s' }}>
                 <button
-                  onClick={() => setShowRegister(true)}
-                  className="px-8 py-4 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-semibold text-lg transition-colors shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+                  onClick={() => {
+                    setLoginRedirectPath('/pricing');
+                    setShowLogin(true);
+                  }}
+                  className="px-8 py-4 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 hover:scale-105"
                 >
                   {t('landing.start_trial')}
                   <FaArrowRight />
                 </button>
                 <button
-                  onClick={() => setShowLogin(true)}
-                  className="px-8 py-4 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-2 border-blue-600 dark:border-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 font-semibold text-lg transition-colors flex items-center justify-center gap-2"
+                  onClick={() => {
+                    setLoginRedirectPath('/dashboard');
+                    setShowLogin(true);
+                  }}
+                  className="px-8 py-4 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-2 border-blue-600 dark:border-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105"
                 >
                   {t('landing.view_demo')}
                 </button>
               </div>
 
-              <p className="text-sm text-gray-500 dark:text-gray-400">
+              <p className="text-sm text-gray-500 dark:text-gray-400 animate-in fade-in-0 duration-700" style={{ animationDelay: '0.8s' }}>
                 {t('landing.no_cc')}
               </p>
             </div>
 
             {/* Right: Hero Image/Illustration */}
-            <div className="relative">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 border border-gray-100 dark:border-gray-700">
+            <div className="relative animate-in fade-in-0 slide-in-from-right-4 duration-700" style={{ animationDelay: '0.3s' }}>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 border border-gray-100 dark:border-gray-700 hover:shadow-3xl transition-shadow duration-300">
                 {/* Mock Dashboard Preview */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -192,7 +206,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
+              <div key={index} className="text-center animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${index * 0.1}s` }}>
                 <div className="text-4xl font-bold text-white mb-2">{stat.number}</div>
                 <div className="text-blue-100 dark:text-blue-200">{t(stat.labelKey)}</div>
               </div>
@@ -205,10 +219,10 @@ export default function LandingPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
               {t('landing.features_title')}
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: '0.2s' }}>
               {t('landing.features_subtitle')}
             </p>
           </div>
@@ -217,7 +231,7 @@ export default function LandingPage() {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <div key={index} className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md transition-shadow">
+                <div key={index} className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-300 hover:scale-105 animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${0.4 + index * 0.1}s` }}>
                   <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center mb-4">
                     <Icon className="text-blue-600 dark:text-blue-400 text-xl" />
                   </div>
@@ -234,7 +248,7 @@ export default function LandingPage() {
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="animate-in fade-in-0 slide-in-from-left-4 duration-700">
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
                 {t('landing.benefits_title')}
               </h2>
@@ -244,7 +258,7 @@ export default function LandingPage() {
               
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start gap-3">
+                  <div key={index} className="flex items-start gap-3 animate-in fade-in-0 slide-in-from-left-4 duration-700" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                     <FaCheckCircle className="text-green-500 dark:text-green-400 text-xl mt-1 shrink-0" />
                     <span className="text-gray-700 dark:text-gray-300">{benefit}</span>
                   </div>
@@ -253,14 +267,14 @@ export default function LandingPage() {
 
               <button
                 onClick={() => setShowRegister(true)}
-                className="mt-8 px-8 py-4 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-semibold text-lg transition-colors shadow-lg hover:shadow-xl inline-flex items-center gap-2"
+                className="mt-8 px-8 py-4 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2 hover:scale-105"
               >
                 {t('landing.get_started_now')}
                 <FaArrowRight />
               </button>
             </div>
 
-            <div className="bg-linear-to-br from-blue-50 dark:from-blue-900/30 to-teal-50 dark:to-teal-900/30 rounded-2xl p-8">
+            <div className="bg-linear-to-br from-blue-50 dark:from-blue-900/30 to-teal-50 dark:to-teal-900/30 rounded-2xl p-8 animate-in fade-in-0 slide-in-from-right-4 duration-700" style={{ animationDelay: '0.3s' }}>
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
                   <h3 className="font-semibold text-gray-900 dark:text-white">{t('landing.student_name_sample')}</h3>
@@ -303,28 +317,28 @@ export default function LandingPage() {
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8 bg-linear-to-r from-blue-600 to-teal-600 dark:from-blue-700 dark:to-teal-700">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
             {t('landing.cta_title')}
           </h2>
-          <p className="text-xl text-blue-100 dark:text-blue-200 mb-8">
+          <p className="text-xl text-blue-100 dark:text-blue-200 mb-8 animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: '0.2s' }}>
             {t('landing.cta_subtitle')}
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: '0.4s' }}>
             <button
               onClick={() => setShowRegister(true)}
-              className="px-8 py-4 bg-white dark:bg-gray-100 text-blue-600 dark:text-blue-700 rounded-lg hover:bg-gray-100 dark:hover:bg-white font-semibold text-lg transition-colors shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2"
+              className="px-8 py-4 bg-white dark:bg-gray-100 text-blue-600 dark:text-blue-700 rounded-lg hover:bg-gray-100 dark:hover:bg-white font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2 hover:scale-105"
             >
               {t('landing.start_trial')}
               <FaArrowRight />
             </button>
             <button
               onClick={() => setShowLogin(true)}
-              className="px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg hover:bg-white/10 font-semibold text-lg transition-colors inline-flex items-center justify-center gap-2"
+              className="px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg hover:bg-white/10 font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center gap-2 hover:scale-105"
             >
               {t('auth.sign_in')}
             </button>
           </div>
-          <p className="text-sm text-blue-100 dark:text-blue-200 mt-6">
+          <p className="text-sm text-blue-100 dark:text-blue-200 mt-6 animate-in fade-in-0 duration-700" style={{ animationDelay: '0.6s' }}>
             <Trans i18nKey="landing.cta_questions">
               Questions? Contact us at <a href="mailto:support@proactiveeducation.org" className="underline hover:text-white">support@proactiveeducation.org</a>
             </Trans>
@@ -388,10 +402,19 @@ export default function LandingPage() {
       {/* Modals */}
       <LoginModal 
         isOpen={showLogin} 
-        onClose={() => setShowLogin(false)}
+        onClose={() => {
+          setShowLogin(false);
+          setLoginRedirectPath(null);
+        }}
         onSwitchToRegister={() => {
           setShowLogin(false);
           setShowRegister(true);
+        }}
+        onLoginSuccess={() => {
+          if (loginRedirectPath) {
+            navigate(loginRedirectPath);
+            setLoginRedirectPath(null);
+          }
         }}
       />
       

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "../pages/LandingPage";
+import PricingTable from "../pages/payement/PricingTable";
+import PaymentUI from "../pages/payement/PaymentUI";
 import DashboardPage from "../pages/teacher/DashboardPage";
 import StudentListPage from "../pages/teacher/StudentListPage";
 import StudentProfilePage from "../pages/teacher/StudentProfilePage";
@@ -46,6 +48,8 @@ export default function AppRoutes() {
     <Routes>
       {/* Public Landing Page */}
       <Route path="/" element={<LandingPage />} />
+      <Route path="/pricing" element={<PricingTable />} />
+      <Route path="/payment" element={<PaymentUI />} />
       
       {/* Admin Routes */}
       {isLoggedIn && userRole === "admin" ? (

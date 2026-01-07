@@ -226,13 +226,23 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         {/* 1️⃣ Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            {t("dashboard.title")}
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            {t("dashboard.subtitle")}
-          </p>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+              {t("dashboard.title")}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              {t("dashboard.subtitle")}
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/pricing')}
+            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
+          >
+            <span>🚀</span>
+            <span>Start Free Trial</span>
+            <FaArrowRight className="text-sm" />
+          </button>
         </div>
 
         {/* 2️⃣ Risk Summary Cards */}
