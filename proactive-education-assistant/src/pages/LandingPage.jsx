@@ -44,45 +44,55 @@ export default function LandingPage() {
     <div className="min-h-screen bg-white dark:bg-gray-900 overflow-x-hidden">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-blue-400/5 rounded-full animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-400/5 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-green-400/5 rounded-full animate-pulse" style={{animationDelay: '2s'}}></div>
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-blue-400/10 to-cyan-400/10 dark:from-blue-500/5 dark:to-cyan-500/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-gradient-to-br from-purple-400/10 to-pink-400/10 dark:from-purple-500/5 dark:to-pink-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-br from-green-400/10 to-teal-400/10 dark:from-green-500/5 dark:to-teal-500/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
       </div>
 
       {/* Header/Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-sm animate-in fade-in-0 slide-in-from-top-2 duration-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/90 backdrop-blur-md shadow-lg border-b border-gray-200/50 dark:border-gray-800/50 animate-in fade-in-0 slide-in-from-top-2 duration-700">
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16 gap-2">
             {/* Logo */}
             <div className="flex items-center gap-2 animate-in fade-in-0 slide-in-from-left-4 duration-500" style={{animationDelay: '0.2s'}}>
-              <div className="w-10 h-10 bg-linear-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center animate-in zoom-in-95 duration-300" style={{animationDelay: '0.4s'}}>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-400 rounded-lg flex items-center justify-center shadow-lg shadow-blue-400/25 animate-in zoom-in-95 duration-300 hover:scale-110 transition-transform" style={{animationDelay: '0.4s'}}>
                 <FaBook className="text-white text-lg" />
               </div>
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <span className="text-xl font-bold text-gray-800 dark:text-gray-100">
                 {t('landing.brand_name')}
               </span>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-3 animate-in fade-in-0 slide-in-from-right-4 duration-500" style={{animationDelay: '0.3s'}}>
+            <div className="flex flex-nowrap items-center justify-end gap-1 sm:gap-3 animate-in fade-in-0 slide-in-from-right-4 duration-500" style={{animationDelay: '0.3s'}}>
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 hover:scale-105"
+                className="flex items-center gap-1 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg text-[11px] sm:text-sm text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border border-gray-300 dark:border-gray-600 transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 whitespace-nowrap shadow-sm shadow-gray-400/20 hover:shadow-md"
                 title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
                 aria-label="Toggle theme"
               >
-                {theme === 'light' ? <FaMoon size={18} /> : <FaSun size={18} />}
+                {theme === 'light' ? (
+                  <>
+                    <FaMoon size={16} />
+                    <span className="text-sm font-medium hidden sm:inline">Dark</span>
+                  </>
+                ) : (
+                  <>
+                    <FaSun size={16} />
+                    <span className="text-sm font-medium hidden sm:inline">Light</span>
+                  </>
+                )}
               </button>
-              <LanguageSelector />
+              <LanguageSelector buttonClassName="text-[11px] sm:text-sm" />
               <button
                 onClick={() => setShowLogin(true)}
-                className="px-4 py-2 text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white font-medium transition-all duration-200 hover:scale-105"
+                className="px-2 py-1 text-[11px] sm:text-sm text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-white font-medium transition-all duration-200 hover:scale-105 whitespace-nowrap shadow-sm hover:shadow-md"
               >
                 {t('auth.sign_in')}
               </button>
               <button
                 onClick={() => setShowRegister(true)}
-                className="px-5 py-2 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-medium transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+                className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-sm bg-blue-500 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-600 dark:hover:bg-blue-600 font-medium transition-all duration-300 hover:scale-105 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-600/40 whitespace-nowrap"
               >
                 {t('auth.get_started')}
               </button>
@@ -92,23 +102,23 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-linear-to-b from-blue-50 dark:from-gray-800 to-white dark:to-gray-900">
+      <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-blue-50 via-white to-white dark:from-gray-900 dark:via-gray-900 dark:to-gray-900 relative overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Hero Content */}
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium animate-in fade-in-0 slide-in-from-left-4 duration-700">
-                <FaCheckCircle />
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 text-blue-600 dark:text-blue-400 rounded-full text-sm font-medium shadow-md shadow-blue-200/40 dark:shadow-blue-900/20 animate-in fade-in-0 slide-in-from-left-4 duration-700 border border-blue-200 dark:border-blue-700/50">
+                <FaCheckCircle className="text-teal-600 dark:text-teal-400" />
                 <span>{t('landing.trusted_badge')}</span>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight animate-in fade-in-0 slide-in-from-left-4 duration-700" style={{ animationDelay: '0.2s' }}>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-gray-100 leading-tight animate-in fade-in-0 slide-in-from-left-4 duration-700" style={{ animationDelay: '0.2s' }}>
                 <Trans i18nKey="landing.headline">
-                  Prevent Student Dropouts <span className="text-blue-600 dark:text-blue-400">Before They Happen</span>
+                  Prevent Student Dropouts <span className="text-blue-500 dark:text-blue-400">Before They Happen</span>
                 </Trans>
               </h1>
               
-              <p className="text-xl text-gray-600 dark:text-gray-300 leading-relaxed animate-in fade-in-0 slide-in-from-left-4 duration-700" style={{ animationDelay: '0.4s' }}>
+              <p className="text-xl text-gray-600 dark:text-gray-400 leading-relaxed animate-in fade-in-0 slide-in-from-left-4 duration-700" style={{ animationDelay: '0.4s' }}>
                 {t('landing.subheadline')}
               </p>
 
@@ -118,17 +128,17 @@ export default function LandingPage() {
                     setLoginRedirectPath('/pricing');
                     setShowLogin(true);
                   }}
-                  className="px-8 py-4 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl flex items-center justify-center gap-2 hover:scale-105"
+                  className="group px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 font-semibold text-lg transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-600/40 flex items-center justify-center gap-2 hover:scale-105"
                 >
                   {t('landing.start_trial')}
-                  <FaArrowRight />
+                  <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button
                   onClick={() => {
                     setLoginRedirectPath('/dashboard');
                     setShowLogin(true);
                   }}
-                  className="px-8 py-4 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-2 border-blue-600 dark:border-blue-500 rounded-lg hover:bg-blue-50 dark:hover:bg-gray-700 font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-2 hover:scale-105"
+                  className="group px-8 py-4 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 border-2 border-blue-500 dark:border-blue-500 rounded-xl hover:bg-blue-50 dark:hover:bg-gray-700 font-semibold text-lg transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 hover:scale-105 backdrop-blur-sm"
                 >
                   {t('landing.view_demo')}
                 </button>
@@ -141,48 +151,48 @@ export default function LandingPage() {
 
             {/* Right: Hero Image/Illustration */}
             <div className="relative animate-in fade-in-0 slide-in-from-right-4 duration-700" style={{ animationDelay: '0.3s' }}>
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 border border-gray-100 dark:border-gray-700 hover:shadow-3xl transition-shadow duration-300">
+              <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-2xl p-6 border border-gray-200 dark:border-gray-700/50 hover:shadow-3xl transition-all duration-500 hover:scale-[1.02]">
                 {/* Mock Dashboard Preview */}
                 <div className="space-y-4">
                   <div className="flex items-center gap-3 pb-4 border-b border-gray-200 dark:border-gray-700">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                      <FaChartLine className="text-blue-600 dark:text-blue-400 text-xl" />
+                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center">
+                      <FaChartLine className="text-blue-500 dark:text-blue-400 text-xl" />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900 dark:text-white">{t('landing.risk_dashboard')}</h3>
+                      <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('landing.risk_dashboard')}</h3>
                       <p className="text-sm text-gray-500 dark:text-gray-400">{t('landing.live_student_monitoring')}</p>
                     </div>
                   </div>
 
                   {/* Mock Risk Cards */}
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-red-50 p-4 rounded-lg border border-red-200">
-                      <div className="text-2xl font-bold text-red-600">8</div>
-                      <div className="text-xs text-red-700 font-medium mt-1">{t('landing.high_risk')}</div>
+                    <div className="bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-900/20 dark:to-red-800/20 p-4 rounded-xl border border-red-200 dark:border-red-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                      <div className="text-2xl font-bold text-red-600 dark:text-red-400">8</div>
+                      <div className="text-xs text-red-700 dark:text-red-300 font-medium mt-1">{t('landing.high_risk')}</div>
                     </div>
-                    <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                      <div className="text-2xl font-bold text-yellow-600">12</div>
-                      <div className="text-xs text-yellow-700 font-medium mt-1">{t('landing.medium_risk')}</div>
+                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-900/20 dark:to-yellow-800/20 p-4 rounded-xl border border-yellow-200 dark:border-yellow-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                      <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">12</div>
+                      <div className="text-xs text-yellow-700 dark:text-yellow-300 font-medium mt-1">{t('landing.medium_risk')}</div>
                     </div>
-                    <div className="bg-green-50 p-4 rounded-lg border border-green-200">
-                      <div className="text-2xl font-bold text-green-600">45</div>
-                      <div className="text-xs text-green-700 font-medium mt-1">{t('landing.low_risk')}</div>
+                    <div className="bg-gradient-to-br from-teal-50 to-teal-100/50 dark:from-teal-900/20 dark:to-teal-800/20 p-4 rounded-xl border border-teal-200 dark:border-teal-800 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+                      <div className="text-2xl font-bold text-teal-600 dark:text-teal-400">45</div>
+                      <div className="text-xs text-teal-700 dark:text-teal-300 font-medium mt-1">{t('landing.low_risk')}</div>
                     </div>
                   </div>
 
                   {/* Mock Student List */}
                   <div className="space-y-2">
                     {[1, 2, 3].map((i) => (
-                      <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <div className="w-8 h-8 bg-linear-to-br from-blue-400 to-teal-400 rounded-full flex items-center justify-center text-white text-sm font-bold">
                           {String.fromCharCode(65 + i)}
                         </div>
                         <div className="flex-1">
-                          <div className="h-2 bg-gray-200 rounded w-24 mb-1"></div>
-                          <div className="h-2 bg-gray-200 rounded w-16"></div>
+                          <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded w-24 mb-1"></div>
+                          <div className="h-2 bg-gray-200 dark:bg-gray-600 rounded w-16"></div>
                         </div>
                         <div className={`px-2 py-1 rounded text-xs font-medium ${
-                          i === 1 ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'
+                          i === 1 ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
                         }`}>
                           {i === 1 ? t('landing.high_risk') : t('landing.medium_risk')}
                         </div>
@@ -193,7 +203,7 @@ export default function LandingPage() {
               </div>
               
               {/* Floating Badge */}
-              <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-full shadow-lg font-semibold text-sm">
+              <div className="absolute -top-4 -right-4 bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-2 rounded-full shadow-lg shadow-teal-500/40 font-semibold text-sm animate-pulse border-2 border-white dark:border-gray-700">
                 ✓ {t('landing.real_time_updates')}
               </div>
             </div>
@@ -202,7 +212,7 @@ export default function LandingPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-12 bg-blue-600 dark:bg-blue-700">
+      <section className="py-12 bg-gradient-to-r from-blue-400 via-blue-500 to-teal-500 dark:from-blue-600 dark:via-blue-700 dark:to-teal-700 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
@@ -216,13 +226,13 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-800">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4 animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
               {t('landing.features_title')}
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: '0.2s' }}>
+            <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: '0.2s' }}>
               {t('landing.features_subtitle')}
             </p>
           </div>
@@ -231,12 +241,12 @@ export default function LandingPage() {
             {features.map((feature, index) => {
               const Icon = feature.icon;
               return (
-                <div key={index} className="bg-white dark:bg-gray-700 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-gray-600 hover:shadow-md transition-all duration-300 hover:scale-105 animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${0.4 + index * 0.1}s` }}>
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center mb-4">
-                    <Icon className="text-blue-600 dark:text-blue-400 text-xl" />
+                <div key={index} className="group bg-white dark:bg-gray-800/80 rounded-2xl p-6 shadow-lg border border-gray-200 dark:border-gray-700/50 hover:shadow-2xl hover:border-blue-300 dark:hover:border-blue-500/50 transition-all duration-300 hover:scale-105 hover:-translate-y-2 animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: `${0.4 + index * 0.1}s` }}>
+                  <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl flex items-center justify-center mb-4 shadow-md group-hover:scale-110 transition-transform duration-300">
+                    <Icon className="text-blue-500 dark:text-blue-400 text-2xl" />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">{t(feature.titleKey)}</h3>
-                  <p className="text-gray-600 dark:text-gray-300">{t(feature.descKey)}</p>
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">{t(feature.titleKey)}</h3>
+                  <p className="text-gray-600 dark:text-gray-400">{t(feature.descKey)}</p>
                 </div>
               );
             })}
@@ -249,10 +259,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="animate-in fade-in-0 slide-in-from-left-4 duration-700">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-6">
+              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-6">
                 {t('landing.benefits_title')}
               </h2>
-              <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-8">
                 {t('landing.benefits_subtitle')}
               </p>
               
@@ -267,18 +277,18 @@ export default function LandingPage() {
 
               <button
                 onClick={() => setShowRegister(true)}
-                className="mt-8 px-8 py-4 bg-blue-600 dark:bg-blue-600 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-700 font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center gap-2 hover:scale-105"
+                className="mt-8 px-8 py-4 bg-blue-500 text-white rounded-xl hover:bg-blue-600 font-semibold text-lg transition-all duration-300 shadow-lg shadow-blue-500/30 hover:shadow-xl inline-flex items-center gap-2 hover:scale-105 group"
               >
                 {t('landing.get_started_now')}
-                <FaArrowRight />
+                <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
 
-            <div className="bg-linear-to-br from-blue-50 dark:from-blue-900/30 to-teal-50 dark:to-teal-900/30 rounded-2xl p-8 animate-in fade-in-0 slide-in-from-right-4 duration-700" style={{ animationDelay: '0.3s' }}>
-              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 space-y-6">
+            <div className="bg-gradient-to-br from-blue-50 to-teal-50 dark:from-blue-950/30 dark:to-teal-950/30 rounded-2xl p-8 animate-in fade-in-0 slide-in-from-right-4 duration-700" style={{ animationDelay: '0.3s' }}>
+              <div className="bg-white dark:bg-gray-800/90 rounded-xl shadow-lg p-6 space-y-6">
                 <div className="flex items-center justify-between pb-4 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">{t('landing.student_name_sample')}</h3>
-                  <span className="px-3 py-1 bg-red-100 dark:bg-red-900/50 text-red-700 dark:text-red-300 rounded-full text-sm font-medium">
+                  <h3 className="font-semibold text-gray-900 dark:text-gray-100">{t('landing.student_name_sample')}</h3>
+                  <span className="px-3 py-1 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-full text-sm font-medium">
                     {t('landing.high_risk')}
                   </span>
                 </div>
@@ -294,12 +304,12 @@ export default function LandingPage() {
                     <div className="text-xs text-red-600 dark:text-red-400 font-medium mt-1">{t('landing.declining_trend')}</div>
                   </div>
 
-                  <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800/50 rounded-lg p-4">
                     <div className="flex items-start gap-2">
                       <FaLightbulb className="text-yellow-600 dark:text-yellow-400 mt-1" />
                       <div>
                         <div className="font-semibold text-yellow-900 dark:text-yellow-300 text-sm mb-1">{t('landing.recommended_actions')}</div>
-                        <ul className="text-xs text-yellow-800 dark:text-yellow-200 space-y-1">
+                        <ul className="text-xs text-yellow-800 dark:text-yellow-400 space-y-1">
                           <li>• {t('landing.action_parent_meeting')}</li>
                           <li>• {t('landing.action_family_issues')}</li>
                           <li>• {t('landing.action_peer_buddy')}</li>
@@ -315,7 +325,7 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-linear-to-r from-blue-600 to-teal-600 dark:from-blue-700 dark:to-teal-700">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-blue-400 via-blue-500 to-teal-500 dark:from-blue-600 dark:via-blue-700 dark:to-teal-700 relative overflow-hidden">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-6 animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
             {t('landing.cta_title')}
@@ -326,14 +336,14 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-in fade-in-0 slide-in-from-bottom-4 duration-700" style={{ animationDelay: '0.4s' }}>
             <button
               onClick={() => setShowRegister(true)}
-              className="px-8 py-4 bg-white dark:bg-gray-100 text-blue-600 dark:text-blue-700 rounded-lg hover:bg-gray-100 dark:hover:bg-white font-semibold text-lg transition-all duration-300 shadow-lg hover:shadow-xl inline-flex items-center justify-center gap-2 hover:scale-105"
+              className="group px-8 py-4 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 font-semibold text-lg transition-all duration-300 shadow-xl shadow-black/20 hover:shadow-2xl inline-flex items-center justify-center gap-2 hover:scale-105"
             >
               {t('landing.start_trial')}
-              <FaArrowRight />
+              <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
             </button>
             <button
               onClick={() => setShowLogin(true)}
-              className="px-8 py-4 bg-transparent text-white border-2 border-white rounded-lg hover:bg-white/10 font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center gap-2 hover:scale-105"
+              className="px-8 py-4 bg-blue-500/20 backdrop-blur-sm text-white border-2 border-white rounded-xl hover:bg-blue-500/30 font-semibold text-lg transition-all duration-300 inline-flex items-center justify-center gap-2 hover:scale-105 shadow-lg"
             >
               {t('auth.sign_in')}
             </button>
@@ -352,7 +362,7 @@ export default function LandingPage() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 bg-linear-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-teal-500 rounded-lg flex items-center justify-center shadow-md">
                   <FaBook className="text-white text-sm" />
                 </div>
                 <span className="text-white dark:text-gray-200 font-semibold">{t('landing.brand_name')}</span>

@@ -7,11 +7,11 @@ import {
   FaUsers, 
   FaFileImport, 
   FaChartBar,
-  FaBars,
-  FaTimes
+  FaShieldAlt,
+  FaChevronRight
 } from 'react-icons/fa';
 
-function AdminSidebar() {
+function AdminSidebar({ onClose }) {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
@@ -26,80 +26,61 @@ function AdminSidebar() {
 
   const isActive = (path) => location.pathname === path;
 
+  const handleNavClick = () => {
+    if (onClose) onClose();
+  };
+
   return (
-    <>
-      {/* Mobile Toggle Button */}
-      <button
-        onClick={() => setCollapsed(!collapsed)}
-        className="md:hidden fixed top-4 left-4 z-50 bg-blue-600 text-white p-2 rounded-md shadow-lg"
-      >
-        {collapsed ? <FaBars size={20} /> : <FaTimes size={20} />}
-      </button>
-
-      {/* Sidebar */}
-      <aside
-        className={`
-          fixed md:sticky top-0 left-0 h-screen bg-linear-to-b from-blue-900 to-blue-800 text-white
-          transition-all duration-300 z-40 shadow-xl
-          ${collapsed ? '-translate-x-full md:translate-x-0 md:w-20' : 'translate-x-0 w-64'}
-        `}
-      >
-        {/* Logo Section */}
-        <div className="h-16 flex items-center justify-center border-b border-blue-700">
-          {!collapsed ? (
+    <aside className="w-64 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 text-white h-screen flex flex-col shadow-2xl">
+      {/* Logo Section */}
+      <div className="h-20 flex items-center justify-center border-b border-blue-700 px-4">
+        <div className="flex items-center gap-3">
+          <div className="bg-gradient-to-br from-blue-400 to-purple-500 p-2 rounded-lg">
+            <FaShieldAlt className="text-xl text-white" />
+          </div>
+          <div>
             <h1 className="text-xl font-bold">Admin Panel</h1>
-          ) : (
-            <span className="text-2xl font-bold">A</span>
-          )}
+            <p className="text-xs text-blue-200">Control Center</p>
+          </div>
         </div>
+      </div>
 
-        {/* Navigation */}
-        <nav className="mt-6 px-3">
-          {menuItems.map((item) => {
-            const Icon = item.icon;
-            const active = isActive(item.path);
-            
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`
-                  flex items-center gap-4 px-4 py-3 mb-2 rounded-lg transition-all
-                  ${active 
-                    ? 'bg-white text-blue-900 shadow-md' 
-                    : 'hover:bg-blue-700 text-white'
-                  }
-                  ${collapsed ? 'justify-center' : ''}
-                `}
-                title={collapsed ? item.label : ''}
-              >
-                <Icon size={20} className="shrink-0" />
-                {!collapsed && (
-                  <span className="font-medium">{item.label}</span>
-                )}
-              </Link>
-            );
-          })}
-        </nav>
+      {/* Navigation */}
+      <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
+        <p className="text-xs font-semibold text-blue-300 uppercase tracking-wider px-4 mb-4">Menu</p>
+        {menuItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.path);
+          
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={handleNavClick}
+              className={`
+                flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
+                ${active 
+                  ? 'bg-gradient-to-r from-white to-blue-50 text-blue-900 shadow-lg' 
+                  : 'text-blue-100 hover:bg-blue-700/50'
+                }
+              `}
+            >
+              <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-blue-600' : 'group-hover:text-blue-300'}`} />
+              <span className="font-medium flex-1">{item.label}</span>
+              {active && <FaChevronRight className="w-4 h-4 text-blue-600" />}
+            </Link>
+          );
+        })}
+      </nav>
 
-        {/* Toggle Button (Desktop) */}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="hidden md:flex absolute bottom-6 left-1/2 transform -translate-x-1/2 
-                     bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md transition-colors"
-        >
-          {collapsed ? '→' : '←'}
-        </button>
-      </aside>
-
-      {/* Overlay for Mobile */}
-      {!collapsed && (
-        <div
-          onClick={() => setCollapsed(true)}
-          className="md:hidden fixed inset-0 bg-black/50 z-30"
-        />
-      )}
-    </>
+      {/* Footer Section */}
+      <div className="border-t border-blue-700 p-4">
+        <div className="bg-blue-800/50 rounded-lg p-4 text-center">
+          <p className="text-sm text-blue-200">School Management System</p>
+          <p className="text-xs text-blue-300 mt-1">v1.0.0</p>
+        </div>
+      </div>
+    </aside>
   );
 }
 

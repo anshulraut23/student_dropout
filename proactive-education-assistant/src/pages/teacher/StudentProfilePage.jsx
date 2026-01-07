@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { students } from "../../data/students";
 import RiskBadge from "../../components/RiskBadge";
+import { useTheme } from "../../context/ThemeContext";
 import {
   FaArrowLeft,
   FaUser,
@@ -23,6 +24,7 @@ export default function StudentProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+  const { darkMode } = useTheme();
 
   // Find student from mock data
   const student = students.find((s) => s.id === parseInt(id));
@@ -30,15 +32,14 @@ export default function StudentProfilePage() {
   // If student not found
   if (!student) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 px-4">
         <div className="text-center">
-          <FaUser className="mx-auto text-6xl text-gray-300 dark:text-gray-600 mb-4" />
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">{t('teacher.student_not_found')}</h1>
-          <p className="text-gray-600 dark:text-gray-300 mb-6">{t('teacher.student_not_found_desc')}</p>
+          <FaUser className="mx-auto text-7xl text-gray-300 dark:text-gray-600 mb-4" />
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('teacher.student_not_found')}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">{t('teacher.student_not_found_desc')}</p>
           <button
             onClick={() => navigate("/students")}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white
-                       rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-2xl hover:shadow-lg transition-all duration-300 font-semibold transform hover:scale-105 active:scale-95"
           >
             <FaArrowLeft />
             {t('teacher.back_to_students')}
@@ -71,39 +72,51 @@ export default function StudentProfilePage() {
   const suggestedInterventions = getSuggestedInterventions(student);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto">
         {/* 1️⃣ Page Header */}
-        <div className="mb-6">
+        <div className="mb-8">
           <button
             onClick={() => navigate("/students")}
-            className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700
-                       font-medium mb-4 transition-colors"
+            className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold mb-4 transition-colors transform hover:translate-x-1"
           >
             <FaArrowLeft />
             {t('teacher.back_to_students')}
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('teacher.student_profile_title')}</h1>
-          <p className="text-gray-600 dark:text-gray-300">{t('teacher.student_profile_subtitle')}</p>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent mb-2">
+            🎓 {t('teacher.student_profile_title')}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">{t('teacher.student_profile_subtitle')}</p>
         </div>
 
         {/* 2️⃣ Student Basic Information Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-teal-500 rounded-full
-                              flex items-center justify-center text-white text-2xl font-bold">
-                {student.name.charAt(0)}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-8">
+          <div className="h-40 bg-gradient-to-r from-blue-500 via-blue-600 to-teal-500 relative">
+            <div className="absolute inset-0 opacity-20 bg-pattern" style={{
+              backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)',
+            }}></div>
+          </div>
+
+          <div className="relative px-6 pb-6">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-20 mb-6">
+              <div className="flex items-end gap-4">
+                <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-teal-500 rounded-2xl shadow-2xl flex items-center justify-center text-white text-4xl font-bold border-4 border-white dark:border-gray-800 transform transition-all duration-300 hover:scale-105">
+                  {student.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="pb-2">
+                  <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{student.name}</h2>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <span className="text-sm font-bold text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full">
+                      🎓 {student.class}
+                    </span>
+                    <div className="text-sm font-bold text-gray-700 dark:text-gray-300 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded-full">
+                      📊 {student.attendance}% {t('teacher.attendance_label')}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{student.name}</h2>
-                <p className="text-gray-600 dark:text-gray-300">{student.class}</p>
-              </div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <RiskBadge level={student.riskLevel} />
-              <div className="text-sm text-gray-600 dark:text-gray-300">
-                {t('teacher.attendance_label')}: <span className="font-semibold text-gray-900 dark:text-white">{student.attendance}%</span>
+              <div className="flex items-center gap-3">
+                <RiskBadge level={student.riskLevel} />
               </div>
             </div>
           </div>
@@ -111,92 +124,92 @@ export default function StudentProfilePage() {
 
         {/* 3️⃣ Risk Explanation Section (MOST IMPORTANT) */}
         <div
-          className={`rounded-lg shadow-md border-l-4 p-6 mb-6 ${
+          className={`rounded-2xl shadow-xl p-8 mb-8 border-l-4 ${
             student.riskLevel === "high"
-              ? "bg-red-50 dark:bg-red-900/20 border-red-500"
+              ? "bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-500"
               : student.riskLevel === "medium"
-              ? "bg-yellow-50 dark:bg-yellow-900/20 border-yellow-500"
-              : "bg-green-50 dark:bg-green-900/20 border-green-500"
+              ? "bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-500"
+              : "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-500"
           }`}
         >
-          <div className="flex items-start gap-3 mb-4">
-            <FaExclamationTriangle
-              className={`text-2xl mt-1 ${
-                student.riskLevel === "high"
-                  ? "text-red-600"
-                  : student.riskLevel === "medium"
-                  ? "text-yellow-600"
-                  : "text-green-600"
-              }`}
-            />
-            <div>
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+          <div className="flex items-start gap-4 mb-4">
+            <div className={`text-3xl mt-1 ${
+              student.riskLevel === "high"
+                ? "text-red-600"
+                : student.riskLevel === "medium"
+                ? "text-yellow-600"
+                : "text-green-600"
+            }`}>
+              ⚠️
+            </div>
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
                 {t('teacher.risk_analysis_title')}
               </h3>
-              <p className="text-gray-800 dark:text-gray-200 leading-relaxed">{riskText}</p>
+              <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-lg">{riskText}</p>
             </div>
           </div>
         </div>
 
         {/* 4️⃣ Attendance Trend Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <FaCalendarCheck className="text-blue-600 text-xl" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+          <div className="flex items-center gap-2 mb-6">
+            <FaCalendarCheck className="text-blue-600 text-2xl" />
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
               {t('teacher.attendance_trend_title')}
             </h3>
           </div>
-          <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
             {attendanceTrend.map((day, index) => (
               <div key={index} className="text-center">
                 <div
-                  className={`w-full h-12 rounded-md flex items-center justify-center text-white font-bold ${
-                    day.present ? "bg-green-500" : "bg-red-500"
+                  className={`w-full h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md transform transition-all duration-300 hover:scale-110 cursor-default ${
+                    day.present ? "bg-gradient-to-br from-green-500 to-emerald-600" : "bg-gradient-to-br from-red-500 to-orange-600"
                   }`}
                 >
                   {day.present ? t('teacher.present_short') : t('teacher.absent_short')}
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">{day.label}</p>
+                <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mt-2">{day.label}</p>
               </div>
             ))}
           </div>
-          <div className="mt-4 flex items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-green-500 rounded"></div>
-              <span className="text-gray-700 dark:text-gray-300">{t('teacher.present')}</span>
+          <div className="mt-6 flex items-center gap-6 text-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg"></div>
+              <span className="font-semibold text-gray-700 dark:text-gray-300">{t('teacher.present')}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 bg-red-500 rounded"></div>
-              <span className="text-gray-700 dark:text-gray-300">{t('teacher.absent')}</span>
+            <div className="flex items-center gap-3">
+              <div className="w-5 h-5 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg"></div>
+              <span className="font-semibold text-gray-700 dark:text-gray-300">{t('teacher.absent')}</span>
             </div>
           </div>
         </div>
 
         {/* 5️⃣ Academic Performance Trend */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <FaChartLine className="text-teal-600 text-xl" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+          <div className="flex items-center gap-2 mb-6">
+            <FaChartLine className="text-teal-600 text-2xl" />
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
               {t('teacher.academic_overview_title')}
             </h3>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-6">
             {academicPerformance.map((subject, index) => (
               <div key={index}>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{subject.name}</span>
-                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{subject.name}</span>
+                  <span className="text-lg font-bold text-gray-900 dark:text-white bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
                     {subject.score}%
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden shadow-md">
                   <div
-                    className={`h-2 rounded-full transition-all ${
+                    className={`h-3 rounded-full transition-all duration-500 ${
                       subject.score >= 75
-                        ? "bg-green-500"
+                        ? "bg-gradient-to-r from-green-500 to-emerald-600"
                         : subject.score >= 50
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
+                        ? "bg-gradient-to-r from-yellow-500 to-amber-600"
+                        : "bg-gradient-to-r from-red-500 to-orange-600"
                     }`}
                     style={{ width: `${subject.score}%` }}
                   ></div>
@@ -207,28 +220,30 @@ export default function StudentProfilePage() {
         </div>
 
         {/* 6️⃣ Suggested Interventions Section */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4">
-            <FaLightbulb className="text-yellow-600 text-xl" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
+          <div className="flex items-center gap-2 mb-6">
+            <FaLightbulb className="text-yellow-600 text-2xl" />
+            <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
               {t('teacher.suggested_interventions_title')}
             </h3>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-4">
             {suggestedInterventions.map((intervention, index) => (
               <div
                 key={index}
-                className="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700"
+                className="flex items-start gap-4 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-700 hover:shadow-lg transition-all duration-300 transform hover:translate-x-1"
               >
-                <intervention.icon className="text-blue-600 text-xl mt-0.5 flex shrink-0" />
+                <div className="text-2xl text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1">
+                  <intervention.icon />
+                </div>
                 <div className="flex-1">
-                  <h4 className="font-semibold text-gray-900 dark:text-white mb-1">
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-1 text-lg">
                     {intervention.title}
                   </h4>
                   <p className="text-sm text-gray-700 dark:text-gray-300">{intervention.description}</p>
                 </div>
                 <span
-                  className={`px-2 py-1 rounded text-xs font-medium ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap flex-shrink-0 ${
                     intervention.priority === "High"
                       ? "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-200"
                       : intervention.priority === "Medium"
@@ -244,32 +259,26 @@ export default function StudentProfilePage() {
         </div>
 
         {/* 7️⃣ Action Buttons */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">{t('teacher.quick_actions')}</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('teacher.quick_actions')}</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <button
               onClick={() => alert(t('teacher.coming_soon_add_attendance'))}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-green-600
-                         text-white rounded-lg hover:bg-green-700 transition-colors
-                         font-medium"
+              className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-bold transform hover:scale-105 active:scale-95"
             >
               <FaCalendarCheck />
               {t('teacher.add_attendance')}
             </button>
             <button
               onClick={() => alert(t('teacher.coming_soon_add_score'))}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-600
-                         text-white rounded-lg hover:bg-blue-700 transition-colors
-                         font-medium"
+              className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-bold transform hover:scale-105 active:scale-95"
             >
               <FaBook />
               {t('teacher.add_academic_score')}
             </button>
             <button
               onClick={() => alert(t('teacher.coming_soon_add_behaviour'))}
-              className="flex items-center justify-center gap-2 px-4 py-3 bg-purple-600
-                         text-white rounded-lg hover:bg-purple-700 transition-colors
-                         font-medium"
+              className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-bold transform hover:scale-105 active:scale-95"
             >
               <FaComments />
               {t('teacher.add_behaviour')}

@@ -170,30 +170,36 @@ export default function StudentListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Page Header */}
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('students.page_title_management')}</h1>
-          <p className="text-gray-600 dark:text-gray-300">{t('students.page_subtitle_management')}</p>
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent mb-3">
+            {t('students.page_title_management', 'Student Management')}
+          </h1>
+          <p className="text-gray-600 dark:text-gray-300 text-lg">
+            {t('students.page_subtitle_management', 'View, add, and manage your students')}
+          </p>
         </div>
 
         {/* Class Selector (only shown if teacher has multiple classes) */}
         {hasMultipleClasses && teacher?.assignedClasses && (
-          <div className="mb-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-            <div className="flex items-center gap-3">
-              <FaChalkboardTeacher className="text-blue-600 dark:text-blue-400 text-xl" />
+          <div className="mb-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-blue-200 dark:border-blue-800 p-6">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <FaChalkboardTeacher className="text-white text-2xl" />
+              </div>
               <div className="flex-1">
-                <label htmlFor="classSelect" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  {t('students.select_class')}
+                <label htmlFor="classSelect" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 uppercase tracking-wide">
+                  {t('students.select_class', 'Select Class')}
                 </label>
                 <select
                   id="classSelect"
                   value={selectedClass || ""}
                   onChange={(e) => setSelectedClass(e.target.value)}
-                  className="w-full md:w-64 px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full md:w-80 px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium transition-all"
                 >
-                  <option value="">{t('students.all_classes')}</option>
+                  <option value="">{t('students.all_classes', 'All Classes')}</option>
                   {teacher.assignedClasses.map((cls) => (
                     <option key={cls} value={cls}>
                       {cls}
@@ -202,33 +208,33 @@ export default function StudentListPage() {
                 </select>
               </div>
               {selectedClass && (
-                <div className="text-sm text-gray-600 dark:text-gray-300">
-                  {t('students.showing_from')} <span className="font-semibold text-blue-600 dark:text-blue-400">{selectedClass}</span>
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-xl font-semibold">
+                  <span className="text-sm">{t('students.showing_from', 'Showing from')} </span>
+                  <span className="font-bold">{selectedClass}</span>
                 </div>
               )}
             </div>
           </div>
         )}
 
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-6">
           {/* Left: Vertical Tabs */}
-          <div className="w-full md:w-48 shrink-0">
+          <div className="w-full md:w-48 shrink-0 order-2 md:order-1">
             {/* Mobile Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden w-full mb-4 flex items-center justify-between px-4 py-2 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-lg border border-gray-200 dark:border-gray-700"
+              className="md:hidden w-full mb-4 flex items-center justify-between px-6 py-3 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-2xl shadow-xl font-bold transition-all duration-300 hover:shadow-2xl transform hover:scale-105"
             >
-              <span className="font-medium">{t('students.tabs')}</span>
-              <FaBars />
+              <span className="text-lg">{mobileMenuOpen ? '✕ Close Tabs' : '☰ Open Tabs'}</span>
             </button>
 
             {/* Tabs Panel */}
             <div
-              className={`bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden ${
-                !mobileMenuOpen ? "hidden md:block" : ""
+              className={`bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden transition-all duration-300 ${
+                !mobileMenuOpen ? "hidden md:block" : "block"
               }`}
             >
-              <nav className="flex flex-col">
+              <nav className="flex flex-col p-2">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -241,14 +247,14 @@ export default function StudentListPage() {
                         setFormMessage("");
                         setImportMessage("");
                       }}
-                      className={`flex items-center gap-3 px-4 py-3 border-l-4 transition-colors text-left ${
+                      className={`flex items-center gap-3 px-5 py-4 rounded-xl transition-all duration-200 text-left mb-1 ${
                         isActive
-                          ? "border-l-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium"
-                          : "border-l-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                          ? "bg-gradient-to-r from-blue-600 to-teal-600 text-white shadow-lg transform scale-105"
+                          : "text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-gray-700 hover:transform hover:translate-x-1"
                       }`}
                     >
-                      <Icon className="text-lg" />
-                      <span className="text-sm">{tab.label}</span>
+                      <Icon className="text-xl" />
+                      <span className="text-sm font-semibold">{tab.label}</span>
                     </button>
                   );
                 })}
@@ -257,92 +263,117 @@ export default function StudentListPage() {
           </div>
 
           {/* Right: Content Area */}
-          <div className="flex-1 min-w-0">
+          <div className="w-full md:flex-1 min-w-0 order-1 md:order-2">
             {/* Tab 1: List Students */}
             {activeTab === "list" && (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {/* Filters */}
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+                    <span>🔍</span>
+                    {t('students.filter_students', 'Filter Students')}
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t('students.risk_level')}
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
+                        {t('students.risk_level', 'Risk Level')}
                       </label>
                       <select
                         value={riskFilter}
                         onChange={(e) => setRiskFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium transition-all"
                       >
-                        <option value="all">{t('students.filter_all')}</option>
-                        <option value="high">{t('students.filter_high')}</option>
-                        <option value="medium">{t('students.filter_medium')}</option>
-                        <option value="low">{t('students.filter_low')}</option>
+                        <option value="all">{t('students.filter_all', 'All Levels')}</option>
+                        <option value="high">{t('students.filter_high', 'High Risk')}</option>
+                        <option value="medium">{t('students.filter_medium', 'Medium Risk')}</option>
+                        <option value="low">{t('students.filter_low', 'Low Risk')}</option>
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {t('students.class')}
+                      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
+                        {t('students.class', 'Class')}
                       </label>
                       <select
                         value={gradeFilter}
                         onChange={(e) => setGradeFilter(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-4 py-3 border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium transition-all"
                       >
-                        <option value="all">{t('students.all_grades')}</option>
+                        <option value="all">{t('students.all_grades', 'All Grades')}</option>
                         {uniqueGrades.map((grade) => (
                           <option key={grade} value={grade}>
-                            {t('students.class')} {grade}
+                            {t('students.class', 'Class')} {grade}
                           </option>
                         ))}
                       </select>
                     </div>
                   </div>
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {t('students.showing', 'Showing')} <span className="font-bold text-blue-600 dark:text-blue-400">{filteredStudents.length}</span> {t('students.students', 'students')}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Table View (Desktop) */}
-                <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                <div className="hidden md:block bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
                   {filteredStudents.length > 0 ? (
                     <div className="overflow-x-auto">
                       <table className="w-full">
-                        <thead className="bg-gray-50 dark:bg-gray-700 border-b border-gray-200 dark:border-gray-600">
+                        <thead className="bg-gradient-to-r from-blue-600 to-teal-600 text-white">
                           <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                              {t('students.student_name')}
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                              {t('students.student_name', 'Student Name')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                              {t('students.class')}
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                              {t('students.class', 'Class')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                              {t('students.attendance')}
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                              {t('students.attendance', 'Attendance')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                              {t('students.risk_status')}
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                              {t('students.risk_status', 'Risk Status')}
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-600 dark:text-gray-300 uppercase">
-                              {t('students.action')}
+                            <th className="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                              {t('students.action', 'Action')}
                             </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                          {filteredStudents.map((student) => (
-                            <tr key={student.id} className={getRowBgColor(student.riskLevel)}>
-                              <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
+                          {filteredStudents.map((student, index) => (
+                            <tr 
+                              key={student.id} 
+                              className={`${getRowBgColor(student.riskLevel)} transition-all duration-200 group`}
+                              style={{ animationDelay: `${index * 50}ms` }}
+                            >
+                              <td className="px-6 py-5 text-sm font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                                 {student.name}
                               </td>
-                              <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-200">{student.class}</td>
-                              <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white">
-                                {student.attendance}%
+                              <td className="px-6 py-5">
+                                <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+                                  🎓 {student.class}
+                                </span>
                               </td>
-                              <td className="px-6 py-4 text-sm">
+                              <td className="px-6 py-5">
+                                <div className="flex items-center gap-2">
+                                  <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2 w-20">
+                                    <div 
+                                      className={`h-2 rounded-full ${student.attendance >= 75 ? 'bg-green-500' : student.attendance >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                                      style={{ width: `${student.attendance}%` }}
+                                    ></div>
+                                  </div>
+                                  <span className="text-sm font-bold text-gray-900 dark:text-white">{student.attendance}%</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-5">
                                 <RiskBadge level={student.riskLevel} />
                               </td>
-                              <td className="px-6 py-4 text-sm">
+                              <td className="px-6 py-5">
                                 <button
                                   onClick={() => navigate(`/students/${student.id}`)}
-                                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-xl hover:shadow-xl transition-all duration-300 font-semibold text-sm transform hover:scale-105"
                                 >
-                                  <FaEye className="text-xs" />
-                                  {t('students.view')}
+                                  <FaEye className="text-sm" />
+                                  {t('students.view', 'View')}
                                 </button>
                               </td>
                             </tr>
@@ -351,38 +382,63 @@ export default function StudentListPage() {
                       </table>
                     </div>
                   ) : (
-                    <div className="text-center py-12">
-                      <p className="text-gray-500 dark:text-gray-400">{t('students.no_students')}</p>
+                    <div className="text-center py-16">
+                      <div className="w-24 h-24 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-6">
+                        <span className="text-5xl">📋</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-500 dark:text-gray-400">{t('students.no_students', 'No students found')}</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">{t('students.try_different_filters', 'Try adjusting your filters')}</p>
                     </div>
                   )}
                 </div>
 
                 {/* Card View (Mobile) */}
-                <div className="md:hidden space-y-3">
+                <div className="md:hidden space-y-4">
                   {filteredStudents.length > 0 ? (
-                    filteredStudents.map((student) => (
+                    filteredStudents.map((student, index) => (
                       <div
                         key={student.id}
-                        className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-4"
+                        className={`${getRowBgColor(student.riskLevel)} rounded-2xl shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 transition-all duration-300 hover:scale-105`}
+                        style={{ animationDelay: `${index * 100}ms` }}
                       >
-                        <div className="flex justify-between items-start mb-2">
-                          <h3 className="font-semibold text-gray-900 dark:text-white">{student.name}</h3>
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">{student.name}</h3>
+                            <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-semibold">
+                              🎓 {student.class}
+                            </span>
+                          </div>
                           <RiskBadge level={student.riskLevel} />
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
-                          {student.class} • Attendance: {student.attendance}%
-                        </p>
+                        
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">Attendance</span>
+                            <span className="text-sm font-bold text-gray-900 dark:text-white">{student.attendance}%</span>
+                          </div>
+                          <div className="bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+                            <div 
+                              className={`h-3 rounded-full ${student.attendance >= 75 ? 'bg-green-500' : student.attendance >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                              style={{ width: `${student.attendance}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        
                         <button
                           onClick={() => navigate(`/students/${student.id}`)}
-                          className="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm font-medium"
+                          className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-xl hover:shadow-xl transition-all duration-300 text-sm font-bold transform hover:scale-105"
                         >
-                          {t('students.view_profile')}
+                          {t('students.view_profile', 'View Profile')}
                         </button>
                       </div>
                     ))
                   ) : (
-                    <div className="text-center py-8">
-                      <p className="text-gray-500 dark:text-gray-400">{t('students.no_students')}</p>
+                    <div className="text-center py-12 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border-2 border-gray-200 dark:border-gray-700">
+                      <div className="w-24 h-24 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-6">
+                        <span className="text-5xl">📋</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-500 dark:text-gray-400">{t('students.no_students', 'No students found')}</p>
+                      <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">{t('students.try_different_filters', 'Try adjusting your filters')}</p>
                     </div>
                   )}
                 </div>
