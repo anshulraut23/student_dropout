@@ -8,6 +8,8 @@ import StudentListPage from "../pages/teacher/StudentListPage";
 import StudentProfilePage from "../pages/teacher/StudentProfilePage";
 import ProfilePage from "../pages/teacher/ProfilePage";
 import MainLayout from "../layouts/MainLayout";
+import AboutPage from "../pages/AboutPage";
+
 
 // Admin imports
 import AdminLayout from "../layouts/AdminLayout";
