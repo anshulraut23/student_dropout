@@ -3,26 +3,34 @@ import { createContext, useContext, useState, useEffect } from 'react';
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  // Initialize theme from localStorage, default to 'light'
+  // Initialize theme from localStorage, default to 'dark'
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
-    return savedTheme || 'light';
+    return savedTheme || 'dark';
   });
 
   // Update document class and localStorage when theme changes
   useEffect(() => {
     const root = document.documentElement;
+    const body = document.body;
     
     // Remove both classes first to ensure clean state
     root.classList.remove('light', 'dark');
+    body.classList.remove('light', 'dark', 'dark-mode');
     
     // Add the current theme class
     root.classList.add(theme);
+    body.classList.add(theme);
+    
+    if (theme === 'dark') {
+      body.classList.add('dark-mode');
+    }
     
     // Save to localStorage
     localStorage.setItem('theme', theme);
     
-    console.log('Theme changed to:', theme, 'Classes:', root.classList.value);
+    // Log for debugging
+    console.log('Theme changed to:', theme, 'Root classes:', root.classList.value);
   }, [theme]);
 
   const toggleTheme = () => {

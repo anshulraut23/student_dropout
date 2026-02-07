@@ -112,6 +112,40 @@ function Modal({ isOpen, onClose, onSwitchToRegister, onLoginSuccess }) {
       setRole("teacher");
     }
   };
+
+  const handleGuestLogin = () => {
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("userRole", role === "coordinator" ? "admin" : "teacher");
+    
+    // Set guest teacher data
+    const guestTeacher = {
+      email: "guest@school.org",
+      name: "Guest User",
+      status: "APPROVED",
+      assignedClasses: ["Demo Class"],
+      subject: "All Subjects",
+      isGuest: true
+    };
+    
+    if (role === "teacher") {
+      loginTeacher(guestTeacher);
+    } else {
+      localStorage.setItem("adminData", JSON.stringify(guestTeacher));
+    }
+    
+    // Trigger custom event for route update
+    window.dispatchEvent(new Event("localStorageUpdate"));
+    setEmail("");
+    setPassword("");
+    setRole("teacher");
+    onClose();
+    
+    if (onLoginSuccess) {
+      onLoginSuccess();
+    } else {
+      setTimeout(() => navigate(role === "coordinator" ? "/admin/dashboard" : "/dashboard"), 100);
+    }
+  };
   
   return (
     // Overlay (click outside closes)
@@ -294,6 +328,20 @@ function Modal({ isOpen, onClose, onSwitchToRegister, onLoginSuccess }) {
                      shadow-md"
         >
           {t('login.sign_in_button', 'Sign In')}
+        </button>
+
+        {/* Guest Login Button */}
+        <button 
+          onClick={handleGuestLogin}
+          className="w-full mt-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white
+                     font-bold py-3.5 rounded-xl text-base
+                     hover:from-gray-700 hover:to-gray-800 hover:shadow-lg
+                     focus:outline-none focus:ring-4 focus:ring-gray-300/50
+                     active:scale-95
+                     transition-all duration-200
+                     shadow-md"
+        >
+          {t('login.guest_login', 'Continue as Guest')}
         </button>
 
         {/* Helper Info Section */}

@@ -1,8 +1,283 @@
 @import "tailwindcss";
 
-@variant dark (&:where(.dark, .dark *));
+/* Removed unsupported @variant directive; using html.dark selectors below */
 
-@theme {
-  --color-darkmode-bg: #111827;
-  --color-darkmode-card: #1f2937;
+/* ========== LIGHT THEME (ENTERPRISE INDIGO/TEAL PALETTE) ========== */
+/* Main Background: #F8FAFC - Off-white */
+/* Primary: #1E3A8A - Deep indigo */
+/* Accent: #0EA5A4 - Muted teal */
+/* Borders: #E2E8F0 - Subtle gray */
+/* Text: #0F172A primary, #475569 secondary */
+
+html,
+body,
+html.light,
+body.light {
+  background: #F8FAFC;
+  background-attachment: fixed;
+  color: #333;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Light theme text colors */
+html.light h1,
+html.light h2,
+html.light h3,
+html.light h4 {
+  color: #0F172A !important;
+}
+
+html.light p,
+html.light span:not([class*="text-"]) {
+  color: #475569 !important;
+}
+
+/* Light theme cards and containers */
+html.light .bg-white {
+  background-color: #ffffff !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light .bg-gray-50 {
+  background-color: #F8FAFC !important;
+}
+
+/* Light theme nav/header */
+html.light nav,
+html.light header,
+html.light [class*="navbar"],
+html.light [class*="header"] {
+  background-color: #0F172A;
+  color: #F8FAFC;
+  border-bottom: 1px solid #1E293B;
+}
+
+/* PROFESSIONAL DARK THEME */
+/* Apply to html.dark selector and body.dark-mode */
+
+/* ========== BACKGROUND ========== */
+html.dark,
+.dark,
+html.dark body,
+body.dark-mode {
+  background: linear-gradient(135deg, rgba(26, 31, 53, 0.95) 0%, rgba(22, 33, 62, 0.95) 100%);
+  background-attachment: fixed;
+}
+
+/* ========== TEXT COLORS ========== */
+html.dark,
+html.dark * {
+  color-scheme: dark;
+}
+
+html.dark h1,
+html.dark h2,
+html.dark h3,
+html.dark h4,
+html.dark h5,
+html.dark h6,
+html.dark strong,
+html.dark .font-bold {
+  color: #f0f4f8 !important;
+  text-shadow: none;
+}
+
+html.dark p,
+html.dark span,
+html.dark label,
+html.dark li,
+html.dark td {
+  color: #cbd5e0 !important;
+}
+
+html.dark .text-gray-900 { color: #f0f4f8 !important; }
+html.dark .text-gray-800 { color: #e2e8f0 !important; }
+html.dark .text-gray-700 { color: #cbd5e0 !important; }
+html.dark .text-gray-600 { color: #a0aec0 !important; }
+html.dark .text-slate-900 { color: #f0f4f8 !important; }
+html.dark .text-slate-800 { color: #cbd5e0 !important; }
+html.dark .text-white { color: #f0f4f8 !important; }
+
+/* ========== BACKGROUNDS ========== */
+html.dark .bg-white { 
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(71, 85, 105, 0.4);
+}
+
+html.dark .bg-gray-50 { background-color: rgba(30, 41, 59, 0.7) !important; }
+html.dark .bg-gray-100 { background-color: rgba(30, 41, 59, 0.8) !important; }
+html.dark .bg-gray-900 { background-color: rgba(15, 23, 42, 0.85) !important; }
+html.dark .bg-slate-50 { background-color: rgba(30, 41, 59, 0.7) !important; }
+html.dark .bg-blue-50 { background-color: rgba(30, 58, 138, 0.3) !important; }
+html.dark .bg-slate-900 { background-color: rgba(15, 23, 42, 0.85) !important; }
+
+/* ========== BORDERS ========== */
+html.dark .border-gray-200 { border-color: rgba(71, 85, 105, 0.4) !important; }
+html.dark .border-gray-300 { border-color: rgba(71, 85, 105, 0.5) !important; }
+html.dark .border-slate-700 { border-color: rgba(71, 85, 105, 0.4) !important; }
+html.dark .border-blue-200 { border-color: rgba(59, 130, 246, 0.3) !important; }
+
+html.dark .border {
+  border-color: rgba(71, 85, 105, 0.3) !important;
+}
+
+html.dark [class*="border"] {
+  border-color: rgba(71, 85, 105, 0.3) !important;
+}
+
+/* ========== INPUTS & FORMS ========== */
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark textarea,
+html.dark select {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  color: #e2e8f0 !important;
+  border: 1px solid rgba(71, 85, 105, 0.5) !important;
+  backdrop-filter: blur(8px);
+}
+
+html.dark input[type="text"]:focus,
+html.dark input[type="email"]:focus,
+html.dark input[type="password"]:focus,
+html.dark input[type="number"]:focus,
+html.dark textarea:focus,
+html.dark select:focus {
+  border-color: rgba(59, 130, 246, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+  outline: none !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #71717a !important;
+}
+
+html.dark input[type="radio"],
+html.dark input[type="checkbox"] {
+  accent-color: #3b82f6 !important;
+}
+
+/* ========== BUTTONS ========== */
+html.dark button,
+html.dark .btn,
+html.dark [class*="button"] {
+  transition: all 0.2s ease;
+  border-radius: 0.5rem;
+}
+
+html.dark .bg-blue-600,
+html.dark .bg-blue-500 {
+  background-color: #3b82f6 !important;
+  color: #ffffff !important;
+  border: none !important;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15) !important;
+}
+
+html.dark .bg-blue-600:hover,
+html.dark .bg-blue-500:hover {
+  background-color: #2563eb !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
+}
+
+/* ========== CARDS & CONTAINERS ========== */
+html.dark .bg-white,
+html.dark [class*="card"],
+html.dark [class*="shadow-lg"] {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(71, 85, 105, 0.4) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+}
+
+html.dark .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05) !important;
+}
+
+html.dark [class*="card"]:hover,
+html.dark [class*="hover:shadow"]:hover {
+  border-color: rgba(71, 85, 105, 0.6) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ========== TABLES ========== */
+html.dark table {
+  background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+html.dark table thead {
+  background-color: rgba(30, 41, 59, 0.9) !important;
+}
+
+html.dark table thead th {
+  color: #f0f4f8 !important;
+  border-bottom: 1px solid rgba(71, 85, 105, 0.4) !important;
+  font-weight: 600;
+}
+
+html.dark table tbody tr {
+  border-color: rgba(71, 85, 105, 0.2) !important;
+  background-color: rgba(30, 41, 59, 0.8) !important;
+}
+
+html.dark table tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.95) !important;
+}
+
+html.dark table td {
+  color: #cbd5e0 !important;
+  border-color: rgba(71, 85, 105, 0.2) !important;
+}
+
+/* ========== BADGES & TAGS ========== */
+html.dark [class*="badge"],
+html.dark [class*="tag"],
+html.dark .px-3.py-1 {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #3b82f6 !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+}
+
+/* ========== LINKS ========== */
+html.dark a,
+html.dark [class*="link"] {
+  color: #3b82f6 !important;
+}
+
+html.dark a:hover,
+html.dark [class*="link"]:hover {
+  color: #2563eb !important;
+}
+
+/* ========== NAV & HEADER ========== */
+html.dark nav,
+html.dark header,
+html.dark [class*="navbar"],
+html.dark [class*="header"] {
+  background-color: rgba(30, 41, 59, 0.9) !important;
+  border-bottom: 1px solid rgba(71, 85, 105, 0.2) !important;
+}
+
+/* ========== ICONS ========== */
+html.dark svg {
+  color: inherit;
+  filter: none;
+}
+
+html.dark [class*="text-gray"] svg,
+html.dark button svg,
+html.dark [class*="icon"] svg {
+  color: inherit;
+  filter: none;
+}
+
+/* ========== UTILITY CLASSES ========== */
+@layer utilities {
+  .glass-effect {
+    background-color: rgba(30, 41, 59, 0.8) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+  }
 }
