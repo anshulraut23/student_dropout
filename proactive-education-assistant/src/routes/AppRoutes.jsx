@@ -1,17 +1,21 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+
 import LandingPage from "../pages/LandingPage";
 import PricingTable from "../pages/payement/PricingTable";
 import PaymentUI from "../pages/payement/PaymentUI";
+import AboutPage from "../pages/AboutPage";
+
 import DashboardPage from "../pages/teacher/DashboardPage";
 import StudentListPage from "../pages/teacher/StudentListPage";
 import StudentProfilePage from "../pages/teacher/StudentProfilePage";
 import ProfilePage from "../pages/teacher/ProfilePage";
+import DataEntryPage from "../pages/teacher/DataEntryPage";
+
 import MainLayout from "../layouts/MainLayout";
-import AboutPage from "../pages/AboutPage";
 
 
-// Admin imports
+// Admin
 import AdminLayout from "../layouts/AdminLayout";
 import AdminDashboard from "../pages/admin/AdminDashboard";
 import TeacherManagement from "../pages/admin/TeacherManagement";
@@ -24,19 +28,15 @@ export default function AppRoutes() {
   const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("loggedIn"));
   const [userRole, setUserRole] = useState(localStorage.getItem("userRole"));
 
-  // Listen for storage changes
   useEffect(() => {
     const handleStorageChange = () => {
       setIsLoggedIn(localStorage.getItem("loggedIn"));
       setUserRole(localStorage.getItem("userRole"));
     };
 
-    // Check on mount and when window gains focus
     handleStorageChange();
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener("focus", handleStorageChange);
-
-    // Custom event for same-window localStorage changes
     window.addEventListener("localStorageUpdate", handleStorageChange);
 
     return () => {
@@ -48,12 +48,15 @@ export default function AppRoutes() {
 
   return (
     <Routes>
-      {/* Public Landing Page */}
+
+      {/* Public Pages */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/pricing" element={<PricingTable />} />
       <Route path="/payment" element={<PaymentUI />} />
-      
-      {/* Admin Routes */}
+
+
+      {/* ---------------- ADMIN ROUTES ---------------- */}
+
       {isLoggedIn && userRole === "admin" ? (
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<Navigate to="/admin/dashboard" />} />
@@ -68,23 +71,35 @@ export default function AppRoutes() {
         <Route path="/admin/*" element={<Navigate to="/" />} />
       )}
 
-      {/* Teacher Routes */}
+
+      {/* ---------------- TEACHER ROUTES ---------------- */}
+
       {isLoggedIn && userRole !== "admin" ? (
         <Route element={<MainLayout />}>
+
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/students" element={<StudentListPage />} />
           <Route path="/students/:id" element={<StudentProfilePage />} />
+          <Route path="/data-entry" element={<DataEntryPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/about" element={<AboutPage />} />
+
         </Route>
       ) : null}
-      
-      {/* Redirect to landing if not logged in */}
+
+
+      {/* ---------------- PROTECTION ---------------- */}
+
       {!isLoggedIn && (
         <>
           <Route path="/dashboard" element={<Navigate to="/" />} />
           <Route path="/students/*" element={<Navigate to="/" />} />
+          <Route path="/data-entry" element={<Navigate to="/" />} />
+          <Route path="/profile" element={<Navigate to="/" />} />
+          
         </>
       )}
+
     </Routes>
   );
 }

@@ -7,6 +7,8 @@ export default function Sidebar() {
       <nav className="flex-1 px-3 py-4 space-y-1">
         <NavItem to="/dashboard" label="Dashboard" />
         <NavItem to="/students" label="Students" />
+        <NavItem to="/data-entry" label="Data Entry" />
+
         <NavItem to="/chatbot" label="Chatbot" />
       </nav>
 

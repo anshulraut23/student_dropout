@@ -373,13 +373,10 @@
 
 
 
-
-
-
 import { useParams, useNavigate } from "react-router-dom";
 import { students } from "../../data/students";
 import RiskBadge from "../../components/RiskBadge";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaUserCircle, FaPlus } from "react-icons/fa";
 
 export default function StudentProfilePage() {
   const { id } = useParams();
@@ -391,12 +388,10 @@ export default function StudentProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-100">
         <div className="text-center">
-          <h2 className="text-lg font-semibold text-slate-700 mb-2">
-            Student not found
-          </h2>
+          <h2 className="text-lg font-semibold">Student not found</h2>
           <button
             onClick={() => navigate("/students")}
-            className="text-blue-600 hover:underline text-sm"
+            className="text-blue-600 mt-2"
           >
             Back to students
           </button>
@@ -407,70 +402,129 @@ export default function StudentProfilePage() {
 
   return (
     <div className="px-6 py-6 bg-slate-100 min-h-screen">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
 
         {/* Back */}
         <button
           onClick={() => navigate("/students")}
-          className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
+          className="flex items-center gap-2 text-blue-600 text-sm"
         >
-          <FaArrowLeft />
-          Back to students
+          <FaArrowLeft /> Back to students
         </button>
 
-        {/* Header */}
-        <div className="bg-white border border-slate-200 rounded-md p-6">
-          <div className="flex items-center justify-between">
+        {/* Student Header */}
+        <div className="bg-white rounded-lg border p-6 flex flex-col sm:flex-row justify-between gap-6">
+
+          <div className="flex items-center gap-4">
+            <FaUserCircle className="text-slate-400 text-6xl" />
+
             <div>
-              <h1 className="text-2xl font-semibold text-slate-900">
-                {student.name}
-              </h1>
-              <p className="text-sm text-slate-600 mt-1">
+              <h1 className="text-2xl font-semibold">{student.name}</h1>
+              <p className="text-sm text-slate-600">
                 {student.class} • Attendance {student.attendance}%
               </p>
+              <p className="text-sm text-slate-500 mt-1">
+                Address: Village Area (mock) | Parent Contact: 9XXXXXXXXX
+              </p>
             </div>
+          </div>
+
+          <RiskBadge level={student.riskLevel} />
+        </div>
+
+        {/* Explainable Risk */}
+        <div className="bg-white rounded-lg border p-6">
+          <h2 className="text-lg font-semibold mb-3">Explainable Risk Factors</h2>
+          <ul className="text-sm text-slate-700 space-y-2 list-disc pl-5">
+            <li>Attendance dropped below 70% in last month</li>
+            <li>Recent academic scores declined</li>
+            <li>Multiple absences in consecutive days</li>
+          </ul>
+        </div>
+
+        {/* Snapshot */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+          <div className="bg-white rounded-lg border p-5">
+            <p className="text-slate-500 text-sm">Attendance</p>
+            <p className="text-2xl font-semibold">{student.attendance}%</p>
+          </div>
+
+          <div className="bg-white rounded-lg border p-5">
+            <p className="text-slate-500 text-sm">Class</p>
+            <p className="text-2xl font-semibold">{student.class}</p>
+          </div>
+
+          <div className="bg-white rounded-lg border p-5">
+            <p className="text-slate-500 text-sm">Risk Level</p>
             <RiskBadge level={student.riskLevel} />
           </div>
         </div>
 
-        {/* Risk Explanation */}
-        <div className="bg-white border border-slate-200 rounded-md p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-2">
-            Risk Analysis
-          </h2>
-          <p className="text-sm text-slate-700 leading-relaxed">
-            This student is currently classified as <strong>{student.riskLevel}</strong> risk
-            based on attendance trends and academic indicators. Continuous monitoring
-            and timely intervention are recommended.
-          </p>
+        {/* Quick Actions */}
+        <div className="bg-white rounded-lg border p-6">
+          <h2 className="text-lg font-semibold mb-4">Quick Data Entry</h2>
+
+          <div className="flex flex-wrap gap-3">
+            <ActionButton text="Add Attendance" />
+            <ActionButton text="Add Academic Score" />
+            <ActionButton text="Add Behaviour Note" />
+            <ActionButton text="Add Intervention" />
+          </div>
         </div>
 
-        {/* Academic Snapshot */}
-        <div className="bg-white border border-slate-200 rounded-md p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            Academic Overview
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-            <div>
-              <p className="text-slate-500">Attendance</p>
-              <p className="font-semibold text-slate-900">
-                {student.attendance}%
-              </p>
-            </div>
-            <div>
-              <p className="text-slate-500">Class</p>
-              <p className="font-semibold text-slate-900">
-                {student.class}
-              </p>
-            </div>
-            <div>
-              <p className="text-slate-500">Risk Level</p>
-              <RiskBadge level={student.riskLevel} />
-            </div>
+        {/* History Sections */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          {/* Attendance History */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="font-semibold mb-3">Attendance History</h3>
+            <ul className="text-sm text-slate-700 space-y-2">
+              <li>Jan 10 – Present</li>
+              <li>Jan 09 – Absent</li>
+              <li>Jan 08 – Present</li>
+            </ul>
           </div>
+
+          {/* Academic History */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="font-semibold mb-3">Academic Scores</h3>
+            <ul className="text-sm text-slate-700 space-y-2">
+              <li>Math: 62%</li>
+              <li>English: 68%</li>
+              <li>Science: 65%</li>
+            </ul>
+          </div>
+
+          {/* Behaviour Notes */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="font-semibold mb-3">Behaviour Observations</h3>
+            <ul className="text-sm text-slate-700 space-y-2">
+              <li>Low participation in class</li>
+              <li>Frequent absences</li>
+            </ul>
+          </div>
+
+          {/* Interventions */}
+          <div className="bg-white rounded-lg border p-6">
+            <h3 className="font-semibold mb-3">Interventions</h3>
+            <ul className="text-sm text-slate-700 space-y-2">
+              <li>Home visit – Completed</li>
+              <li>Parent meeting – Planned</li>
+            </ul>
+          </div>
+
         </div>
 
       </div>
     </div>
+  );
+}
+
+function ActionButton({ text }) {
+  return (
+    <button className="flex items-center gap-2 px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700">
+      <FaPlus /> {text}
+    </button>
   );
 }

@@ -12,6 +12,7 @@ function MainLayout() {
   const navItems = [
     { path: "/dashboard", label: t("nav.dashboard", "Dashboard") },
     { path: "/students", label: t("nav.students", "Students") },
+    { path: "/data-entry", label: t("nav.dataEntry", "Data Entry") },
     { path: "/about", label: t("nav.about", "About") },
     { path: "/contact", label: t("nav.contact", "Contact") },
   ];
