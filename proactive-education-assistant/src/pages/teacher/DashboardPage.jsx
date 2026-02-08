@@ -464,6 +464,9 @@ import {
   FaExclamationTriangle,
   FaCheckCircle,
   FaEye,
+  FaBell,
+  FaWifi,
+  FaSyncAlt,
 } from "react-icons/fa";
 
 export default function DashboardPage() {
@@ -477,6 +480,31 @@ export default function DashboardPage() {
   };
 
   const highRiskStudents = students.filter(s => s.riskLevel === "high");
+  const isOnline = true;
+  const syncQueueCount = 3;
+  const alerts = [
+    {
+      id: 1,
+      title: "High-risk student missed 3 classes",
+      detail: "Aditi (Grade 8B) has 3 consecutive absences.",
+      severity: "High",
+      due: "Today",
+    },
+    {
+      id: 2,
+      title: "Follow-up due",
+      detail: "Parent call pending for Rohan (Grade 7A).",
+      severity: "Medium",
+      due: "Tomorrow",
+    },
+    {
+      id: 3,
+      title: "Assessment dip",
+      detail: "Science scores dropped 12% for 3 students.",
+      severity: "Low",
+      due: "This week",
+    },
+  ];
 
   return (
     <div className="pt-16 px-6 bg-slate-100 min-h-screen">
@@ -560,6 +588,68 @@ export default function DashboardPage() {
               </tbody>
             </table>
           )}
+        </div>
+
+        {/* Alerts and Reminders */}
+        <div className="mt-8 bg-white border border-slate-200 rounded-md">
+          <div className="px-5 py-3 border-b border-slate-200 flex items-center gap-2">
+            <FaBell className="text-slate-500" />
+            <h2 className="text-sm font-semibold text-slate-900">Alerts & Reminders</h2>
+          </div>
+          <div className="divide-y divide-slate-100">
+            {alerts.map((alert) => (
+              <div key={alert.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{alert.title}</p>
+                  <p className="text-xs text-slate-600 mt-1">{alert.detail}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                      alert.severity === "High"
+                        ? "bg-red-50 text-red-700"
+                        : alert.severity === "Medium"
+                        ? "bg-amber-50 text-amber-700"
+                        : "bg-emerald-50 text-emerald-700"
+                    }`}
+                  >
+                    {alert.severity}
+                  </span>
+                  <span className="text-xs text-slate-500">Due: {alert.due}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Offline Sync Status */}
+        <div className="mt-8 bg-white border border-slate-200 rounded-md p-5">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <div className={`w-10 h-10 rounded-md flex items-center justify-center ${isOnline ? "bg-blue-600" : "bg-slate-400"}`}>
+                <FaWifi className="text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-slate-900">
+                  {isOnline ? "Online" : "Offline mode"}
+                </p>
+                <p className="text-xs text-slate-600 mt-1">
+                  {isOnline
+                    ? "All changes will sync automatically."
+                    : "Changes are saved locally and will sync when back online."}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 text-xs text-slate-600">
+                <FaSyncAlt className="text-slate-400" />
+                Last sync: 20 min ago
+              </div>
+              <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full">
+                Sync queue: {syncQueueCount}
+              </span>
+            </div>
+          </div>
         </div>
 
       </div>

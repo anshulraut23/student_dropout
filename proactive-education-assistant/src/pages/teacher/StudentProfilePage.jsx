@@ -377,15 +377,36 @@
 
 
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { students } from "../../data/students";
 import RiskBadge from "../../components/RiskBadge";
-import { FaArrowLeft } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaBullseye,
+  FaCheckCircle,
+  FaClipboardList,
+  FaExclamationTriangle,
+  FaFlag,
+  FaPlus,
+  FaRegCommentDots,
+} from "react-icons/fa";
 
 export default function StudentProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const student = students.find((s) => s.id === parseInt(id));
+  const [interventions, setInterventions] = useState(() => getInitialInterventions(student));
+  const [outcomes, setOutcomes] = useState(() => getInitialOutcomes(student));
+  const [followUps, setFollowUps] = useState(() => getInitialFollowUps(student));
+  const [newIntervention, setNewIntervention] = useState({
+    title: "",
+    type: "",
+    owner: "",
+    dueDate: "",
+    priority: "Medium",
+  });
+  const [followUpNote, setFollowUpNote] = useState("");
 
   if (!student) {
     return (
@@ -404,6 +425,60 @@ export default function StudentProfilePage() {
       </div>
     );
   }
+
+  const riskDrivers = getRiskDrivers(student);
+
+  const handleAddIntervention = (event) => {
+    event.preventDefault();
+
+    if (!newIntervention.title || !newIntervention.type) {
+      return;
+    }
+
+    const nextItem = {
+      id: Date.now(),
+      status: "Planned",
+      ...newIntervention,
+    };
+
+    setInterventions((prev) => [nextItem, ...prev]);
+    setNewIntervention({
+      title: "",
+      type: "",
+      owner: "",
+      dueDate: "",
+      priority: "Medium",
+    });
+  };
+
+  const handleMarkComplete = (idToUpdate) => {
+    setInterventions((prev) =>
+      prev.map((item) =>
+        item.id === idToUpdate ? { ...item, status: "Completed" } : item
+      )
+    );
+  };
+
+  const handleAddFollowUp = () => {
+    if (!followUpNote.trim()) {
+      return;
+    }
+
+    setFollowUps((prev) => [
+      {
+        id: Date.now(),
+        note: followUpNote.trim(),
+        date: new Date().toISOString().slice(0, 10),
+        owner: "Teacher",
+      },
+      ...prev,
+    ]);
+    setFollowUpNote("");
+  };
+
+  const updateOutcome = (key, value) => {
+    setOutcomes((prev) => prev.map((item) => (item.key === key ? { ...item, ...value } : item)));
+  };
 
   return (
     <div className="px-6 py-6 bg-slate-100 min-h-screen">
@@ -433,16 +508,52 @@ export default function StudentProfilePage() {
           </div>
         </div>
 
-        {/* Risk Explanation */}
-        <div className="bg-white border border-slate-200 rounded-md p-6">
-          <h2 className="text-lg font-semibold text-slate-900 mb-2">
-            Risk Analysis
-          </h2>
-          <p className="text-sm text-slate-700 leading-relaxed">
-            This student is currently classified as <strong>{student.riskLevel}</strong> risk
-            based on attendance trends and academic indicators. Continuous monitoring
-            and timely intervention are recommended.
-          </p>
+        {/* Risk Explainability */}
+        <div className="bg-white border border-slate-200 rounded-md p-6 space-y-5">
+          <div className="flex items-start gap-3">
+            <div className="mt-1 text-red-500">
+              <FaExclamationTriangle />
+            </div>
+            <div>
+              <h2 className="text-lg font-semibold text-slate-900">Risk Analysis</h2>
+              <p className="text-sm text-slate-700 leading-relaxed mt-2">
+                Risk level is <strong>{student.riskLevel}</strong>. The model flags these drivers based on
+                recent signals and historical attendance patterns.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {riskDrivers.map((driver) => (
+              <span
+                key={driver.label}
+                className="px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200"
+              >
+                {driver.label}
+              </span>
+            ))}
+          </div>
+
+          <div className="space-y-3">
+            {riskDrivers.map((driver) => (
+              <div key={driver.label} className="flex items-center gap-4">
+                <div className="w-40 text-sm font-medium text-slate-700">
+                  {driver.label}
+                </div>
+                <div className="flex-1">
+                  <div className="h-2 rounded-full bg-slate-100">
+                    <div
+                      className="h-2 rounded-full bg-blue-500"
+                      style={{ width: `${driver.weight}%` }}
+                    ></div>
+                  </div>
+                </div>
+                <div className="text-xs text-slate-500 w-16 text-right">
+                  {driver.weight}%
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Academic Snapshot */}
@@ -470,7 +581,292 @@ export default function StudentProfilePage() {
           </div>
         </div>
 
+        {/* Intervention Workflow */}
+        <div className="bg-white border border-slate-200 rounded-md p-6 space-y-6">
+          <div className="flex items-center gap-2">
+            <FaClipboardList className="text-slate-500" />
+            <h2 className="text-lg font-semibold text-slate-900">
+              Intervention Plan
+            </h2>
+          </div>
+
+          <form onSubmit={handleAddIntervention} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-slate-600">Intervention Title</label>
+              <input
+                value={newIntervention.title}
+                onChange={(event) => setNewIntervention((prev) => ({ ...prev, title: event.target.value }))}
+                className="mt-1 w-full border border-slate-200 rounded-md px-3 py-2 text-sm"
+                placeholder="Weekly mentoring session"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">Type</label>
+              <input
+                value={newIntervention.type}
+                onChange={(event) => setNewIntervention((prev) => ({ ...prev, type: event.target.value }))}
+                className="mt-1 w-full border border-slate-200 rounded-md px-3 py-2 text-sm"
+                placeholder="Counseling / Home Visit"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">Owner</label>
+              <input
+                value={newIntervention.owner}
+                onChange={(event) => setNewIntervention((prev) => ({ ...prev, owner: event.target.value }))}
+                className="mt-1 w-full border border-slate-200 rounded-md px-3 py-2 text-sm"
+                placeholder="Ms. Sharma"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">Due Date</label>
+              <input
+                type="date"
+                value={newIntervention.dueDate}
+                onChange={(event) => setNewIntervention((prev) => ({ ...prev, dueDate: event.target.value }))}
+                className="mt-1 w-full border border-slate-200 rounded-md px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">Priority</label>
+              <select
+                value={newIntervention.priority}
+                onChange={(event) => setNewIntervention((prev) => ({ ...prev, priority: event.target.value }))}
+                className="mt-1 w-full border border-slate-200 rounded-md px-3 py-2 text-sm"
+              >
+                <option>High</option>
+                <option>Medium</option>
+                <option>Low</option>
+              </select>
+            </div>
+            <div className="flex items-end">
+              <button
+                type="submit"
+                className="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-semibold hover:bg-blue-700"
+              >
+                <FaPlus /> Add Intervention
+              </button>
+            </div>
+          </form>
+
+          <div className="space-y-3">
+            {interventions.map((item) => (
+              <div key={item.id} className="border border-slate-200 rounded-md p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-900">{item.title}</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                      {item.priority}
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-600 mt-1">
+                    {item.type} • Owner: {item.owner || "Unassigned"} • Due: {item.dueDate || "TBD"}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                      item.status === "Completed"
+                        ? "bg-emerald-50 text-emerald-700"
+                        : "bg-amber-50 text-amber-700"
+                    }`}
+                  >
+                    {item.status}
+                  </span>
+                  {item.status !== "Completed" && (
+                    <button
+                      onClick={() => handleMarkComplete(item.id)}
+                      className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                    >
+                      <FaCheckCircle /> Mark complete
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Outcomes and Follow-ups */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white border border-slate-200 rounded-md p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <FaBullseye className="text-slate-500" />
+              <h2 className="text-lg font-semibold text-slate-900">Intervention Outcomes</h2>
+            </div>
+            <div className="space-y-3">
+              {outcomes.map((item) => (
+                <div key={item.key} className="border border-slate-200 rounded-md p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm font-semibold text-slate-800">{item.label}</p>
+                    <span className="text-xs text-slate-500">Baseline: {item.before}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <input
+                      value={item.after}
+                      onChange={(event) => updateOutcome(item.key, { after: event.target.value })}
+                      className="w-24 border border-slate-200 rounded-md px-2 py-1 text-sm"
+                      placeholder="After"
+                    />
+                    <select
+                      value={item.status}
+                      onChange={(event) => updateOutcome(item.key, { status: event.target.value })}
+                      className="flex-1 border border-slate-200 rounded-md px-2 py-1 text-sm"
+                    >
+                      <option>Improving</option>
+                      <option>Stable</option>
+                      <option>Needs Attention</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white border border-slate-200 rounded-md p-6 space-y-4">
+            <div className="flex items-center gap-2">
+              <FaRegCommentDots className="text-slate-500" />
+              <h2 className="text-lg font-semibold text-slate-900">Follow-ups</h2>
+            </div>
+            <div className="space-y-3">
+              {followUps.map((item) => (
+                <div key={item.id} className="border border-slate-200 rounded-md p-3">
+                  <div className="flex items-center justify-between text-xs text-slate-500">
+                    <span>{item.owner}</span>
+                    <span>{item.date}</span>
+                  </div>
+                  <p className="text-sm text-slate-700 mt-2">{item.note}</p>
+                </div>
+              ))}
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-slate-600">Add follow-up note</label>
+              <textarea
+                value={followUpNote}
+                onChange={(event) => setFollowUpNote(event.target.value)}
+                className="mt-1 w-full border border-slate-200 rounded-md px-3 py-2 text-sm min-h-[88px]"
+                placeholder="Call scheduled with parent. Waiting for counselor feedback."
+              />
+              <button
+                onClick={handleAddFollowUp}
+                className="mt-3 inline-flex items-center gap-2 px-3 py-2 bg-slate-900 text-white rounded-md text-xs font-semibold"
+              >
+                <FaFlag /> Log follow-up
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
+}
+
+function getRiskDrivers(student) {
+  if (!student) {
+    return [];
+  }
+
+  if (student.riskLevel === "high") {
+    return [
+      { label: "Attendance decline", weight: 35 },
+      { label: "Assignment gaps", weight: 25 },
+      { label: "Classroom disengagement", weight: 20 },
+      { label: "Recent behavior flags", weight: 20 },
+    ];
+  }
+
+  if (student.riskLevel === "medium") {
+    return [
+      { label: "Inconsistent attendance", weight: 30 },
+      { label: "Quiz volatility", weight: 25 },
+      { label: "Homework backlog", weight: 20 },
+      { label: "Engagement dip", weight: 25 },
+    ];
+  }
+
+  return [
+    { label: "Strong attendance", weight: 40 },
+    { label: "Stable assessment scores", weight: 30 },
+    { label: "Positive engagement", weight: 20 },
+    { label: "Family check-ins", weight: 10 },
+  ];
+}
+
+function getInitialInterventions(student) {
+  if (!student) {
+    return [];
+  }
+
+  return [
+    {
+      id: 1,
+      title: "Weekly mentoring check-in",
+      type: "Counseling",
+      owner: "Ms. Rao",
+      dueDate: "2026-02-12",
+      priority: student.riskLevel === "high" ? "High" : "Medium",
+      status: "In Progress",
+    },
+    {
+      id: 2,
+      title: "Parent outreach call",
+      type: "Family Engagement",
+      owner: "Mr. Singh",
+      dueDate: "2026-02-10",
+      priority: "High",
+      status: "Planned",
+    },
+  ];
+}
+
+function getInitialOutcomes(student) {
+  if (!student) {
+    return [];
+  }
+
+  return [
+    {
+      key: "attendance",
+      label: "Attendance rate",
+      before: `${student.attendance}%`,
+      after: "",
+      status: "Improving",
+    },
+    {
+      key: "scores",
+      label: "Assessment average",
+      before: student.riskLevel === "high" ? "52%" : "68%",
+      after: "",
+      status: "Stable",
+    },
+    {
+      key: "engagement",
+      label: "Engagement score",
+      before: student.riskLevel === "high" ? "Low" : "Medium",
+      after: "",
+      status: "Needs Attention",
+    },
+  ];
+}
+
+function getInitialFollowUps(student) {
+  if (!student) {
+    return [];
+  }
+
+  return [
+    {
+      id: 1,
+      date: "2026-02-06",
+      owner: "Teacher",
+      note: "Spoke with student after class. Agreed on daily check-ins.",
+    },
+    {
+      id: 2,
+      date: "2026-02-04",
+      owner: "Counselor",
+      note: "Counselor session scheduled for next week.",
+    },
+  ];
 }

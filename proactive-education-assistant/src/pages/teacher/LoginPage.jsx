@@ -9,6 +9,8 @@ export default function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
+  const [isOnline] = useState(true);
+  const [syncQueueCount] = useState(2);
 
   const handleLogin = () => {
     localStorage.setItem("loggedIn", "true");
@@ -50,8 +52,6 @@ export default function LoginPage() {
       navigate("/dashboard");
     }
   };
-
-  return null; // Will render JSX below
 
   return (
     <div 
@@ -344,6 +344,45 @@ export default function LoginPage() {
           >
             Continue as Guest
           </button>
+
+          {/* Offline Sync Status */}
+          <div
+            className="mt-5 rounded-lg border px-4 py-3 text-xs flex items-start gap-3"
+            style={isDarkMode ? {
+              backgroundColor: 'rgba(15, 23, 42, 0.6)',
+              borderColor: 'rgba(34, 211, 238, 0.25)',
+              color: '#CBD5F5'
+            } : {
+              backgroundColor: '#F8FAFC',
+              borderColor: '#E2E8F0',
+              color: '#475569'
+            }}
+          >
+            <div
+              className="w-8 h-8 rounded-md flex items-center justify-center"
+              style={isDarkMode ? { backgroundColor: 'rgba(34, 211, 238, 0.2)', color: '#22D3EE' } : { backgroundColor: '#DBEAFE', color: '#2563EB' }}
+            >
+              {isOnline ? (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 18a2 2 0 100-4 2 2 0 000 4zm5.07-4.24a7 7 0 00-10.14 0 1 1 0 01-1.42-1.42 9 9 0 0112.98 0 1 1 0 01-1.42 1.42zM20 9.5a12 12 0 00-16 0 1 1 0 01-1.34-1.49 14 14 0 0118.68 0A1 1 0 0120 9.5z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M2 5.27L3.28 4 20 20.72 18.73 22l-3.28-3.28A10.9 10.9 0 0112 20a10.9 10.9 0 01-8-3.5 1 1 0 011.46-1.36A8.9 8.9 0 0012 18c1.29 0 2.52-.27 3.64-.76L13 14.6a5 5 0 01-6.77-6.77L2 5.27z" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold">
+                {isOnline ? "Online" : "Offline mode"} • Sync queue {syncQueueCount}
+              </p>
+              <p className="mt-1">
+                {isOnline
+                  ? "Changes will sync automatically after login."
+                  : "Saved locally. Sync will resume once connected."}
+              </p>
+            </div>
+          </div>
 
           {/* Helper text */}
           <p 
