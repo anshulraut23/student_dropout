@@ -466,6 +466,11 @@ import {
   FaEye,
 } from "react-icons/fa";
 
+import GamificationWidget from "../../components/GamificationWidget";
+
+<GamificationWidget />
+
+
 export default function DashboardPage() {
   const navigate = useNavigate();
 
@@ -584,3 +589,117 @@ function StatCard({ title, value, icon }) {
     </div>
   );
 }
+
+
+
+// // latest 8 2 afternoon
+
+// import { useNavigate } from "react-router-dom";
+// import { students } from "../../data/students";
+// import RiskBadge from "../../components/RiskBadge";
+// // import GamificationWidget from "../../components/GamificationWidget";
+
+// import {
+//   FaUsers,
+//   FaExclamationTriangle,
+//   FaCheckCircle,
+//   FaEye,
+// } from "react-icons/fa";
+
+// export default function DashboardPage() {
+//   const navigate = useNavigate();
+
+//   const stats = {
+//     total: students.length,
+//     high: students.filter(s => s.riskLevel === "high").length,
+//     medium: students.filter(s => s.riskLevel === "medium").length,
+//     low: students.filter(s => s.riskLevel === "low").length,
+//   };
+
+//   const highRiskStudents = students.filter(s => s.riskLevel === "high");
+
+//   return (
+//     <div className="pt-16 px-6 bg-slate-100 min-h-screen">
+//       <div className="max-w-7xl mx-auto space-y-6">
+
+//         {/* Gamification */}
+//         {/* <GamificationWidget /> */}
+
+//         {/* Title */}
+//         <div className="flex justify-between items-start">
+//           <div>
+//             <h1 className="text-2xl font-semibold">Dashboard</h1>
+//             <p className="text-sm text-slate-600">
+//               Student risk monitoring overview
+//             </p>
+//           </div>
+//           <button
+//             onClick={() => navigate("/students")}
+//             className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+//           >
+//             View Students
+//           </button>
+//         </div>
+
+//         {/* Stats */}
+//         <div className="grid sm:grid-cols-4 gap-4">
+//           <StatCard title="Total Students" value={stats.total} icon={<FaUsers />} />
+//           <StatCard title="High Risk" value={stats.high} icon={<FaExclamationTriangle />} />
+//           <StatCard title="Medium Risk" value={stats.medium} icon={<FaExclamationTriangle />} />
+//           <StatCard title="Low Risk" value={stats.low} icon={<FaCheckCircle />} />
+//         </div>
+
+//         {/* High Risk Table */}
+//         <div className="bg-white border rounded-md">
+//           <div className="px-5 py-3 border-b">
+//             <h2 className="font-semibold text-sm">Immediate Attention</h2>
+//           </div>
+
+//           <table className="w-full text-sm">
+//             <thead className="bg-slate-50">
+//               <tr>
+//                 <th className="px-5 py-2 text-left">Student</th>
+//                 <th className="px-5 py-2 text-left">Class</th>
+//                 <th className="px-5 py-2 text-left">Attendance</th>
+//                 <th className="px-5 py-2 text-left">Risk</th>
+//                 <th></th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {highRiskStudents.map(s => (
+//                 <tr key={s.id} className="border-t hover:bg-slate-50">
+//                   <td className="px-5 py-3 font-medium">{s.name}</td>
+//                   <td className="px-5 py-3">{s.class}</td>
+//                   <td className="px-5 py-3">{s.attendance}%</td>
+//                   <td className="px-5 py-3"><RiskBadge level={s.riskLevel} /></td>
+//                   <td className="px-5 py-3 text-right">
+//                     <button
+//                       onClick={() => navigate(`/students/${s.id}`)}
+//                       className="text-blue-600 inline-flex items-center gap-1"
+//                     >
+//                       <FaEye /> View
+//                     </button>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// }
+
+// function StatCard({ title, value, icon }) {
+//   return (
+//     <div className="bg-white border rounded-md p-4 flex justify-between">
+//       <div>
+//         <p className="text-xs text-slate-500 uppercase">{title}</p>
+//         <p className="text-2xl font-semibold">{value}</p>
+//       </div>
+//       <div className="text-slate-400 text-xl">{icon}</div>
+//     </div>
+//   );
+// }

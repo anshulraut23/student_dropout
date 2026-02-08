@@ -14,6 +14,9 @@ import DataEntryPage from "../pages/teacher/DataEntryPage";
 
 import MainLayout from "../layouts/MainLayout";
 
+import GamificationPage from "../pages/teacher/GamificationPage";
+
+
 
 // Admin
 import AdminLayout from "../layouts/AdminLayout";
@@ -81,6 +84,8 @@ export default function AppRoutes() {
           <Route path="/students" element={<StudentListPage />} />
           <Route path="/students/:id" element={<StudentProfilePage />} />
           <Route path="/data-entry" element={<DataEntryPage />} />
+          <Route path="/gamification" element={<GamificationPage />} />
+
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/about" element={<AboutPage />} />
 
