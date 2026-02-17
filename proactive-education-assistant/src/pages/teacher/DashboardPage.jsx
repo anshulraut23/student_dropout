@@ -464,10 +464,12 @@ import {
   FaExclamationTriangle,
   FaCheckCircle,
   FaEye,
-  FaBell,
-  FaWifi,
-  FaSyncAlt,
 } from "react-icons/fa";
+
+import GamificationWidget from "../../components/GamificationWidget";
+
+<GamificationWidget />
+
 
 export default function DashboardPage() {
   const navigate = useNavigate();
@@ -480,31 +482,6 @@ export default function DashboardPage() {
   };
 
   const highRiskStudents = students.filter(s => s.riskLevel === "high");
-  const isOnline = true;
-  const syncQueueCount = 3;
-  const alerts = [
-    {
-      id: 1,
-      title: "High-risk student missed 3 classes",
-      detail: "Aditi (Grade 8B) has 3 consecutive absences.",
-      severity: "High",
-      due: "Today",
-    },
-    {
-      id: 2,
-      title: "Follow-up due",
-      detail: "Parent call pending for Rohan (Grade 7A).",
-      severity: "Medium",
-      due: "Tomorrow",
-    },
-    {
-      id: 3,
-      title: "Assessment dip",
-      detail: "Science scores dropped 12% for 3 students.",
-      severity: "Low",
-      due: "This week",
-    },
-  ];
 
   return (
     <div className="pt-16 px-6 bg-slate-100 min-h-screen">
@@ -590,68 +567,6 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Alerts and Reminders */}
-        <div className="mt-8 bg-white border border-slate-200 rounded-md">
-          <div className="px-5 py-3 border-b border-slate-200 flex items-center gap-2">
-            <FaBell className="text-slate-500" />
-            <h2 className="text-sm font-semibold text-slate-900">Alerts & Reminders</h2>
-          </div>
-          <div className="divide-y divide-slate-100">
-            {alerts.map((alert) => (
-              <div key={alert.id} className="px-5 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-slate-900">{alert.title}</p>
-                  <p className="text-xs text-slate-600 mt-1">{alert.detail}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span
-                    className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                      alert.severity === "High"
-                        ? "bg-red-50 text-red-700"
-                        : alert.severity === "Medium"
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-emerald-50 text-emerald-700"
-                    }`}
-                  >
-                    {alert.severity}
-                  </span>
-                  <span className="text-xs text-slate-500">Due: {alert.due}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Offline Sync Status */}
-        <div className="mt-8 bg-white border border-slate-200 rounded-md p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-start gap-3">
-              <div className={`w-10 h-10 rounded-md flex items-center justify-center ${isOnline ? "bg-blue-600" : "bg-slate-400"}`}>
-                <FaWifi className="text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-slate-900">
-                  {isOnline ? "Online" : "Offline mode"}
-                </p>
-                <p className="text-xs text-slate-600 mt-1">
-                  {isOnline
-                    ? "All changes will sync automatically."
-                    : "Changes are saved locally and will sync when back online."}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 text-xs text-slate-600">
-                <FaSyncAlt className="text-slate-400" />
-                Last sync: 20 min ago
-              </div>
-              <span className="text-xs font-semibold bg-slate-100 text-slate-700 px-3 py-1 rounded-full">
-                Sync queue: {syncQueueCount}
-              </span>
-            </div>
-          </div>
-        </div>
-
       </div>
     </div>
   );
@@ -674,3 +589,117 @@ function StatCard({ title, value, icon }) {
     </div>
   );
 }
+
+
+
+// // latest 8 2 afternoon
+
+// import { useNavigate } from "react-router-dom";
+// import { students } from "../../data/students";
+// import RiskBadge from "../../components/RiskBadge";
+// // import GamificationWidget from "../../components/GamificationWidget";
+
+// import {
+//   FaUsers,
+//   FaExclamationTriangle,
+//   FaCheckCircle,
+//   FaEye,
+// } from "react-icons/fa";
+
+// export default function DashboardPage() {
+//   const navigate = useNavigate();
+
+//   const stats = {
+//     total: students.length,
+//     high: students.filter(s => s.riskLevel === "high").length,
+//     medium: students.filter(s => s.riskLevel === "medium").length,
+//     low: students.filter(s => s.riskLevel === "low").length,
+//   };
+
+//   const highRiskStudents = students.filter(s => s.riskLevel === "high");
+
+//   return (
+//     <div className="pt-16 px-6 bg-slate-100 min-h-screen">
+//       <div className="max-w-7xl mx-auto space-y-6">
+
+//         {/* Gamification */}
+//         {/* <GamificationWidget /> */}
+
+//         {/* Title */}
+//         <div className="flex justify-between items-start">
+//           <div>
+//             <h1 className="text-2xl font-semibold">Dashboard</h1>
+//             <p className="text-sm text-slate-600">
+//               Student risk monitoring overview
+//             </p>
+//           </div>
+//           <button
+//             onClick={() => navigate("/students")}
+//             className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+//           >
+//             View Students
+//           </button>
+//         </div>
+
+//         {/* Stats */}
+//         <div className="grid sm:grid-cols-4 gap-4">
+//           <StatCard title="Total Students" value={stats.total} icon={<FaUsers />} />
+//           <StatCard title="High Risk" value={stats.high} icon={<FaExclamationTriangle />} />
+//           <StatCard title="Medium Risk" value={stats.medium} icon={<FaExclamationTriangle />} />
+//           <StatCard title="Low Risk" value={stats.low} icon={<FaCheckCircle />} />
+//         </div>
+
+//         {/* High Risk Table */}
+//         <div className="bg-white border rounded-md">
+//           <div className="px-5 py-3 border-b">
+//             <h2 className="font-semibold text-sm">Immediate Attention</h2>
+//           </div>
+
+//           <table className="w-full text-sm">
+//             <thead className="bg-slate-50">
+//               <tr>
+//                 <th className="px-5 py-2 text-left">Student</th>
+//                 <th className="px-5 py-2 text-left">Class</th>
+//                 <th className="px-5 py-2 text-left">Attendance</th>
+//                 <th className="px-5 py-2 text-left">Risk</th>
+//                 <th></th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               {highRiskStudents.map(s => (
+//                 <tr key={s.id} className="border-t hover:bg-slate-50">
+//                   <td className="px-5 py-3 font-medium">{s.name}</td>
+//                   <td className="px-5 py-3">{s.class}</td>
+//                   <td className="px-5 py-3">{s.attendance}%</td>
+//                   <td className="px-5 py-3"><RiskBadge level={s.riskLevel} /></td>
+//                   <td className="px-5 py-3 text-right">
+//                     <button
+//                       onClick={() => navigate(`/students/${s.id}`)}
+//                       className="text-blue-600 inline-flex items-center gap-1"
+//                     >
+//                       <FaEye /> View
+//                     </button>
+//                   </td>
+//                 </tr>
+//               ))}
+//             </tbody>
+//           </table>
+
+//         </div>
+
+//       </div>
+//     </div>
+//   );
+// }
+
+// function StatCard({ title, value, icon }) {
+//   return (
+//     <div className="bg-white border rounded-md p-4 flex justify-between">
+//       <div>
+//         <p className="text-xs text-slate-500 uppercase">{title}</p>
+//         <p className="text-2xl font-semibold">{value}</p>
+//       </div>
+//       <div className="text-slate-400 text-xl">{icon}</div>
+//     </div>
+//   );
+// }

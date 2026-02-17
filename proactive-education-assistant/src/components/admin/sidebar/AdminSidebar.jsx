@@ -19,6 +19,7 @@ function AdminSidebar({ onClose }) {
     { path: '/admin/dashboard', label: 'Dashboard', icon: FaChartLine },
     { path: '/admin/teachers', label: 'Teachers', icon: FaUserTie },
     { path: '/admin/classes', label: 'Classes', icon: FaChalkboard },
+    { path: '/admin/subjects', label: 'Subjects', icon: FaFileImport },
     { path: '/admin/students', label: 'Students', icon: FaUsers },
     { path: '/admin/data-import', label: 'Data Import', icon: FaFileImport },
     { path: '/admin/analytics', label: 'Analytics', icon: FaChartBar },

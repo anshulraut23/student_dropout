@@ -20,6 +20,7 @@ export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [loginRedirectPath, setLoginRedirectPath] = useState(null);
+  const [isAccessibilityMode, setIsAccessibilityMode] = useState(false);
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -100,8 +101,13 @@ export default function LandingPage() {
     }
   ];
 
+  const mutedText = isAccessibilityMode ? "text-slate-700" : "text-slate-600";
+  const subtleText = isAccessibilityMode ? "text-slate-200" : "text-slate-300";
+  const captionText = isAccessibilityMode ? "text-slate-900" : "text-slate-700";
+  const baseTextSize = isAccessibilityMode ? "text-[1.02rem]" : "text-base";
+
   return (
-    <div className="min-h-screen bg-slate-50 overflow-x-hidden text-slate-900">
+    <div className={`min-h-screen bg-slate-50 overflow-x-hidden text-slate-900 ${baseTextSize}`}>
       {/* Header/Navigation */}
       <header className="sticky top-0 z-50 bg-slate-900 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -122,6 +128,14 @@ export default function LandingPage() {
             </nav>
 
             <div className="flex items-center gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setIsAccessibilityMode((prev) => !prev)}
+                aria-pressed={isAccessibilityMode}
+                className="px-3 py-1.5 text-xs sm:text-sm text-white border border-slate-700 rounded-md hover:border-slate-500"
+              >
+                Accessibility Mode
+              </button>
               <button
                 onClick={() => setShowLogin(true)}
                 className="px-3 py-1.5 text-sm text-white hover:text-white font-medium border border-transparent"
@@ -146,11 +160,12 @@ export default function LandingPage() {
             {/* Left: Hero Content */}
             <div className="space-y-6">
               <h1 className="text-[42px] sm:text-6xl font-semibold text-slate-900 leading-tight tracking-tight">
-                Stop Student Dropout Before It Happens
+                Detect Student Dropout Risk Before It&apos;s Too Late
               </h1>
 
-              <p className="text-xl sm:text-2xl text-slate-600 leading-relaxed max-w-xl">
-                AI-powered early warning system for teachers, fieldworkers, and NGOs
+              <p className={`text-xl sm:text-2xl ${mutedText} leading-relaxed max-w-xl`}>
+                An AI-powered early warning system that helps teachers identify at-risk students using
+                attendance, academic performance, and behavior data — with clear, explainable insights.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
@@ -173,6 +188,21 @@ export default function LandingPage() {
                   View Demo
                 </button>
               </div>
+
+              <div className="flex flex-wrap items-center gap-4 text-sm text-slate-600">
+                <span className="inline-flex items-center gap-2">
+                  <span className="text-emerald-600">✔</span>
+                  30% Faster Intervention
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="text-emerald-600">✔</span>
+                  100% Explainable Risk Alerts
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <span className="text-emerald-600">✔</span>
+                  Built for Low-Connectivity Schools
+                </span>
+              </div>
             </div>
 
             {/* Right: Hero Image/Illustration */}
@@ -184,7 +214,10 @@ export default function LandingPage() {
                     alt={slides[currentSlide].caption}
                     className="w-full h-[260px] sm:h-[320px] object-cover"
                   />
-                  <div className="absolute bottom-3 left-3 text-xs text-slate-700 bg-white/90 border border-slate-200 rounded px-2 py-1">
+                  <div
+                    className={`absolute bottom-3 left-3 text-xs ${captionText} bg-white/90 border border-slate-200 rounded px-2 py-1`}
+                    aria-live="polite"
+                  >
                     {slides[currentSlide].caption}
                   </div>
                   <button
@@ -220,6 +253,56 @@ export default function LandingPage() {
                   ))}
                 </div>
               </div>
+
+              <div className="mt-4 bg-white border border-slate-200 rounded-lg p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="text-xs font-semibold text-red-600">High Risk</div>
+                  <div className="text-[11px] text-slate-500">Explainable AI Preview</div>
+                </div>
+                <div className="text-xs text-slate-700" aria-live="polite">
+                  <div className="font-semibold text-slate-900 mb-1">Reason</div>
+                  <ul className="space-y-1">
+                    <li>• Attendance dropped from 82% to 60%</li>
+                    <li>• Math score decreased 15%</li>
+                    <li>• 3 behavioral concerns</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-14 px-4 sm:px-6 lg:px-8 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900">How It Works</h2>
+            <p className={`text-sm ${mutedText} max-w-md text-right`}>
+              A simple, repeatable workflow for early detection and coordinated action.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-5">
+            <div className="bg-white border border-slate-200 rounded-lg p-5">
+              <div className="w-9 h-9 rounded-md bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 mb-3">
+                <FaClipboardCheck className="text-sm" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900">Collect Data</h3>
+              <p className={`text-sm ${mutedText} mt-2`}>Attendance, marks, and behavior signals.</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-lg p-5">
+              <div className="w-9 h-9 rounded-md bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 mb-3">
+                <FaChartLine className="text-sm" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900">Detect Risk</h3>
+              <p className={`text-sm ${mutedText} mt-2`}>Trend analysis + explainable risk score.</p>
+            </div>
+            <div className="bg-white border border-slate-200 rounded-lg p-5">
+              <div className="w-9 h-9 rounded-md bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 mb-3">
+                <FaLightbulb className="text-sm" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-900">Take Action</h3>
+              <p className={`text-sm ${mutedText} mt-2`}>Intervention tracking and follow-up reminders.</p>
             </div>
           </div>
         </div>
@@ -230,7 +313,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-10">
           <div className="bg-white border border-slate-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-slate-900 mb-4">The Problem</h2>
-            <ul className="space-y-3 text-sm text-slate-600">
+            <ul className={`space-y-3 text-sm ${mutedText}`}>
               {problemPoints.map((item) => (
                 <li key={item} className="flex items-start gap-2">
                   <span className="mt-1 h-2 w-2 rounded-full bg-red-500" aria-hidden="true" />
@@ -241,7 +324,7 @@ export default function LandingPage() {
           </div>
           <div className="bg-white border border-slate-200 rounded-lg p-6">
             <h2 className="text-xl font-semibold text-slate-900 mb-4">The Solution</h2>
-            <ul className="space-y-3 text-sm text-slate-600">
+            <ul className={`space-y-3 text-sm ${mutedText}`}>
               {solutionPoints.map((item) => (
                 <li key={item} className="flex items-start gap-2">
                   <span className="mt-1 h-2 w-2 rounded-full bg-emerald-600" aria-hidden="true" />
@@ -258,7 +341,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl sm:text-3xl font-semibold text-slate-900">Core Features</h2>
-            <p className="text-sm text-slate-500 max-w-md text-right">
+            <p className={`text-sm ${mutedText} max-w-md text-right`}>
               A focused toolset for early detection and coordinated intervention.
             </p>
           </div>
@@ -274,7 +357,7 @@ export default function LandingPage() {
                     <Icon className="text-sm" />
                   </div>
                   <h3 className="text-sm font-semibold text-slate-900">{feature.title}</h3>
-                  <p className="text-sm text-slate-600">{feature.description}</p>
+                  <p className={`text-sm ${mutedText}`}>{feature.description}</p>
                 </div>
               );
             })}
@@ -290,7 +373,7 @@ export default function LandingPage() {
             {audiences.map((audience) => (
               <div key={audience.title} className="border border-slate-200 rounded-lg p-5 bg-white">
                 <h3 className="text-sm font-semibold text-slate-900 mb-3">{audience.title}</h3>
-                <ul className="space-y-2 text-sm text-slate-600">
+                <ul className={`space-y-2 text-sm ${mutedText}`}>
                   {audience.points.map((item) => (
                     <li key={item} className="flex items-start gap-2">
                       <span className="mt-1 h-2 w-2 rounded-full bg-blue-600" aria-hidden="true" />
@@ -327,14 +410,17 @@ export default function LandingPage() {
               <FaBook className="text-blue-400" />
               <span className="font-semibold text-white">Proactive Education</span>
             </div>
-            <p className="text-sm text-slate-300">
+            <p className={`text-sm ${subtleText}`}>
               Decision support for keeping students in school.
             </p>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-slate-300">
+          <div className={`flex flex-wrap items-center gap-4 text-sm ${subtleText}`}>
             <a href="/privacy" className="hover:text-white">Privacy</a>
             <a href="/terms" className="hover:text-white">Terms</a>
             <a href="/contact" className="hover:text-white">Contact</a>
+            <a href="/accessibility" className="hover:text-white">Accessibility Statement</a>
+            <a href="/security" className="hover:text-white">Data Security</a>
+            <a href="/about" className="hover:text-white">About</a>
             <span className="text-slate-400">© 2026 Proactive Education</span>
           </div>
         </div>

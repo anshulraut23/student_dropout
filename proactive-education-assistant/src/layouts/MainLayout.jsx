@@ -9,12 +9,15 @@ function MainLayout() {
   const location = useLocation();
   const { t } = useTranslation();
 
-  const navItems = [
-    { path: "/dashboard", label: t("nav.dashboard", "Dashboard") },
-    { path: "/students", label: t("nav.students", "Students") },
-    { path: "/about", label: t("nav.about", "About") },
-    { path: "/contact", label: t("nav.contact", "Contact") },
-  ];
+ const navItems = [
+  { path: "/dashboard", label: t("nav.dashboard", "Dashboard") },
+  { path: "/students", label: t("nav.students", "Students") },
+  { path: "/data-entry", label: t("nav.dataEntry", "Data Entry") },
+  { path: "/gamification", label: "Progress" },   // ← comma added here
+  { path: "/about", label: t("nav.about", "About") },
+  { path: "/contact", label: t("nav.contact", "Contact") },
+];
+
 
   return (
     <div className="min-h-screen flex bg-slate-100 dark:bg-gray-900">

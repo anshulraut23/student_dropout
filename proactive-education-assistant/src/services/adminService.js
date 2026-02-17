@@ -1,5 +1,154 @@
 // Mock Admin Service - Replace with real API calls
 
+export const getAdminStats = () => {
+  return {
+    totalTeachers: 12,
+    totalClasses: 24,
+    totalStudents: 487,
+    highRiskStudents: 23,
+    activeInterventions: 8,
+  };
+};
+
+export const getRiskDistribution = () => {
+  return [
+    { name: 'Low Risk', value: 350, color: '#10b981' },
+    { name: 'Medium Risk', value: 114, color: '#f59e0b' },
+    { name: 'High Risk', value: 23, color: '#ef4444' },
+  ];
+};
+
+export const getRiskTrendData = () => {
+  // Last 30 days of risk data
+  const days = [];
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+    days.push({
+      date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      highRisk: Math.max(18, Math.floor(Math.random() * 35)),
+      mediumRisk: Math.max(80, Math.floor(Math.random() * 150)),
+    });
+  }
+  return days;
+};
+
+export const getHighRiskAlerts = () => {
+  return [
+    {
+      id: 1,
+      name: 'Raj Kumar',
+      class: '10-A',
+      riskLevel: 'High',
+      lastIntervention: '2 days ago',
+      avatar: '🔴',
+    },
+    {
+      id: 2,
+      name: 'Priya Sharma',
+      class: '9-B',
+      riskLevel: 'High',
+      lastIntervention: '5 days ago',
+      avatar: '🔴',
+    },
+    {
+      id: 3,
+      name: 'Amit Patel',
+      class: '10-C',
+      riskLevel: 'High',
+      lastIntervention: '1 day ago',
+      avatar: '🔴',
+    },
+    {
+      id: 4,
+      name: 'Neha Singh',
+      class: '9-A',
+      riskLevel: 'Medium',
+      lastIntervention: '3 days ago',
+      avatar: '🟡',
+    },
+    {
+      id: 5,
+      name: 'Vikram Das',
+      class: '8-D',
+      riskLevel: 'High',
+      lastIntervention: '1 week ago',
+      avatar: '🔴',
+    },
+  ];
+};
+
+export const getTeachers = () => {
+  return [
+    {
+      id: 1,
+      name: 'Dr. Anjali Sharma',
+      email: 'anjali.sharma@school.edu',
+      assignedClasses: ['10-A', '10-B'],
+      status: 'Approved',
+      joinedDate: '2025-12-15',
+    },
+    {
+      id: 2,
+      name: 'Mr. Rakesh Kumar',
+      email: 'rakesh.kumar@school.edu',
+      assignedClasses: ['9-A', '9-C'],
+      status: 'Approved',
+      joinedDate: '2025-12-20',
+    },
+    {
+      id: 3,
+      name: 'Ms. Priya Patel',
+      email: 'priya.patel@school.edu',
+      assignedClasses: ['8-A', '8-B', '8-C'],
+      status: 'Pending',
+      joinedDate: '2026-01-10',
+    },
+  ];
+};
+
+export const getClasses = () => {
+  return [
+    {
+      id: 1,
+      name: '10-A',
+      attendanceMode: 'Daily',
+      studentCount: 42,
+      teachers: ['Dr. Anjali Sharma'],
+    },
+    {
+      id: 2,
+      name: '10-B',
+      attendanceMode: 'Subject-wise',
+      studentCount: 38,
+      teachers: ['Dr. Anjali Sharma', 'Mr. Rakesh Kumar'],
+    },
+    {
+      id: 3,
+      name: '9-A',
+      attendanceMode: 'Daily',
+      studentCount: 45,
+      teachers: ['Mr. Rakesh Kumar'],
+    },
+  ];
+};
+
+export const getSubjects = (classId) => {
+  const subjectsMap = {
+    1: [
+      { id: 1, name: 'Mathematics', teacher: 'Dr. Anjali Sharma' },
+      { id: 2, name: 'English', teacher: 'Ms. Priya Patel' },
+    ],
+    2: [
+      { id: 3, name: 'Mathematics', teacher: 'Mr. Rakesh Kumar' },
+      { id: 4, name: 'Science', teacher: 'Dr. Anjali Sharma' },
+      { id: 5, name: 'Hindi', teacher: 'Ms. Priya Patel' },
+    ],
+  };
+  return subjectsMap[classId] || [];
+};
+
+// Legacy service exports for compatibility
 // Mock Teachers Data
 const mockTeachers = [
   {
@@ -118,8 +267,7 @@ export const adminService = {
   // Fetch all students (from existing data)
   async getStudents() {
     await delay();
-    // This would typically fetch from the same students data
-    return { success: true, data: [] }; // Will use existing students data
+    return { success: true, data: [] };
   },
 
   // Fetch analytics data
@@ -167,7 +315,6 @@ export const adminService = {
   // Import data (bulk upload)
   async importData(file, type) {
     await delay(1000);
-    // Mock import result
     return {
       success: true,
       data: {
@@ -177,9 +324,6 @@ export const adminService = {
         errors: [
           { row: 23, reason: 'Missing required field: email' },
           { row: 45, reason: 'Invalid date format' },
-          { row: 67, reason: 'Duplicate entry' },
-          { row: 89, reason: 'Invalid class code' },
-          { row: 92, reason: 'Missing required field: name' }
         ]
       }
     };
