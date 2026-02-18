@@ -73,7 +73,7 @@ function Analytics() {
     <div className="bg-gray-50 min-h-screen p-6">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 text-white shadow-lg">
+        <div className=" rounded-lg sm:rounded-xl md:rounded-2xl p-4 sm:p-6 md:p-8 text-white shadow-lg">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-1 sm:mb-2">Analytics Dashboard</h1>
           <p className="text-indigo-100 text-sm sm:text-base md:text-lg">Real-time insights and performance metrics</p>
         </div>

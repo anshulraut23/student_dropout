@@ -8,7 +8,6 @@ export const OverviewCards = ({ stats }) => {
       icon: UserCheck,
       color: 'bg-blue-50',
       textColor: 'text-blue-600',
-      borderColor: 'border-blue-200',
     },
     {
       title: 'Total Classes',
@@ -16,7 +15,6 @@ export const OverviewCards = ({ stats }) => {
       icon: BookOpen,
       color: 'bg-green-50',
       textColor: 'text-green-600',
-      borderColor: 'border-green-200',
     },
     {
       title: 'Total Students',
@@ -24,7 +22,6 @@ export const OverviewCards = ({ stats }) => {
       icon: Users,
       color: 'bg-purple-50',
       textColor: 'text-purple-600',
-      borderColor: 'border-purple-200',
     },
     {
       title: 'High Risk Students',
@@ -32,7 +29,6 @@ export const OverviewCards = ({ stats }) => {
       icon: AlertCircle,
       color: 'bg-red-50',
       textColor: 'text-red-600',
-      borderColor: 'border-red-200',
     },
     {
       title: 'Active Interventions',
@@ -40,29 +36,30 @@ export const OverviewCards = ({ stats }) => {
       icon: Activity,
       color: 'bg-yellow-50',
       textColor: 'text-yellow-600',
-      borderColor: 'border-yellow-200',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
       {cards.map((card, index) => {
         const IconComponent = card.icon;
         return (
           <div
             key={index}
-            className={`${card.color} ${card.borderColor} border rounded-lg p-6 transition-all hover:shadow-md`}
+            className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow"
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+                <p className="text-sm text-gray-600 font-medium mb-2">
                   {card.title}
                 </p>
-                <p className={`${card.textColor} text-3xl font-bold mt-2`}>
+                <p className="text-3xl font-semibold text-gray-900">
                   {card.value}
                 </p>
               </div>
-              <IconComponent className={`${card.textColor} w-8 h-8 opacity-70`} />
+              <div className={`w-12 h-12 ${card.color} rounded-lg flex items-center justify-center`}>
+                <IconComponent className={`${card.textColor} w-6 h-6`} />
+              </div>
             </div>
           </div>
         );

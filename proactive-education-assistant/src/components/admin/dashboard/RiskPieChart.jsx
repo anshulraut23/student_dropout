@@ -2,8 +2,8 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recha
 
 export const RiskPieChart = ({ data }) => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-      <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-4">
+    <div className="bg-white rounded-xl border border-gray-200 p-6">
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">
         Risk Distribution
       </h3>
       <ResponsiveContainer width="100%" height={300}>

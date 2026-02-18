@@ -9,24 +9,22 @@ function MainLayout() {
   const location = useLocation();
   const { t } = useTranslation();
 
- const navItems = [
-  { path: "/dashboard", label: t("nav.dashboard", "Dashboard") },
-  { path: "/students", label: t("nav.students", "Students") },
-  { path: "/data-entry", label: t("nav.dataEntry", "Data Entry") },
-  { path: "/gamification", label: "Progress" },   // ← comma added here
-  { path: "/about", label: t("nav.about", "About") },
-  { path: "/contact", label: t("nav.contact", "Contact") },
-];
-
+  const navItems = [
+    { path: "/dashboard", label: t("nav.dashboard", "Dashboard") },
+    { path: "/my-classes", label: "My Classes" },
+    { path: "/students", label: t("nav.students", "Students") },
+    { path: "/add-student", label: "Add Student" },
+    { path: "/data-entry", label: t("nav.dataEntry", "Data Entry") },
+    { path: "/gamification", label: "Progress" },
+  ];
 
   return (
-    <div className="min-h-screen flex bg-slate-100 dark:bg-gray-900">
+    <div className="min-h-screen flex bg-gray-50">
       
       {/* Sidebar */}
       <aside
-        className={`fixed top-16 left-0 z-40 w-64 bg-slate-900 text-slate-300
-        border-r border-slate-800 transition-transform duration-200
-        min-h-[calc(100vh-4rem)]
+        className={`fixed top-16 left-0 z-40 w-64 bg-white border-r border-gray-200
+        transition-transform duration-200 min-h-[calc(100vh-4rem)]
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <nav className="flex flex-col h-full px-3 py-4 space-y-1">
@@ -36,11 +34,11 @@ function MainLayout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`block px-3 py-2 rounded-md text-sm font-medium transition-colors
+                className={`block px-4 py-2.5 rounded-lg text-sm font-medium transition-colors
                   ${
                     active
-                      ? "bg-slate-800 text-white"
-                      : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-gray-700 hover:bg-gray-50"
                   }`}
               >
                 {item.label}
@@ -48,10 +46,10 @@ function MainLayout() {
             );
           })}
 
-          {/* Sidebar bottom filler (keeps bg till bottom) */}
+          {/* Sidebar bottom filler */}
           <div className="flex-1" />
 
-          <div className="px-3 py-3 text-xs text-slate-500 border-t border-slate-800">
+          <div className="px-4 py-3 text-xs text-gray-500 border-t border-gray-200">
             Proactive Education Assistant
           </div>
         </nav>

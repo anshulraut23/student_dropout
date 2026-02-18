@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useTheme } from "../../context/ThemeContext";
 import LanguageSelector from "../LanguageSelector";
 
 const ROLE_ADMIN = "admin";
@@ -23,14 +22,12 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { theme } = useTheme();
   const [step, setStep] = useState("role");
   const [role, setRole] = useState("");
   const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isDark = theme === "dark";
   const schoolIdPattern = /^SCH-[A-Z0-9]{4,10}$/;
 
   const handleRoleSelect = (nextRole) => {
@@ -104,7 +101,6 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
     setIsSubmitting(true);
     try {
-      // TODO: Replace with real signup API call and JWT handling.
       const targetRoute = role === ROLE_ADMIN ? "/admin/dashboard" : "/teacher/dashboard";
       onClose();
       navigate(targetRoute);
@@ -120,98 +116,91 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
   return (
     <div
-      className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className={`rounded-2xl w-[90%] max-w-md p-8 relative max-h-[90vh] overflow-y-auto ${
-          isDark ? "bg-gray-800 shadow-2xl shadow-black/50" : "bg-white shadow-2xl shadow-blue-200/30"
-        }`}
+        className="bg-white rounded-xl w-full max-w-md mx-4 p-8 shadow-2xl relative max-h-[90vh] overflow-y-auto"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg mb-6">
-            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-4">
+            <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
           </div>
-
-          <h1 className={`text-2xl font-bold text-center mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">
             {t("signup.page_title", "Create Your Account")}
-          </h1>
-          <p className={`text-sm text-center leading-relaxed ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-            {t("signup.page_subtitle", "Choose your role to continue.")}
+          </h2>
+          <p className="text-sm text-gray-600">
+            {t("signup.page_subtitle", "Choose your role to continue")}
           </p>
-
           <div className="flex justify-center mt-4">
             <LanguageSelector />
           </div>
         </div>
 
-        <div className={`h-px mb-6 ${isDark ? "bg-gray-700" : "bg-gray-200"}`}></div>
-
         {step === "role" && (
           <div className="space-y-4">
-            <div className={`text-sm font-semibold uppercase tracking-wide ${isDark ? "text-gray-300" : "text-gray-700"}`}>
-              I am signing up as
-            </div>
+            <p className="text-sm font-medium text-gray-700 mb-4">I am signing up as</p>
             <div className="grid gap-3">
               <button
                 type="button"
                 onClick={() => handleRoleSelect(ROLE_ADMIN)}
-                className={`w-full text-left border-2 rounded-xl p-4 transition-all ${
-                  isDark
-                    ? "border-gray-600 hover:border-blue-400 bg-gray-700/50"
-                    : "border-blue-200 hover:border-blue-400 bg-blue-50/60"
-                }`}
+                className="w-full text-left border-2 border-gray-200 hover:border-blue-500 rounded-lg p-4 transition-all group"
               >
-                <div className="text-sm font-semibold text-blue-700">Admin</div>
-                <p className={`text-xs mt-1 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
-                  Create and manage a school or organization.
+                <div className="text-base font-semibold text-gray-900 group-hover:text-blue-600">Admin</div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Create and manage a school or organization
                 </p>
               </button>
               <button
                 type="button"
                 onClick={() => handleRoleSelect(ROLE_TEACHER)}
-                className={`w-full text-left border-2 rounded-xl p-4 transition-all ${
-                  isDark
-                    ? "border-gray-600 hover:border-emerald-400 bg-gray-700/50"
-                    : "border-emerald-200 hover:border-emerald-400 bg-emerald-50/60"
-                }`}
+                className="w-full text-left border-2 border-gray-200 hover:border-blue-500 rounded-lg p-4 transition-all group"
               >
-                <div className="text-sm font-semibold text-emerald-700">Teacher</div>
-                <p className={`text-xs mt-1 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
-                  Join an existing school with a School ID.
+                <div className="text-base font-semibold text-gray-900 group-hover:text-blue-600">Teacher</div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Join an existing school with a School ID
                 </p>
               </button>
             </div>
-            {errors.role && <p className="text-xs text-red-500">{errors.role}</p>}
+            {errors.role && <p className="text-sm text-red-600">{errors.role}</p>}
           </div>
         )}
 
         {step === "form" && (
-          <form className="space-y-5" onSubmit={handleSubmit}>
-            <div className="flex items-center justify-between">
-              <div className={`text-sm font-semibold ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">
                 {role === ROLE_ADMIN ? "Create Your Organization" : "Join Your School"}
-              </div>
+              </h3>
               <button
                 type="button"
                 onClick={() => setStep("role")}
-                className={`text-xs font-semibold ${isDark ? "text-gray-400 hover:text-gray-200" : "text-gray-500 hover:text-gray-700"}`}
+                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
               >
                 Change Role
               </button>
             </div>
 
             {errors.form && (
-              <div className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {errors.form}
               </div>
             )}
 
             <div>
-              <label className={`block text-xs font-semibold mb-2.5 uppercase tracking-wide ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("signup.name_label", "Full Name")}
               </label>
               <input
@@ -220,20 +209,13 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                 onChange={handleChange}
                 type="text"
                 placeholder={t("signup.name_placeholder", "John Doe")}
-                className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-medium placeholder-gray-400
-                           focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 ${
-                             formData.fullName
-                               ? "bg-blue-50/80 border-blue-400 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                               : isDark
-                                 ? "bg-gray-700/80 border-gray-600 text-gray-100 focus:border-blue-400 focus:ring-blue-400"
-                                 : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                           }`}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-              {errors.fullName && <p className="text-xs text-red-500 mt-1">{errors.fullName}</p>}
+              {errors.fullName && <p className="text-sm text-red-600 mt-1">{errors.fullName}</p>}
             </div>
 
             <div>
-              <label className={`block text-xs font-semibold mb-2.5 uppercase tracking-wide ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("signup.email_label", "Email Address")}
               </label>
               <input
@@ -242,20 +224,13 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                 onChange={handleChange}
                 type="email"
                 placeholder={t("signup.email_placeholder", "educator@school.org")}
-                className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-medium placeholder-gray-400
-                           focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 ${
-                             formData.email
-                               ? "bg-blue-50/80 border-blue-400 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                               : isDark
-                                 ? "bg-gray-700/80 border-gray-600 text-gray-100 focus:border-blue-400 focus:ring-blue-400"
-                                 : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                           }`}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-              {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-sm text-red-600 mt-1">{errors.email}</p>}
             </div>
 
             <div>
-              <label className={`block text-xs font-semibold mb-2.5 uppercase tracking-wide ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 {t("signup.password_label", "Password")}
               </label>
               <input
@@ -264,20 +239,13 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                 onChange={handleChange}
                 type="password"
                 placeholder={t("signup.password_placeholder", "Create a secure password")}
-                className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-medium placeholder-gray-400
-                           focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 ${
-                             formData.password
-                               ? "bg-blue-50/80 border-blue-400 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                               : isDark
-                                 ? "bg-gray-700/80 border-gray-600 text-gray-100 focus:border-blue-400 focus:ring-blue-400"
-                                 : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                           }`}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-              {errors.password && <p className="text-xs text-red-500 mt-1">{errors.password}</p>}
+              {errors.password && <p className="text-sm text-red-600 mt-1">{errors.password}</p>}
             </div>
 
             <div>
-              <label className={`block text-xs font-semibold mb-2.5 uppercase tracking-wide ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Confirm Password
               </label>
               <input
@@ -286,22 +254,15 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                 onChange={handleChange}
                 type="password"
                 placeholder="Re-enter your password"
-                className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-medium placeholder-gray-400
-                           focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 ${
-                             formData.confirmPassword
-                               ? "bg-blue-50/80 border-blue-400 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                               : isDark
-                                 ? "bg-gray-700/80 border-gray-600 text-gray-100 focus:border-blue-400 focus:ring-blue-400"
-                                 : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                           }`}
+                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
               />
-              {errors.confirmPassword && <p className="text-xs text-red-500 mt-1">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>}
             </div>
 
             {role === ROLE_ADMIN && (
               <>
                 <div>
-                  <label className={`block text-xs font-semibold mb-2.5 uppercase tracking-wide ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     School Name
                   </label>
                   <input
@@ -310,31 +271,20 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                     onChange={handleChange}
                     type="text"
                     placeholder="Sunrise Public School"
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-medium placeholder-gray-400
-                               focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 ${
-                                 formData.schoolName
-                                   ? "bg-blue-50/80 border-blue-400 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                                   : isDark
-                                     ? "bg-gray-700/80 border-gray-600 text-gray-100 focus:border-blue-400 focus:ring-blue-400"
-                                     : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                               }`}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
-                  {errors.schoolName && <p className="text-xs text-red-500 mt-1">{errors.schoolName}</p>}
+                  {errors.schoolName && <p className="text-sm text-red-600 mt-1">{errors.schoolName}</p>}
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-semibold mb-2.5 uppercase tracking-wide ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     School Type
                   </label>
                   <select
                     name="schoolType"
                     value={formData.schoolType}
                     onChange={handleChange}
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 ${
-                      isDark
-                        ? "bg-gray-700/80 border-gray-600 text-gray-100 focus:border-blue-400 focus:ring-blue-400"
-                        : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                    }`}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   >
                     <option value="School">School</option>
                     <option value="NGO">NGO</option>
@@ -343,7 +293,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-semibold mb-2.5 uppercase tracking-wide ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     City (Optional)
                   </label>
                   <input
@@ -352,14 +302,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                     onChange={handleChange}
                     type="text"
                     placeholder="Mumbai"
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-medium placeholder-gray-400
-                               focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 ${
-                                 formData.city
-                                   ? "bg-blue-50/80 border-blue-400 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                                   : isDark
-                                     ? "bg-gray-700/80 border-gray-600 text-gray-100 focus:border-blue-400 focus:ring-blue-400"
-                                     : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                               }`}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
                 </div>
               </>
@@ -368,7 +311,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
             {role === ROLE_TEACHER && (
               <>
                 <div>
-                  <label className={`block text-xs font-semibold mb-2.5 uppercase tracking-wide ${isDark ? "text-gray-200" : "text-gray-800"}`}>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     School ID
                   </label>
                   <input
@@ -377,27 +320,18 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                     onChange={handleChange}
                     type="text"
                     placeholder="SCH-49A8X2"
-                    className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-medium placeholder-gray-400
-                               focus:outline-none focus:ring-2 focus:ring-offset-0 transition-all duration-200 ${
-                                 formData.schoolId
-                                   ? "bg-blue-50/80 border-blue-400 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                                   : isDark
-                                     ? "bg-gray-700/80 border-gray-600 text-gray-100 focus:border-blue-400 focus:ring-blue-400"
-                                     : "bg-gray-50 border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-300"
-                               }`}
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   />
-                  <p className={`text-xs mt-1 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                    School ID is required to join your organization.
+                  <p className="text-xs text-gray-500 mt-1">
+                    School ID is required to join your organization
                   </p>
-                  {errors.schoolId && <p className="text-xs text-red-500 mt-1">{errors.schoolId}</p>}
+                  {errors.schoolId && <p className="text-sm text-red-600 mt-1">{errors.schoolId}</p>}
                 </div>
 
                 {showSchoolLookupPlaceholder && (
-                  <div className={`border rounded-lg p-3 text-xs ${
-                    isDark ? "border-blue-600 bg-blue-900/20 text-blue-200" : "border-blue-200 bg-blue-50 text-blue-800"
-                  }`}>
-                    <div className="font-semibold">School Lookup</div>
-                    <div className="mt-1">School validation will appear here after backend integration.</div>
+                  <div className="border border-blue-200 bg-blue-50 rounded-lg p-3 text-sm text-blue-800">
+                    <div className="font-medium">School Lookup</div>
+                    <div className="mt-1 text-xs">School validation will appear here after backend integration</div>
                   </div>
                 )}
               </>
@@ -406,38 +340,24 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-4 bg-linear-to-r from-teal-500 to-blue-500 text-white
-                         font-semibold py-3 rounded-lg hover:from-teal-600 hover:to-blue-600
-                         focus:outline-none focus:ring-4 focus:ring-teal-200 transition-all duration-200
-                         shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {isSubmitting ? "Creating Account..." : t("signup.sign_up_button", "Create Account")}
             </button>
           </form>
         )}
 
-        <div className={`text-center mt-6 pt-6 border-t ${isDark ? "border-gray-700" : "border-gray-200"}`}>
-          <span className={`text-sm ${isDark ? "text-gray-300" : "text-gray-600"}`}>
+        <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+          <span className="text-sm text-gray-600">
             {t("signup.already_have_account", "Already have an account?")}
           </span>
           <button
             onClick={onSwitchToLogin}
-            className="ml-2 text-sm text-teal-600 hover:text-teal-700 font-semibold hover:underline transition-colors"
+            className="ml-2 text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
             {t("signup.sign_in_link", "Sign in")}
           </button>
         </div>
-
-        <button
-          onClick={onClose}
-          className={`absolute top-4 right-4 rounded-full p-2 transition-all ${
-            isDark ? "text-gray-400 hover:text-gray-200 hover:bg-gray-700" : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
-          }`}
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
       </div>
     </div>
   );

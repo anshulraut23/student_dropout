@@ -1,27 +1,21 @@
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   FaChartLine, 
   FaUserTie, 
   FaChalkboard, 
-  FaUsers, 
-  FaFileImport, 
+  FaBook,
   FaChartBar,
-  FaShieldAlt,
-  FaChevronRight
+  FaGraduationCap
 } from 'react-icons/fa';
 
 function AdminSidebar({ onClose }) {
-  const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
 
   const menuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: FaChartLine },
     { path: '/admin/teachers', label: 'Teachers', icon: FaUserTie },
     { path: '/admin/classes', label: 'Classes', icon: FaChalkboard },
-    { path: '/admin/subjects', label: 'Subjects', icon: FaFileImport },
-    { path: '/admin/students', label: 'Students', icon: FaUsers },
-    { path: '/admin/data-import', label: 'Data Import', icon: FaFileImport },
+    { path: '/admin/subjects', label: 'Subjects', icon: FaBook },
     { path: '/admin/analytics', label: 'Analytics', icon: FaChartBar },
   ];
 
@@ -32,23 +26,22 @@ function AdminSidebar({ onClose }) {
   };
 
   return (
-    <aside className="w-64 bg-gradient-to-b from-blue-900 via-blue-800 to-blue-900 text-white h-screen flex flex-col shadow-2xl">
+    <aside className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
       {/* Logo Section */}
-      <div className="h-20 flex items-center justify-center border-b border-blue-700 px-4">
+      <div className="h-16 flex items-center px-6 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-blue-400 to-purple-500 p-2 rounded-lg">
-            <FaShieldAlt className="text-xl text-white" />
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+            <FaGraduationCap className="text-xl text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold">Admin Panel</h1>
-            <p className="text-xs text-blue-200">Control Center</p>
+            <h1 className="text-lg font-semibold text-gray-900">Admin Panel</h1>
+            <p className="text-xs text-gray-500">Management</p>
           </div>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 mt-6 px-4 space-y-2 overflow-y-auto">
-        <p className="text-xs font-semibold text-blue-300 uppercase tracking-wider px-4 mb-4">Menu</p>
+      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
@@ -59,26 +52,25 @@ function AdminSidebar({ onClose }) {
               to={item.path}
               onClick={handleNavClick}
               className={`
-                flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
+                flex items-center gap-3 px-4 py-3 rounded-lg transition-all
                 ${active 
-                  ? 'bg-gradient-to-r from-white to-blue-50 text-blue-900 shadow-lg' 
-                  : 'text-blue-100 hover:bg-blue-700/50'
+                  ? 'bg-blue-50 text-blue-700 font-medium' 
+                  : 'text-gray-700 hover:bg-gray-50'
                 }
               `}
             >
-              <Icon className={`w-5 h-5 flex-shrink-0 ${active ? 'text-blue-600' : 'group-hover:text-blue-300'}`} />
-              <span className="font-medium flex-1">{item.label}</span>
-              {active && <FaChevronRight className="w-4 h-4 text-blue-600" />}
+              <Icon className={`w-5 h-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
+              <span>{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
       {/* Footer Section */}
-      <div className="border-t border-blue-700 p-4">
-        <div className="bg-blue-800/50 rounded-lg p-4 text-center">
-          <p className="text-sm text-blue-200">School Management System</p>
-          <p className="text-xs text-blue-300 mt-1">v1.0.0</p>
+      <div className="border-t border-gray-200 p-4">
+        <div className="bg-gray-50 rounded-lg p-3 text-center">
+          <p className="text-xs text-gray-600 font-medium">School Management</p>
+          <p className="text-xs text-gray-500 mt-1">Version 1.0.0</p>
         </div>
       </div>
     </aside>

@@ -1,12 +1,12 @@
 function DashboardFooter() {
   return (
-    <footer className="bg-slate-900 border-t border-slate-800">
-      <div className="px-6 py-3 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-400">
+    <footer className="bg-white border-t border-gray-200">
+      <div className="px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-sm text-gray-600">
         <span>© 2026 Proactive Education Assistant</span>
-        <div className="flex gap-4">
-          <a href="/privacy" className="hover:text-slate-200">Privacy</a>
-          <a href="/terms" className="hover:text-slate-200">Terms</a>
-          <a href="/contact" className="hover:text-slate-200">Contact</a>
+        <div className="flex gap-6">
+          <a href="/privacy" className="hover:text-gray-900">Privacy</a>
+          <a href="/terms" className="hover:text-gray-900">Terms</a>
+          <a href="/contact" className="hover:text-gray-900">Contact</a>
         </div>
       </div>
     </footer>

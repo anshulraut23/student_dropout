@@ -485,616 +485,228 @@
 
 
 
-
-
-
 import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { students } from "../../data/students";
 import RiskBadge from "../../components/RiskBadge";
-import { FaArrowLeft, FaUserCircle, FaPlus, FaChartLine, FaExclamationTriangle, FaBrain } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaDownload,
+  FaUser,
+  FaChartLine,
+  FaClipboardList,
+  FaPlus,
+} from "react-icons/fa";
 
 export default function StudentProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
   const student = students.find((s) => s.id === parseInt(id));
+  const [activeTab, setActiveTab] = useState("overview");
 
-  if (!student) return null;
-
-  // Mock data for enhanced visualizations
-  const attendanceData = [
-    { week: "Week 1", value: 90, predicted: false },
-    { week: "Week 2", value: 85, predicted: false },
-    { week: "Week 3", value: 70, predicted: false },
-    { week: "Week 4", value: 62, predicted: false },
-    { week: "Week 5", value: 58, predicted: true },
-    { week: "Week 6", value: 55, predicted: true },
-  ];
-
-  const academicData = [
-    { subject: "Math", current: 62, previous: 75, target: 80 },
-    { subject: "English", current: 68, previous: 70, target: 75 },
-    { subject: "Science", current: 65, previous: 72, target: 78 },
-    { subject: "Social St.", current: 70, previous: 73, target: 80 },
-  ];
+  if (!student) {
+    return (
+      <div className="p-10 text-center text-slate-500">
+        Student not found
+      </div>
+    );
+  }
 
   return (
-    <div className="px-4 sm:px-6 py-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <div className="px-6 py-6 bg-slate-100 min-h-screen">
       <div className="max-w-7xl mx-auto space-y-6">
 
+        {/* Back */}
         <button
-          onClick={() => navigate("/students")}
-          className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-blue-600 text-sm font-medium hover:underline"
         >
-          <FaArrowLeft /> Back to students
+          <FaArrowLeft /> Back
         </button>
 
-        {/* HEADER */}
+        {/* HEADER CARD */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex flex-col lg:flex-row justify-between gap-6">
-            <div className="flex gap-4">
-              <div className="relative">
-                <FaUserCircle className="text-slate-300 text-7xl" />
-                <div className="absolute -bottom-1 -right-1 bg-blue-500 rounded-full p-1.5">
-                  <div className="w-2 h-2 bg-white rounded-full"></div>
-                </div>
+          <div className="flex flex-col sm:flex-row gap-6 sm:items-center justify-between">
+
+            <div className="flex gap-4 items-center">
+              <div className="h-16 w-16 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold">
+                {student.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
               </div>
+
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{student.name}</h1>
-                <p className="text-sm text-slate-600 mt-1">
+                <h1 className="text-2xl font-semibold text-slate-900">
+                  {student.name}
+                </h1>
+                <p className="text-sm text-slate-500">
                   {student.class} • Roll No: {student.id}
                 </p>
-                <div className="flex flex-wrap gap-3 mt-3 text-xs">
-                  <span className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full font-medium">
-                    Attendance: {student.attendance}%
-                  </span>
-                  <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full">
-                    Village Area
-                  </span>
-                  <span className="bg-slate-100 text-slate-700 px-3 py-1 rounded-full">
-                    📞 9XXXXXXXXX
-                  </span>
+                <div className="mt-2">
+                  <RiskBadge level={student.riskLevel} />
                 </div>
               </div>
             </div>
-            <div className="flex flex-col items-start lg:items-end gap-3">
-              <RiskBadge level={student.riskLevel} />
-              <div className="text-xs text-slate-500">
-                Last updated: 2 hours ago
-              </div>
-            </div>
+
+            <button className="px-4 py-2 border border-slate-200 rounded-md text-sm flex items-center gap-2 hover:bg-slate-50">
+              <FaDownload /> Download Report
+            </button>
+
           </div>
         </div>
 
-        {/* AI INSIGHTS BANNER */}
-        <div className="bg-gradient-to-r from-purple-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
-          <div className="flex items-start gap-4">
-            <div className="bg-white/20 p-3 rounded-lg">
-              <FaBrain className="text-2xl" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                AI Prediction & Insights
-              </h3>
-              <p className="text-purple-50 text-sm leading-relaxed">
-                Based on current trends, there's a <strong>78% likelihood</strong> of continued attendance decline. 
-                Immediate intervention recommended within the next 5 days to prevent dropout risk.
-              </p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <span className="bg-white/20 px-3 py-1 rounded-full text-xs">
-                  Dropout Risk: High
-                </span>
-                <span className="bg-white/20 px-3 py-1 rounded-full text-xs">
-                  Trend: Declining
-                </span>
-                <span className="bg-white/20 px-3 py-1 rounded-full text-xs">
-                  Action Needed: Urgent
-                </span>
-              </div>
-            </div>
+        {/* TABS */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+          <div className="flex border-b border-slate-200 text-sm">
+            {["overview", "personal", "academics", "interventions"].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-5 py-3 font-medium capitalize transition ${
+                  activeTab === tab
+                    ? "border-b-2 border-blue-600 text-blue-600"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
-        </div>
 
-        {/* KEY METRICS */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <MetricCard
-            icon="📊"
-            label="Overall Performance"
-            value="66%"
-            trend="down"
-            trendValue="-8%"
-            color="orange"
-          />
-          <MetricCard
-            icon="📅"
-            label="Days Present"
-            value="38/60"
-            trend="down"
-            trendValue="-12 days"
-            color="red"
-          />
-          <MetricCard
-            icon="📚"
-            label="Avg. Score"
-            value="66.25%"
-            trend="down"
-            trendValue="-4.5%"
-            color="yellow"
-          />
-          <MetricCard
-            icon="🎯"
-            label="Interventions"
-            value="2 Active"
-            trend="up"
-            trendValue="+1 this week"
-            color="blue"
-          />
-        </div>
+          <div className="p-6">
 
-        {/* MAIN ANALYTICS */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          
-          {/* LEFT COLUMN - Charts */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Attendance Trend with Prediction */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-slate-900 flex items-center gap-2">
-                  <FaChartLine className="text-blue-600" />
-                  Attendance Trend & AI Prediction
+            {/* OVERVIEW TAB */}
+            {activeTab === "overview" && (
+              <div className="space-y-6">
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+                  <StatCard
+                    title="Attendance"
+                    value={`${student.attendance}%`}
+                    color={
+                      student.attendance < 70
+                        ? "text-red-600"
+                        : student.attendance < 85
+                        ? "text-yellow-600"
+                        : "text-green-600"
+                    }
+                  />
+
+                  <StatCard
+                    title="Average Score"
+                    value={`${student.avgScore || 0}`}
+                    color="text-blue-600"
+                  />
+
+                  <StatCard
+                    title="Risk Level"
+                    value={student.riskLevel.toUpperCase()}
+                    color="text-red-600"
+                  />
+
+                  <StatCard
+                    title="Interventions"
+                    value="2"
+                    color="text-purple-600"
+                  />
+
+                </div>
+
+                {/* Simple Attendance Bar */}
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-700 mb-2">
+                    Attendance Overview
+                  </h3>
+                  <div className="h-4 bg-slate-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${
+                        student.attendance < 70
+                          ? "bg-red-500"
+                          : student.attendance < 85
+                          ? "bg-yellow-500"
+                          : "bg-green-500"
+                      }`}
+                      style={{ width: `${student.attendance}%` }}
+                    />
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* PERSONAL TAB */}
+            {activeTab === "personal" && (
+              <div className="grid sm:grid-cols-2 gap-4 text-sm">
+
+                <InfoBox label="Full Name" value={student.name} />
+                <InfoBox label="Class" value={student.class} />
+                <InfoBox label="Attendance" value={`${student.attendance}%`} />
+                <InfoBox label="Risk Level" value={student.riskLevel} />
+                <InfoBox label="Phone" value="+91 XXXXX XXXXX" />
+                <InfoBox label="Address" value="Village Area" />
+
+              </div>
+            )}
+
+            {/* ACADEMICS TAB */}
+            {activeTab === "academics" && (
+              <div className="space-y-4">
+
+                <h3 className="text-sm font-semibold text-slate-700">
+                  Academic Summary
                 </h3>
-                <div className="flex gap-2 text-xs">
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                    <span className="text-slate-600">Actual</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 bg-purple-400 rounded border-2 border-purple-500 border-dashed"></div>
-                    <span className="text-slate-600">Predicted</span>
-                  </div>
-                </div>
-              </div>
-              
-              <div className="relative">
-                {/* Chart */}
-                <div className="flex items-end justify-between h-48 gap-2 mb-2">
-                  {attendanceData.map((item, idx) => (
-                    <div key={idx} className="flex-1 flex flex-col items-center gap-2">
-                      {/* Bar */}
-                      <div className="relative w-full flex flex-col justify-end items-center h-full">
-                        <div className="absolute bottom-0 w-full flex flex-col items-center">
-                          {/* Value label */}
-                          <span className={`text-xs font-semibold mb-1 ${
-                            item.predicted ? 'text-purple-600' : 
-                            item.value < 70 ? 'text-red-600' : 'text-blue-600'
-                          }`}>
-                            {item.value}%
-                          </span>
-                          {/* Bar */}
-                          <div 
-                            className={`w-full rounded-t transition-all ${
-                              item.predicted 
-                                ? 'bg-gradient-to-t from-purple-300 to-purple-400 border-2 border-dashed border-purple-500' 
-                                : item.value < 70 
-                                ? 'bg-gradient-to-t from-red-400 to-red-500' 
-                                : 'bg-gradient-to-t from-blue-400 to-blue-500'
-                            }`}
-                            style={{ height: `${item.value}%` }}
-                          ></div>
-                        </div>
-                      </div>
-                      {/* Label */}
-                      <span className="text-xs text-slate-600 font-medium mt-2">
-                        {item.week}
-                      </span>
-                    </div>
-                  ))}
+
+                <div className="bg-slate-50 border border-slate-200 rounded-md p-4">
+                  <p className="text-sm text-slate-600">
+                    Average Score:{" "}
+                    <span className="font-semibold text-slate-900">
+                      {student.avgScore || 0}
+                    </span>
+                  </p>
                 </div>
 
-                {/* Threshold line */}
-                <div className="absolute left-0 right-0 border-t-2 border-dashed border-orange-400" 
-                     style={{ top: '30%' }}>
-                  <span className="absolute -top-2 right-0 bg-orange-100 text-orange-700 text-xs px-2 py-0.5 rounded">
-                    Critical: 70%
-                  </span>
-                </div>
               </div>
+            )}
 
-              {/* Prediction Alert */}
-              <div className="mt-4 bg-purple-50 border border-purple-200 rounded-lg p-3">
-                <p className="text-xs text-purple-900">
-                  <strong>AI Forecast:</strong> If current trend continues, attendance may drop to 52% by Week 7. 
-                  Recommended action: Schedule parent meeting immediately.
-                </p>
-              </div>
-            </div>
-
-            {/* Academic Performance Comparison */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Academic Performance Analysis</h3>
-              
+            {/* INTERVENTIONS TAB */}
+            {activeTab === "interventions" && (
               <div className="space-y-4">
-                {academicData.map((subject, idx) => (
-                  <div key={idx}>
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-slate-700">{subject.subject}</span>
-                      <div className="flex gap-3 text-xs">
-                        <span className="text-slate-500">Previous: {subject.previous}%</span>
-                        <span className={`font-semibold ${
-                          subject.current < subject.previous ? 'text-red-600' : 'text-green-600'
-                        }`}>
-                          Current: {subject.current}%
-                        </span>
-                        <span className="text-blue-600">Target: {subject.target}%</span>
-                      </div>
-                    </div>
-                    
-                    {/* Multi-bar visualization */}
-                    <div className="relative h-8 bg-slate-100 rounded-lg overflow-hidden">
-                      {/* Previous score (faded) */}
-                      <div 
-                        className="absolute h-full bg-slate-300 opacity-40"
-                        style={{ width: `${subject.previous}%` }}
-                      ></div>
-                      {/* Current score */}
-                      <div 
-                        className={`absolute h-full ${
-                          subject.current < subject.previous 
-                            ? 'bg-gradient-to-r from-red-400 to-red-500' 
-                            : 'bg-gradient-to-r from-green-400 to-green-500'
-                        }`}
-                        style={{ width: `${subject.current}%` }}
-                      ></div>
-                      {/* Target marker */}
-                      <div 
-                        className="absolute h-full w-1 bg-blue-600"
-                        style={{ left: `${subject.target}%` }}
-                      ></div>
-                      
-                      {/* Percentage labels inside bars */}
-                      <div className="absolute inset-0 flex items-center px-3 justify-between">
-                        <span className="text-xs font-semibold text-white drop-shadow">
-                          {subject.current}%
-                        </span>
-                        {subject.current < subject.target - 5 && (
-                          <span className="text-xs text-slate-600">
-                            Gap: -{subject.target - subject.current}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
 
-              {/* Summary */}
-              <div className="mt-4 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p className="text-xs text-yellow-900">
-                  <strong>Analysis:</strong> Performance declining across all subjects. 
-                  Math shows steepest drop (-13%). Consider additional tutoring support.
-                </p>
-              </div>
-            </div>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm flex items-center gap-2">
+                  <FaPlus /> Add Intervention
+                </button>
 
-            {/* Risk Factor Breakdown */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <FaExclamationTriangle className="text-orange-500" />
-                Risk Factor Contribution
-              </h3>
-              
-              <div className="space-y-4">
-                <RiskFactorBar 
-                  label="Attendance Impact" 
-                  value={60} 
-                  color="from-red-400 to-red-600"
-                  description="Major concern - 38% attendance rate"
-                />
-                <RiskFactorBar 
-                  label="Academic Decline" 
-                  value={25} 
-                  color="from-orange-400 to-orange-600"
-                  description="Scores dropping consistently"
-                />
-                <RiskFactorBar 
-                  label="Behavioral Factors" 
-                  value={15} 
-                  color="from-yellow-400 to-yellow-600"
-                  description="Low participation in class"
-                />
-              </div>
-
-              {/* Risk Score */}
-              <div className="mt-6 p-4 bg-gradient-to-r from-red-50 to-orange-50 border-l-4 border-red-500 rounded">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-semibold text-red-900">Overall Risk Score</p>
-                    <p className="text-xs text-red-700 mt-1">Calculated by AI model</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-3xl font-bold text-red-600">82/100</p>
-                    <p className="text-xs text-red-700">High Risk</p>
-                  </div>
+                <div className="bg-slate-50 border border-slate-200 rounded-md p-4 text-sm text-slate-600">
+                  No interventions logged yet.
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* RIGHT COLUMN - Actions & History */}
-          <div className="space-y-6">
-            
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Quick Actions</h3>
-              <div className="space-y-2">
-                <ActionButton text="Mark Attendance" icon="📅" variant="blue" />
-                <ActionButton text="Add Test Score" icon="📝" variant="green" />
-                <ActionButton text="Log Behavior" icon="💬" variant="purple" />
-                <ActionButton text="Schedule Intervention" icon="🎯" variant="orange" />
               </div>
-            </div>
-
-            {/* AI Recommendations */}
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <FaBrain className="text-indigo-600" />
-                AI Recommendations
-              </h3>
-              <div className="space-y-3">
-                <RecommendationItem 
-                  priority="high"
-                  text="Immediate home visit required"
-                />
-                <RecommendationItem 
-                  priority="high"
-                  text="Parent-teacher meeting this week"
-                />
-                <RecommendationItem 
-                  priority="medium"
-                  text="Assign peer mentor for support"
-                />
-                <RecommendationItem 
-                  priority="medium"
-                  text="Enroll in after-school tutoring"
-                />
-              </div>
-            </div>
-
-            {/* Recent Activity Timeline */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Recent Activity</h3>
-              <div className="space-y-4">
-                <TimelineItem 
-                  date="Today"
-                  event="Absent from class"
-                  type="negative"
-                />
-                <TimelineItem 
-                  date="Yesterday"
-                  event="Math test: 62%"
-                  type="warning"
-                />
-                <TimelineItem 
-                  date="2 days ago"
-                  event="Parent meeting scheduled"
-                  type="positive"
-                />
-                <TimelineItem 
-                  date="3 days ago"
-                  event="Absent from class"
-                  type="negative"
-                />
-              </div>
-            </div>
-
-            {/* Contact Information */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Contact Details</h3>
-              <div className="space-y-3 text-sm">
-                <div>
-                  <p className="text-xs text-slate-500 mb-1">Parent/Guardian</p>
-                  <p className="font-medium text-slate-900">Mr. Rajesh Kumar</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 mb-1">Phone</p>
-                  <p className="font-medium text-slate-900">+91 9XXXXXXXXX</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 mb-1">Address</p>
-                  <p className="font-medium text-slate-900">Village Area, District</p>
-                </div>
-                <div>
-                  <p className="text-xs text-slate-500 mb-1">Last Contact</p>
-                  <p className="font-medium text-slate-900">5 days ago</p>
-                </div>
-              </div>
-            </div>
+            )}
 
           </div>
         </div>
 
-        {/* HISTORY SECTIONS */}
-        <div className="grid md:grid-cols-2 gap-6">
-          <HistoryCard 
-            title="Attendance History" 
-            icon="📅"
-            items={[
-              { text: "Jan 10 – Present", status: "positive" },
-              { text: "Jan 09 – Absent", status: "negative" },
-              { text: "Jan 08 – Present", status: "positive" },
-              { text: "Jan 07 – Absent", status: "negative" },
-              { text: "Jan 06 – Present", status: "positive" },
-            ]}
-          />
-          <HistoryCard 
-            title="Academic Scores" 
-            icon="📚"
-            items={[
-              { text: "Math: 62% (Below avg)", status: "warning" },
-              { text: "English: 68% (Average)", status: "neutral" },
-              { text: "Science: 65% (Below avg)", status: "warning" },
-              { text: "Social Studies: 70% (Average)", status: "neutral" },
-            ]}
-          />
-          <HistoryCard 
-            title="Behavior Notes" 
-            icon="💬"
-            items={[
-              { text: "Low participation in class", status: "warning" },
-              { text: "Frequently absent from school", status: "negative" },
-              { text: "Not completing homework", status: "warning" },
-              { text: "Quiet in group activities", status: "neutral" },
-            ]}
-          />
-          <HistoryCard 
-            title="Interventions" 
-            icon="🎯"
-            items={[
-              { text: "Home visit completed - Jan 8", status: "positive" },
-              { text: "Parent meeting planned - Jan 12", status: "positive" },
-              { text: "Peer mentoring assigned", status: "positive" },
-              { text: "Follow-up scheduled - Jan 15", status: "neutral" },
-            ]}
-          />
-        </div>
-
       </div>
     </div>
   );
 }
 
-/* ---------------- COMPONENTS ---------------- */
+/* ---------------- Small Components ---------------- */
 
-function MetricCard({ icon, label, value, trend, trendValue, color }) {
-  const colorClasses = {
-    blue: 'from-blue-50 to-blue-100 border-blue-200',
-    green: 'from-green-50 to-green-100 border-green-200',
-    red: 'from-red-50 to-red-100 border-red-200',
-    orange: 'from-orange-50 to-orange-100 border-orange-200',
-    yellow: 'from-yellow-50 to-yellow-100 border-yellow-200',
-  };
-
+function StatCard({ title, value, color }) {
   return (
-    <div className={`bg-gradient-to-br ${colorClasses[color]} rounded-xl p-4 border shadow-sm`}>
-      <div className="flex items-start justify-between mb-2">
-        <span className="text-2xl">{icon}</span>
-        <span className={`text-xs px-2 py-1 rounded-full ${
-          trend === 'up' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-        }`}>
-          {trendValue}
-        </span>
-      </div>
-      <p className="text-xs text-slate-600 mb-1">{label}</p>
-      <p className="text-2xl font-bold text-slate-900">{value}</p>
+    <div className="bg-white border border-slate-200 rounded-lg p-4 text-center">
+      <p className="text-xs text-slate-500 mb-1">{title}</p>
+      <p className={`text-2xl font-semibold ${color}`}>{value}</p>
     </div>
   );
 }
 
-function RiskFactorBar({ label, value, color, description }) {
+function InfoBox({ label, value }) {
   return (
-    <div>
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-sm font-medium text-slate-700">{label}</span>
-        <span className="text-sm font-bold text-slate-900">{value}%</span>
-      </div>
-      <div className="h-3 bg-slate-200 rounded-full overflow-hidden">
-        <div 
-          className={`h-full bg-gradient-to-r ${color} rounded-full transition-all duration-500`}
-          style={{ width: `${value}%` }}
-        ></div>
-      </div>
-      <p className="text-xs text-slate-500 mt-1">{description}</p>
-    </div>
-  );
-}
-
-function ActionButton({ text, icon, variant }) {
-  const variants = {
-    blue: 'bg-blue-600 hover:bg-blue-700 text-white',
-    green: 'bg-green-600 hover:bg-green-700 text-white',
-    purple: 'bg-purple-600 hover:bg-purple-700 text-white',
-    orange: 'bg-orange-600 hover:bg-orange-700 text-white',
-  };
-
-  return (
-    <button className={`w-full flex items-center gap-3 px-4 py-3 ${variants[variant]} rounded-lg text-sm font-medium transition-colors shadow-sm`}>
-      <span className="text-lg">{icon}</span>
-      <span>{text}</span>
-      <FaPlus className="ml-auto text-xs" />
-    </button>
-  );
-}
-
-function RecommendationItem({ priority, text }) {
-  const priorityStyles = {
-    high: 'bg-red-100 border-red-300 text-red-800',
-    medium: 'bg-yellow-100 border-yellow-300 text-yellow-800',
-    low: 'bg-blue-100 border-blue-300 text-blue-800',
-  };
-
-  return (
-    <div className={`flex items-start gap-2 p-3 rounded-lg border ${priorityStyles[priority]}`}>
-      <span className="text-lg mt-0.5">
-        {priority === 'high' ? '🔴' : priority === 'medium' ? '🟡' : '🔵'}
-      </span>
-      <div className="flex-1">
-        <p className="text-sm font-medium">{text}</p>
-        <p className="text-xs opacity-75 mt-0.5">
-          {priority === 'high' ? 'Urgent' : priority === 'medium' ? 'Important' : 'Suggested'}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function TimelineItem({ date, event, type }) {
-  const typeStyles = {
-    positive: 'bg-green-100 border-green-300 text-green-800',
-    negative: 'bg-red-100 border-red-300 text-red-800',
-    warning: 'bg-yellow-100 border-yellow-300 text-yellow-800',
-    neutral: 'bg-slate-100 border-slate-300 text-slate-800',
-  };
-
-  const icons = {
-    positive: '✓',
-    negative: '✗',
-    warning: '⚠',
-    neutral: '•',
-  };
-
-  return (
-    <div className="flex gap-3">
-      <div className={`w-8 h-8 rounded-full ${typeStyles[type]} flex items-center justify-center font-bold text-sm flex-shrink-0`}>
-        {icons[type]}
-      </div>
-      <div className="flex-1">
-        <p className="text-xs text-slate-500">{date}</p>
-        <p className="text-sm font-medium text-slate-900">{event}</p>
-      </div>
-    </div>
-  );
-}
-
-function HistoryCard({ title, icon, items }) {
-  return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-      <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-        <span>{icon}</span> {title}
-      </h3>
-      <ul className="space-y-2">
-        {items.map((item, idx) => (
-          <li key={idx} className="flex items-start gap-2 text-sm">
-            <span className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
-              item.status === 'positive' ? 'bg-green-500' :
-              item.status === 'negative' ? 'bg-red-500' :
-              item.status === 'warning' ? 'bg-yellow-500' :
-              'bg-slate-400'
-            }`}></span>
-            <span className="text-slate-700">{item.text}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="bg-slate-50 border border-slate-200 rounded-md p-3">
+      <p className="text-xs text-slate-500">{label}</p>
+      <p className="font-medium text-slate-900">{value}</p>
     </div>
   );
 }

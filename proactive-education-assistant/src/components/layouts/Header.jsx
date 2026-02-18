@@ -1,207 +1,128 @@
-// import { useState, useEffect } from 'react';
-// import { Link, useNavigate } from 'react-router-dom';
-// import { FaGraduationCap, FaBars, FaTimes, FaUserCircle, FaSun, FaMoon } from 'react-icons/fa';
-// import { useTeacher } from '../../context/TeacherContext';
-// import { useTheme } from '../../context/ThemeContext';
-// import LoginModal from '../auth/login.jsx';
-// import RegisterModal from '../auth/register.jsx';
-// import { useTranslation } from 'react-i18next';
-// import LanguageSelector from '../LanguageSelector.jsx';
-
-// function Header({ onToggleSidebar, isSidebarOpen }) {
-//   const [scrolled, setScrolled] = useState(false);
-//   const [open, setOpen] = useState(false);
-//   const [authType, setAuthType] = useState(null);
-//   const [isLoggedIn, setIsLoggedIn] = useState(false);
-//   const navigate = useNavigate();
-//   const { teacher } = useTeacher();
-//   const { theme, toggleTheme } = useTheme();
-//   const { t } = useTranslation();
-
-//   // Check login status
-//   useEffect(() => {
-//     const checkLoginStatus = () => {
-//       setIsLoggedIn(!!localStorage.getItem("loggedIn"));
-//     };
-    
-//     checkLoginStatus();
-//     window.addEventListener("localStorageUpdate", checkLoginStatus);
-    
-//     return () => {
-//       window.removeEventListener("localStorageUpdate", checkLoginStatus);
-//     };
-//   }, []);
-
-//   // Handle scroll effect
-//   useEffect(() => {
-//     const handleScroll = () => {
-//       setScrolled(window.scrollY > 20);
-//     };
-//     window.addEventListener('scroll', handleScroll);
-//     return () => window.removeEventListener('scroll', handleScroll);
-//   }, []);
-
-//   return (
-//     <>
-//       <header
-//         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-//           scrolled ? 'bg-slate-900 shadow-sm' : 'bg-slate-900 shadow-sm'
-//         }`}
-//       >
-//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-//           <div className="flex items-center justify-between h-16">
-//             {/* Left: Logo */}
-//             <Link to="/" className="flex items-center gap-3 group">
-//               <button
-//                 type="button"
-//                 onClick={onToggleSidebar}
-//                 className="p-2 rounded-md text-white hover:bg-white/10 transition-colors"
-//                 aria-label={isSidebarOpen ? t('aria.close_menu', 'Close navigation') : t('aria.open_menu', 'Open navigation')}
-//               >
-//                 {isSidebarOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
-//               </button>
-//               <div className="bg-linear-to-br from-blue-600 to-teal-500 p-2 rounded-lg shadow-md group-hover:shadow-lg transition-all">
-//                 <FaGraduationCap className="text-white text-2xl" />
-//               </div>
-//               <div className="hidden sm:block">
-//                 <h1 className="text-xl font-bold text-white leading-tight">
-//                   {t('app.brand_full')}
-//                 </h1>
-//                 <p className="text-xs text-slate-300">{t('app.tagline')}</p>
-//               </div>
-//               <div className="sm:hidden">
-//                 <h1 className="text-lg font-bold text-white">
-//                   {t('app.brand_short')}
-//                 </h1>
-//               </div>
-//             </Link>
-
-//             {/* Right: Auth Buttons (Desktop) */}
-//             <div className="hidden md:flex items-center gap-3">
-//               {isLoggedIn ? (
-//                 <button
-//                   onClick={() => navigate('/profile')}
-//                   className="flex items-center gap-2 px-4 py-2 text-white hover:bg-white/10 rounded-md transition-colors"
-//                   title={t('auth.profile')}
-//                 >
-//                   <FaUserCircle className="text-2xl" />
-//                   <span className="text-sm font-medium">{teacher?.name?.split(' ')[0] || t('auth.profile')}</span>
-//                 </button>
-//               ) : (
-//                 <>
-//                   <button
-//                     onClick={() => {
-//                       setAuthType('login');
-//                       setOpen(true);
-//                     }}
-//                     className="px-4 py-2 text-sm font-medium text-white border border-white/40 rounded-md hover:bg-white/10 transition-colors"
-//                   >
-//                     {t('auth.login')}
-//                   </button>
-//                   <button
-//                     onClick={() => {
-//                       setAuthType('register');
-//                       setOpen(true);
-//                     }}
-//                     className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors shadow-sm"
-//                   >
-//                     {t('auth.signup')}
-//                   </button>
-//                 </>
-//               )}
-//               <button
-//                 onClick={toggleTheme}
-//                 className="p-2 rounded-md text-white hover:bg-white/10 transition-colors"
-//                 title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
-//                 aria-label="Toggle theme"
-//               >
-//                 {theme === 'light' ? <FaMoon size={20} /> : <FaSun size={20} />}
-//               </button>
-//               <LanguageSelector />
-//             </div>
-
-//           </div>
-//         </div>
-//       </header>
-
-//       {/* Auth Modals */}
-//       <LoginModal
-//         isOpen={open && authType === 'login'}
-//         onClose={() => {
-//           setOpen(false);
-//           setAuthType(null);
-//         }}
-//         onSwitchToRegister={() => {
-//           setAuthType('register');
-//         }}
-//       />
-
-//       <RegisterModal
-//         isOpen={open && authType === 'register'}
-//         onClose={() => {
-//           setOpen(false);
-//           setAuthType(null);
-//         }}
-//         onSwitchToLogin={() => {
-//           setAuthType('login');
-//         }}
-//       />
-//     </>
-//   );
-// }
-
-// export default Header;
-
-
-
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaBars, FaUserCircle, FaSun, FaMoon } from "react-icons/fa";
-import { useTheme } from "../../context/ThemeContext";
+import { FaBars, FaUserCircle, FaGraduationCap, FaBell, FaWifi } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import LanguageSelector from "../LanguageSelector";
 
 function Header({ onToggleSidebar }) {
-  const { theme, toggleTheme } = useTheme();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications] = useState([
+    { id: 1, message: "New high-risk student alert", time: "5 min ago", unread: true },
+    { id: 2, message: "Attendance report ready", time: "1 hour ago", unread: true },
+    { id: 3, message: "Class schedule updated", time: "2 hours ago", unread: false },
+  ]);
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-slate-900 border-b border-slate-800">
-      <div className="h-14 px-4 flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200">
+      <div className="h-16 px-4 flex items-center justify-between">
         
         {/* Left */}
         <div className="flex items-center gap-3">
           <button
             onClick={onToggleSidebar}
-            className="p-2 text-slate-300 hover:text-white"
+            className="p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
           >
-            <FaBars size={18} />
+            <FaBars size={20} />
           </button>
 
-          <Link to="/dashboard" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 flex items-center justify-center rounded-md">
-              <span className="text-white font-bold">PE</span>
+          <Link to="/dashboard" className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-600 flex items-center justify-center rounded-lg">
+              <FaGraduationCap className="text-white text-xl" />
             </div>
-            <span className="text-sm font-semibold text-white hidden sm:inline">
-              Proactive Education Assistant
-            </span>
+            <div className="hidden sm:block">
+              <h1 className="text-lg font-semibold text-gray-900">
+                {t('app.brand_full', 'Proactive Education')}
+              </h1>
+              <p className="text-xs text-gray-500">{t('app.tagline', 'Assistant')}</p>
+            </div>
           </Link>
         </div>
 
         {/* Right */}
         <div className="flex items-center gap-3">
-          <button
-            onClick={toggleTheme}
-            className="p-2 text-slate-300 hover:text-white"
-          >
-            {theme === "light" ? <FaMoon /> : <FaSun />}
-          </button>
+          {/* Online/Offline Status */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
+            <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
+            <span className="text-xs font-medium text-gray-700 hidden sm:inline">
+              {isOnline ? 'Online' : 'Offline'}
+            </span>
+            <FaWifi className={`text-sm ${isOnline ? 'text-green-600' : 'text-red-600'}`} />
+          </div>
 
+          {/* Notifications */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="relative p-2 text-gray-600 hover:text-gray-900 rounded-lg hover:bg-gray-100"
+            >
+              <FaBell size={20} />
+              {unreadCount > 0 && (
+                <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Notifications Dropdown */}
+            {showNotifications && (
+              <>
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowNotifications(false)}
+                ></div>
+                <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <div className="p-4 border-b border-gray-200">
+                    <h3 className="font-semibold text-gray-900">Notifications</h3>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.map((notification) => (
+                      <div
+                        key={notification.id}
+                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer ${
+                          notification.unread ? 'bg-blue-50' : ''
+                        }`}
+                      >
+                        <p className="text-sm text-gray-900">{notification.message}</p>
+                        <p className="text-xs text-gray-500 mt-1">{notification.time}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="p-3 text-center border-t border-gray-200">
+                    <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                      View All Notifications
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <LanguageSelector />
+          
           <button
             onClick={() => navigate("/profile")}
-            className="flex items-center gap-2 px-3 py-1.5 border border-slate-700 text-slate-200 rounded-md hover:bg-slate-800 text-sm"
+            className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
           >
-            <FaUserCircle />
-            Guest
+            <FaUserCircle className="text-xl" />
+            <span className="text-sm font-medium hidden sm:inline">Profile</span>
           </button>
         </div>
 

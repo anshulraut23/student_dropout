@@ -12,12 +12,12 @@ import StudentListPage from "../pages/teacher/StudentListPage";
 import StudentProfilePage from "../pages/teacher/StudentProfilePage";
 import ProfilePage from "../pages/teacher/ProfilePage";
 import DataEntryPage from "../pages/teacher/DataEntryPage";
+import GamificationPage from "../pages/teacher/GamificationPage";
+import AddStudentPage from "../pages/teacher/AddStudentPage";
+import MyClassesPage from "../pages/teacher/MyClassesPage";
+import LoginPage from "../pages/teacher/LoginPage";
 
 import MainLayout from "../layouts/MainLayout";
-
-import GamificationPage from "../pages/teacher/GamificationPage";
-
-
 
 // Admin
 import { AdminProvider } from "../context/AdminContext";
@@ -26,8 +26,6 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import TeacherManagement from "../pages/admin/TeacherManagement";
 import ClassManagement from "../pages/admin/ClassManagement";
 import SubjectManagement from "../pages/admin/SubjectManagement";
-import StudentOverview from "../pages/admin/StudentOverview";
-import DataImport from "../pages/admin/DataImport";
 import Analytics from "../pages/admin/Analytics";
 
 export default function AppRoutes() {
@@ -71,68 +69,74 @@ export default function AppRoutes() {
 
   return (
     <Routes>
-
       {/* Public Pages */}
       <Route path="/" element={<LandingPage />} />
       <Route path="/pricing" element={<PricingTable />} />
       <Route path="/payment" element={<PaymentUI />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      
+      {/* Teacher Login */}
+      <Route 
+        path="/teacher/login" 
+        element={
+          isLoggedIn && userRole === "teacher" 
+            ? <Navigate to="/teacher/dashboard" replace /> 
+            : <LoginPage />
+        } 
+      />
 
-
-      {/* ---------------- ADMIN ROUTES WITH CONTEXT ---------------- */}
-
+      {/* Admin Routes */}
       {isLoggedIn && userRole === "admin" ? (
-        <Route path="/admin" element={
-          <AdminProvider>
-            <AdminLayout />
-          </AdminProvider>
-        }>
-          <Route index element={<Navigate to="/admin/dashboard" />} />
+        <Route 
+          path="/admin" 
+          element={
+            <AdminProvider>
+              <AdminLayout />
+            </AdminProvider>
+          }
+        >
+          <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
           <Route path="teachers" element={<TeacherManagement />} />
           <Route path="classes" element={<ClassManagement />} />
           <Route path="subjects" element={<SubjectManagement />} />
-          <Route path="students" element={<StudentOverview />} />
-          <Route path="data-import" element={<DataImport />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>
       ) : (
-        <Route path="/admin/*" element={<Navigate to="/" />} />
+        <Route path="/admin/*" element={<Navigate to="/" replace />} />
       )}
 
-
-      {/* ---------------- TEACHER ROUTES ---------------- */}
-
-      {isLoggedIn && userRole !== "admin" ? (
-        <Route element={<MainLayout />}>
-
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/teacher/dashboard" element={<DashboardPage />} />
-          <Route path="/students" element={<StudentListPage />} />
-          <Route path="/students/:id" element={<StudentProfilePage />} />
-          <Route path="/data-entry" element={<DataEntryPage />} />
-          <Route path="/gamification" element={<GamificationPage />} />
-
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/about" element={<AboutPage />} />
-
-        </Route>
-      ) : null}
-
-
-      {/* ---------------- PROTECTION ---------------- */}
-
-      {!isLoggedIn && (
+      {/* Teacher Routes */}
+      {isLoggedIn && userRole === "teacher" ? (
         <>
-          <Route path="/dashboard" element={<Navigate to="/" />} />
-          <Route path="/teacher/dashboard" element={<Navigate to="/" />} />
-          <Route path="/students/*" element={<Navigate to="/" />} />
-          <Route path="/data-entry" element={<Navigate to="/" />} />
-          <Route path="/profile" element={<Navigate to="/" />} />
-          
+          <Route element={<MainLayout />}>
+            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/teacher/dashboard" element={<DashboardPage />} />
+            <Route path="/my-classes" element={<MyClassesPage />} />
+            <Route path="/students" element={<StudentListPage />} />
+            <Route path="/students/:id" element={<StudentProfilePage />} />
+            <Route path="/add-student" element={<AddStudentPage />} />
+            <Route path="/data-entry" element={<DataEntryPage />} />
+            <Route path="/gamification" element={<GamificationPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/about" element={<AboutPage />} />
+          </Route>
+        </>
+      ) : (
+        <>
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/teacher/*" element={<Navigate to="/" replace />} />
+          <Route path="/my-classes" element={<Navigate to="/" replace />} />
+          <Route path="/students/*" element={<Navigate to="/" replace />} />
+          <Route path="/add-student" element={<Navigate to="/" replace />} />
+          <Route path="/data-entry" element={<Navigate to="/" replace />} />
+          <Route path="/gamification" element={<Navigate to="/" replace />} />
+          <Route path="/profile" element={<Navigate to="/" replace />} />
         </>
       )}
 
+      {/* Catch all - redirect to home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

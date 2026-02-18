@@ -13,20 +13,22 @@ export default function LoginPage() {
   const [syncQueueCount] = useState(2);
 
   const handleLogin = () => {
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("userRole", role);
+    localStorage.setItem("token", "demo-teacher-token");
+    localStorage.setItem("role", role);
     localStorage.setItem("themeMode", isDarkMode ? "dark" : "light");
     
     if (role === "coordinator") {
       navigate("/admin/dashboard");
     } else {
-      navigate("/dashboard");
+      navigate("/teacher/dashboard");
     }
+    
+    window.dispatchEvent(new Event("localStorageUpdate"));
   };
 
   const handleGuestLogin = () => {
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("userRole", role === "coordinator" ? "admin" : "teacher");
+    localStorage.setItem("token", "demo-guest-token");
+    localStorage.setItem("role", role === "coordinator" ? "admin" : "teacher");
     localStorage.setItem("themeMode", isDarkMode ? "dark" : "light");
     
     const guestUser = {
@@ -49,7 +51,7 @@ export default function LoginPage() {
     if (role === "coordinator") {
       navigate("/admin/dashboard");
     } else {
-      navigate("/dashboard");
+      navigate("/teacher/dashboard");
     }
   };
 
