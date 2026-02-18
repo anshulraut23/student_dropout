@@ -84,6 +84,16 @@ export default function AppRoutes() {
             : <LoginPage />
         } 
       />
+      
+      {/* Admin Login */}
+      <Route 
+        path="/admin/login" 
+        element={
+          isLoggedIn && userRole === "admin" 
+            ? <Navigate to="/admin/dashboard" replace /> 
+            : <LoginPage />
+        } 
+      />
 
       {/* Admin Routes */}
       {isLoggedIn && userRole === "admin" ? (

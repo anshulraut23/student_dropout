@@ -85,6 +85,10 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
       }
 
       storeAuthSession({ token, role: resolvedRole, school_id, school_name });
+      
+      // Trigger custom event for route update
+      window.dispatchEvent(new Event("localStorageUpdate"));
+      
       const targetRoute = getDashboardRoute(resolvedRole);
       onClose();
       navigate(targetRoute);

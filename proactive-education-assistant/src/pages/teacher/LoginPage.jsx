@@ -13,22 +13,24 @@ export default function LoginPage() {
   const [syncQueueCount] = useState(2);
 
   const handleLogin = () => {
+    const actualRole = role === "coordinator" ? "admin" : "teacher";
     localStorage.setItem("token", "demo-teacher-token");
-    localStorage.setItem("role", role);
+    localStorage.setItem("role", actualRole);
     localStorage.setItem("themeMode", isDarkMode ? "dark" : "light");
     
-    if (role === "coordinator") {
+    window.dispatchEvent(new Event("localStorageUpdate"));
+    
+    if (actualRole === "admin") {
       navigate("/admin/dashboard");
     } else {
       navigate("/teacher/dashboard");
     }
-    
-    window.dispatchEvent(new Event("localStorageUpdate"));
   };
 
   const handleGuestLogin = () => {
+    const actualRole = role === "coordinator" ? "admin" : "teacher";
     localStorage.setItem("token", "demo-guest-token");
-    localStorage.setItem("role", role === "coordinator" ? "admin" : "teacher");
+    localStorage.setItem("role", actualRole);
     localStorage.setItem("themeMode", isDarkMode ? "dark" : "light");
     
     const guestUser = {
@@ -40,7 +42,7 @@ export default function LoginPage() {
       isGuest: true
     };
     
-    if (role === "teacher") {
+    if (actualRole === "teacher") {
       localStorage.setItem("teacherData", JSON.stringify(guestUser));
     } else {
       localStorage.setItem("adminData", JSON.stringify(guestUser));
@@ -48,7 +50,7 @@ export default function LoginPage() {
     
     window.dispatchEvent(new Event("localStorageUpdate"));
     
-    if (role === "coordinator") {
+    if (actualRole === "admin") {
       navigate("/admin/dashboard");
     } else {
       navigate("/teacher/dashboard");
