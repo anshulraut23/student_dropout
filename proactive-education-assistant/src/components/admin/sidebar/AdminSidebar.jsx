@@ -5,7 +5,8 @@ import {
   FaChalkboard, 
   FaBook,
   FaChartBar,
-  FaGraduationCap
+  FaGraduationCap,
+  FaSchool
 } from 'react-icons/fa';
 
 function AdminSidebar({ onClose }) {
@@ -13,6 +14,7 @@ function AdminSidebar({ onClose }) {
 
   const menuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: FaChartLine },
+    { path: '/admin/schools', label: 'Schools', icon: FaSchool },
     { path: '/admin/teachers', label: 'Teachers', icon: FaUserTie },
     { path: '/admin/classes', label: 'Classes', icon: FaChalkboard },
     { path: '/admin/subjects', label: 'Subjects', icon: FaBook },

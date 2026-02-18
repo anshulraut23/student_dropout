@@ -73,11 +73,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
       nextErrors.confirmPassword = "Passwords do not match.";
     }
 
-    if (role === ROLE_ADMIN) {
-      if (!formData.schoolName.trim()) {
-        nextErrors.schoolName = "School name is required.";
-      }
-    }
+
 
     if (role === ROLE_TEACHER) {
       if (!formData.schoolId.trim()) {
@@ -260,52 +256,11 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
             </div>
 
             {role === ROLE_ADMIN && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    School Name
-                  </label>
-                  <input
-                    name="schoolName"
-                    value={formData.schoolName}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Sunrise Public School"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  />
-                  {errors.schoolName && <p className="text-sm text-red-600 mt-1">{errors.schoolName}</p>}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    School Type
-                  </label>
-                  <select
-                    name="schoolType"
-                    value={formData.schoolType}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  >
-                    <option value="School">School</option>
-                    <option value="NGO">NGO</option>
-                    <option value="Tuition Center">Tuition Center</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    City (Optional)
-                  </label>
-                  <input
-                    name="city"
-                    value={formData.city}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="Mumbai"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  />
-                </div>
-              </>
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  After registration, you can create and manage schools from the admin dashboard.
+                </p>
+              </div>
             )}
 
             {role === ROLE_TEACHER && (

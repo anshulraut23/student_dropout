@@ -23,6 +23,7 @@ import MainLayout from "../layouts/MainLayout";
 import { AdminProvider } from "../context/AdminContext";
 import AdminLayout from "../layouts/AdminLayout";
 import AdminDashboard from "../pages/admin/AdminDashboard";
+import SchoolManagement from "../pages/admin/SchoolManagement";
 import TeacherManagement from "../pages/admin/TeacherManagement";
 import ClassManagement from "../pages/admin/ClassManagement";
 import SubjectManagement from "../pages/admin/SubjectManagement";
@@ -74,8 +75,9 @@ export default function AppRoutes() {
       <Route path="/pricing" element={<PricingTable />} />
       <Route path="/payment" element={<PaymentUI />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/about" element={<AboutPage />} />
       
-      {/* Teacher Login */}
+      {/* Login Routes - Always Accessible */}
       <Route 
         path="/teacher/login" 
         element={
@@ -85,7 +87,6 @@ export default function AppRoutes() {
         } 
       />
       
-      {/* Admin Login */}
       <Route 
         path="/admin/login" 
         element={
@@ -107,13 +108,14 @@ export default function AppRoutes() {
         >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="schools" element={<SchoolManagement />} />
           <Route path="teachers" element={<TeacherManagement />} />
           <Route path="classes" element={<ClassManagement />} />
           <Route path="subjects" element={<SubjectManagement />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>
       ) : (
-        <Route path="/admin/*" element={<Navigate to="/" replace />} />
+        <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
       )}
 
       {/* Teacher Routes */}
@@ -134,14 +136,15 @@ export default function AppRoutes() {
         </>
       ) : (
         <>
-          <Route path="/dashboard" element={<Navigate to="/" replace />} />
-          <Route path="/teacher/*" element={<Navigate to="/" replace />} />
-          <Route path="/my-classes" element={<Navigate to="/" replace />} />
-          <Route path="/students/*" element={<Navigate to="/" replace />} />
-          <Route path="/add-student" element={<Navigate to="/" replace />} />
-          <Route path="/data-entry" element={<Navigate to="/" replace />} />
-          <Route path="/gamification" element={<Navigate to="/" replace />} />
-          <Route path="/profile" element={<Navigate to="/" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/teacher/dashboard" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/my-classes" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/students" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/students/:id" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/add-student" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/data-entry" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/gamification" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/profile" element={<Navigate to="/teacher/login" replace />} />
         </>
       )}
 

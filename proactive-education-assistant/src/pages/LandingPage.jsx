@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  FaBook,
+  FaShieldAlt,
+  FaArrowRight,
   FaChartLine,
-  FaLightbulb,
-  FaClipboardCheck,
-  FaFileAlt,
-  FaChevronRight
+  FaUsers,
+  FaBrain,
+  FaMobileAlt
 } from "react-icons/fa";
 import LoginModal from "../components/auth/login";
 import RegisterModal from "../components/auth/register";
@@ -20,291 +20,118 @@ export default function LandingPage() {
   const features = [
     {
       icon: FaChartLine,
-      title: "Early Risk Detection",
-      description: "Identify at-risk students before it's too late with data-driven insights"
+      title: "Risk Analytics",
+      desc: "Instant visual risk scoring for every student"
     },
     {
-      icon: FaLightbulb,
-      title: "Explainable Insights",
-      description: "Clear, transparent reasons behind every risk assessment"
+      icon: FaUsers,
+      title: "Class Management",
+      desc: "Organize classes, subjects, and student data"
     },
     {
-      icon: FaClipboardCheck,
-      title: "Teacher-Friendly Dashboard",
-      description: "Simple, intuitive interface designed for real classroom workflows"
+      icon: FaBrain,
+      title: "Smart Insights",
+      desc: "AI-style alerts for attendance drops and score dips"
     },
     {
-      icon: FaFileAlt,
-      title: "Offline Support",
-      description: "Work seamlessly in low-connectivity environments"
+      icon: FaMobileAlt,
+      title: "Offline First",
+      desc: "Works without internet, syncs when online"
     }
   ];
 
-  const stats = [
-    { value: "30%", label: "Faster Intervention" },
-    { value: "100%", label: "Explainable AI" },
-    { value: "24/7", label: "Support Available" }
-  ];
-
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white text-slate-900">
+
       {/* Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <FaBook className="text-white text-lg" />
-              </div>
-              <span className="text-xl font-semibold text-gray-900">
-                Proactive Education
-              </span>
-            </div>
-
-            <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-              <a href="#features" className="text-gray-600 hover:text-gray-900">Features</a>
-              <a href="#how-it-works" className="text-gray-600 hover:text-gray-900">How it Works</a>
-              <a href="#benefits" className="text-gray-600 hover:text-gray-900">Benefits</a>
-            </nav>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setShowLogin(true)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-              >
-                Sign In
-              </button>
-              <button
-                onClick={() => setShowRegister(true)}
-                className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                Get Started
-              </button>
-            </div>
+      <header className="flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
+        <div className="flex items-center gap-2">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white font-bold text-sm">
+            ES
           </div>
+          <span className="font-bold text-xl">EduShield</span>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowLogin(true)}
+            className="px-4 py-2 text-sm font-medium hover:text-blue-600"
+          >
+            Sign In
+          </button>
+          <button
+            onClick={() => setShowRegister(true)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+          >
+            Get Started
+          </button>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="pt-20 pb-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Detect Student Dropout Risk Early
-            </h1>
-            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              An AI-powered early warning system that helps educators identify at-risk students 
-              using attendance, performance, and behavior data with clear, explainable insights.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button
-                onClick={() => {
-                  setLoginRedirectPath('/pricing');
-                  setShowLogin(true);
-                }}
-                className="px-8 py-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
-              >
-                Start Free Trial
-                <FaChevronRight className="text-sm" />
-              </button>
-              <button
-                onClick={() => {
-                  setLoginRedirectPath('/dashboard');
-                  setShowLogin(true);
-                }}
-                className="px-8 py-4 bg-white text-gray-900 border-2 border-gray-200 rounded-lg font-medium hover:border-gray-300 transition-colors"
-              >
-                View Demo
-              </button>
-            </div>
+      <section className="max-w-6xl mx-auto px-6 py-20 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-1.5 text-sm font-medium text-blue-600 mb-6">
+          <FaShieldAlt className="text-xs" />
+          AI-Powered Dropout Prevention
+        </div>
 
-            {/* Stats */}
-            <div className="mt-16 grid grid-cols-3 gap-8">
-              {stats.map((stat) => (
-                <div key={stat.label} className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">{stat.value}</div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight max-w-3xl mx-auto leading-tight">
+          Every Student <span className="text-blue-600">Deserves</span> to Stay in School
+        </h1>
+
+        <p className="mt-6 text-lg text-slate-600 max-w-2xl mx-auto">
+          EduShield helps teachers identify at-risk students early using attendance,
+          academics, and behaviour data — before it's too late.
+        </p>
+
+        <div className="mt-8 flex flex-wrap justify-center gap-4">
+          <button
+            onClick={() => setShowRegister(true)}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 flex items-center gap-2"
+          >
+            Start Free
+            <FaArrowRight className="text-xs" />
+          </button>
+
+          <button
+            onClick={() => {
+              setLoginRedirectPath("/dashboard");
+              setShowLogin(true);
+            }}
+            className="px-6 py-3 border border-slate-300 rounded-lg font-medium hover:bg-slate-100"
+          >
+            Sign In
+          </button>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              Powerful Features for Educators
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Everything you need to identify and support at-risk students effectively
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.title}
-                  className="bg-white rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow"
-                >
-                  <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
-                    <Icon className="text-xl text-blue-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
-                  <p className="text-sm text-gray-600">{feature.description}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section id="how-it-works" className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
-              How It Works
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              A simple, repeatable workflow for early detection and coordinated action
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                1
+      {/* Features */}
+      <section className="max-w-5xl mx-auto px-6 pb-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+        {features.map((f) => {
+          const Icon = f.icon;
+          return (
+            <div
+              key={f.title}
+              className="bg-white border border-slate-200 rounded-xl p-6 text-center hover:shadow-md transition"
+            >
+              <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-lg bg-blue-50">
+                <Icon className="h-5 w-5 text-blue-600" />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Collect Data</h3>
-              <p className="text-gray-600">
-                Gather attendance, academic performance, and behavioral data from your students
-              </p>
+              <h3 className="font-semibold text-sm">{f.title}</h3>
+              <p className="text-xs text-slate-500 mt-1">{f.desc}</p>
             </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                2
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Detect Risk</h3>
-              <p className="text-gray-600">
-                AI analyzes trends and generates explainable risk scores for each student
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4">
-                3
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Take Action</h3>
-              <p className="text-gray-600">
-                Implement targeted interventions with tracking and follow-up reminders
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits Section */}
-      <section id="benefits" className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6">
-                Built for Schools, NGOs, and Education Programs
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">For Teachers</h3>
-                    <p className="text-gray-600">Class-level risk lists, daily follow-up prompts, and simple intervention notes</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">For Schools</h3>
-                    <p className="text-gray-600">Multi-class oversight, attendance trends, and export-ready reports</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3">
-                  <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">For Organizations</h3>
-                    <p className="text-gray-600">Program-level monitoring, field team coordination, and evidence for funding</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-8 border border-gray-200 shadow-lg">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-50 rounded-full mb-4">
-                  <FaChartLine className="text-2xl text-blue-600" />
-                </div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-2">Ready to Get Started?</h3>
-                <p className="text-gray-600">Join schools already using our platform to support their students</p>
-              </div>
-              <button
-                onClick={() => setShowRegister(true)}
-                className="w-full px-8 py-4 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors"
-              >
-                Start Free Trial
-              </button>
-              <p className="text-xs text-gray-500 text-center mt-4">
-                No credit card required • 30-day free trial
-              </p>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </section>
 
       {/* Footer */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 bg-gray-900">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <FaBook className="text-blue-400" />
-                <span className="font-semibold text-white">Proactive Education</span>
-              </div>
-              <p className="text-sm text-gray-400">
-                Decision support for keeping students in school
-              </p>
-            </div>
-            <div className="flex flex-wrap items-center gap-6 text-sm text-gray-400">
-              <a href="/privacy" className="hover:text-white">Privacy</a>
-              <a href="/terms" className="hover:text-white">Terms</a>
-              <a href="/contact" className="hover:text-white">Contact</a>
-              <a href="/about" className="hover:text-white">About</a>
-              <span className="text-gray-500">© 2026 Proactive Education</span>
-            </div>
-          </div>
-        </div>
+      <footer className="border-t py-6 text-center text-sm text-slate-500">
+        © 2026 EduShield — Built for Teachers, By Teachers
       </footer>
 
       {/* Modals */}
-      <LoginModal 
-        isOpen={showLogin} 
+      <LoginModal
+        isOpen={showLogin}
         onClose={() => {
           setShowLogin(false);
           setLoginRedirectPath(null);
@@ -320,9 +147,9 @@ export default function LandingPage() {
           }
         }}
       />
-      
-      <RegisterModal 
-        isOpen={showRegister} 
+
+      <RegisterModal
+        isOpen={showRegister}
         onClose={() => setShowRegister(false)}
         onSwitchToLogin={() => {
           setShowRegister(false);
