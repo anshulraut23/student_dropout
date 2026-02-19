@@ -106,6 +106,13 @@ class ApiService {
     });
   }
 
+  async getMyClasses() {
+    return this.request('/teachers/my-classes', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
   async approveTeacher(teacherId, classIds = []) {
     return this.request(`/approvals/approve/${teacherId}`, {
       method: 'POST',

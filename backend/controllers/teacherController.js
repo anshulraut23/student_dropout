@@ -61,3 +61,93 @@ export const getAllTeachers = (req, res) => {
     });
   }
 };
+
+// Get teacher's own classes (for teacher dashboard)
+export const getMyClasses = (req, res) => {
+  try {
+    const { userId, schoolId } = req.user;
+
+    // Verify user is teacher
+    if (req.user.role !== 'teacher') {
+      return res.status(403).json({ 
+        success: false, 
+        error: 'Only teachers can view their classes' 
+      });
+    }
+
+    // Get all classes and subjects for this school
+    const allClasses = dataStore.getClassesBySchool(schoolId);
+    const allSubjects = dataStore.getSubjectsBySchool(schoolId);
+
+    // Find classes where teacher is incharge
+    const inchargeClassIds = new Set(
+      allClasses
+        .filter(cls => cls.teacherId === userId)
+        .map(cls => cls.id)
+    );
+
+    // Find subjects where teacher is assigned
+    const teachingSubjects = allSubjects.filter(subject => subject.teacherId === userId);
+
+    // Group subjects by class
+    const subjectsByClass = new Map();
+    teachingSubjects.forEach(subject => {
+      if (!subjectsByClass.has(subject.classId)) {
+        subjectsByClass.set(subject.classId, []);
+      }
+      subjectsByClass.get(subject.classId).push({
+        id: subject.id,
+        name: subject.name
+      });
+    });
+
+    // Build the classes list
+    const myClasses = [];
+    const processedClassIds = new Set();
+
+    // Get all unique class IDs (both incharge and subject teacher)
+    const allClassIds = new Set([
+      ...inchargeClassIds,
+      ...subjectsByClass.keys()
+    ]);
+
+    allClassIds.forEach(classId => {
+      const classData = dataStore.getClassById(classId);
+      if (!classData) return;
+
+      const isIncharge = inchargeClassIds.has(classId);
+      const subjects = subjectsByClass.get(classId) || [];
+
+      // Determine the primary role
+      let role = 'subject_teacher';
+      if (isIncharge && subjects.length > 0) {
+        role = 'both'; // Teacher is both incharge and subject teacher
+      } else if (isIncharge) {
+        role = 'incharge';
+      }
+
+      myClasses.push({
+        id: classData.id,
+        name: classData.name,
+        grade: classData.grade,
+        section: classData.section,
+        academicYear: classData.academicYear,
+        attendanceMode: classData.attendanceMode,
+        role: role,
+        isIncharge: isIncharge,
+        subjects: subjects
+      });
+    });
+
+    res.json({
+      success: true,
+      classes: myClasses
+    });
+  } catch (error) {
+    console.error('Get my classes error:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to get classes' 
+    });
+  }
+};
