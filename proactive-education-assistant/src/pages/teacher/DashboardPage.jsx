@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { students } from "../../data/students";
 import RiskBadge from "../../components/RiskBadge";
@@ -10,19 +11,35 @@ import {
   FaClipboardList,
   FaChartLine,
   FaPlusCircle,
+  FaChevronDown,
 } from "react-icons/fa";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const [selectedClass, setSelectedClass] = useState("all");
+
+  // Get unique classes from students
+  const classes = useMemo(() => {
+    const uniqueClasses = [...new Set(students.map(s => s.class))].sort();
+    return uniqueClasses;
+  }, []);
+
+  // Filter students based on selected class
+  const filteredStudents = useMemo(() => {
+    if (selectedClass === "all") {
+      return students;
+    }
+    return students.filter(s => s.class === selectedClass);
+  }, [selectedClass]);
 
   const stats = {
-    total: students.length,
-    high: students.filter(s => s.riskLevel === "high").length,
-    medium: students.filter(s => s.riskLevel === "medium").length,
-    low: students.filter(s => s.riskLevel === "low").length,
+    total: filteredStudents.length,
+    high: filteredStudents.filter(s => s.riskLevel === "high").length,
+    medium: filteredStudents.filter(s => s.riskLevel === "medium").length,
+    low: filteredStudents.filter(s => s.riskLevel === "low").length,
   };
 
-  const highRiskStudents = students.filter(s => s.riskLevel === "high");
+  const highRiskStudents = filteredStudents.filter(s => s.riskLevel === "high");
 
   // Quick actions
   const quickActions = [
@@ -65,14 +82,57 @@ export default function DashboardPage() {
     <div className="px-6 py-8 bg-gray-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
 
-        {/* Page Title */}
+        {/* Page Title and Class Filter */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900">
-            Dashboard
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Early warning overview of student dropout risk
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-3xl font-semibold text-gray-900">
+                Dashboard
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Early warning overview of student dropout risk
+              </p>
+            </div>
+            
+            {/* Class Filter Dropdown */}
+            <div className="w-full sm:w-64">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Filter by Class
+              </label>
+              <div className="relative">
+                <select
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
+                  className="w-full px-4 py-2.5 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-none text-sm font-medium"
+                >
+                  <option value="all">All Classes</option>
+                  {classes.map((cls) => (
+                    <option key={cls} value={cls}>
+                      {cls}
+                    </option>
+                  ))}
+                </select>
+                <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          {/* Selected Class Indicator */}
+          {selectedClass !== "all" && (
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <span className="text-sm font-medium text-blue-700">
+                Showing data for: {selectedClass}
+              </span>
+              <button
+                onClick={() => setSelectedClass("all")}
+                className="text-blue-600 hover:text-blue-800"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Summary Cards */}

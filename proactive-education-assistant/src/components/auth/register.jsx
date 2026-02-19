@@ -11,10 +11,7 @@ const initialFormState = {
   email: "",
   password: "",
   confirmPassword: "",
-  schoolName: "",
-  schoolType: "School",
-  city: "",
-  schoolId: ""
+  schoolName: ""
 };
 
 function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
@@ -28,7 +25,14 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const schoolIdPattern = /^SCH-[A-Z0-9]{4,10}$/;
+  // Mock schools list for teacher registration
+  const schools = [
+    "Sunrise Public School",
+    "Green Valley High School",
+    "St. Mary's Academy",
+    "Delhi Public School",
+    "Modern International School"
+  ];
 
   const handleRoleSelect = (nextRole) => {
     setRole(nextRole);
@@ -39,10 +43,9 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    const nextValue = name === "schoolId" ? value.toUpperCase() : value;
     setFormData((prev) => ({
       ...prev,
-      [name]: nextValue
+      [name]: value
     }));
   };
 
@@ -73,14 +76,8 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
       nextErrors.confirmPassword = "Passwords do not match.";
     }
 
-
-
-    if (role === ROLE_TEACHER) {
-      if (!formData.schoolId.trim()) {
-        nextErrors.schoolId = "School ID is required.";
-      } else if (!schoolIdPattern.test(formData.schoolId.trim())) {
-        nextErrors.schoolId = "Use format SCH-XXXX (letters/numbers).";
-      }
+    if (!formData.schoolName.trim()) {
+      nextErrors.schoolName = "School name is required.";
     }
 
     return nextErrors;
@@ -97,6 +94,10 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
     setIsSubmitting(true);
     try {
+      // Store registration data
+      localStorage.setItem("token", "mock-token");
+      localStorage.setItem("role", role);
+      
       const targetRoute = role === ROLE_ADMIN ? "/admin/dashboard" : "/teacher/dashboard";
       onClose();
       navigate(targetRoute);
@@ -106,9 +107,6 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
       setIsSubmitting(false);
     }
   };
-
-  const showSchoolLookupPlaceholder =
-    role === ROLE_TEACHER && formData.schoolId.trim().length > 0 && schoolIdPattern.test(formData.schoolId.trim());
 
   return (
     <div
@@ -156,7 +154,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
               >
                 <div className="text-base font-semibold text-gray-900 group-hover:text-blue-600">Admin</div>
                 <p className="text-sm text-gray-600 mt-1">
-                  Create and manage a school or organization
+                  Create and manage your school
                 </p>
               </button>
               <button
@@ -166,7 +164,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
               >
                 <div className="text-base font-semibold text-gray-900 group-hover:text-blue-600">Teacher</div>
                 <p className="text-sm text-gray-600 mt-1">
-                  Join an existing school with a School ID
+                  Request to join an existing school
                 </p>
               </button>
             </div>
@@ -178,7 +176,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                {role === ROLE_ADMIN ? "Create Your Organization" : "Join Your School"}
+                {role === ROLE_ADMIN ? "Create Your School" : "Join a School"}
               </h3>
               <button
                 type="button"
@@ -197,7 +195,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("signup.name_label", "Full Name")}
+                {t("signup.name_label", "Full Name")} <span className="text-red-500">*</span>
               </label>
               <input
                 name="fullName"
@@ -212,7 +210,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("signup.email_label", "Email Address")}
+                {t("signup.email_label", "Email Address")} <span className="text-red-500">*</span>
               </label>
               <input
                 name="email"
@@ -227,7 +225,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                {t("signup.password_label", "Password")}
+                {t("signup.password_label", "Password")} <span className="text-red-500">*</span>
               </label>
               <input
                 name="password"
@@ -242,7 +240,7 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Confirm Password
+                Confirm Password <span className="text-red-500">*</span>
               </label>
               <input
                 name="confirmPassword"
@@ -255,41 +253,49 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
               {errors.confirmPassword && <p className="text-sm text-red-600 mt-1">{errors.confirmPassword}</p>}
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                School Name <span className="text-red-500">*</span>
+              </label>
+              {role === ROLE_ADMIN ? (
+                <input
+                  name="schoolName"
+                  value={formData.schoolName}
+                  onChange={handleChange}
+                  type="text"
+                  placeholder="Sunrise Public School"
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                />
+              ) : (
+                <select
+                  name="schoolName"
+                  value={formData.schoolName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="">Select a school</option>
+                  {schools.map((school, index) => (
+                    <option key={index} value={school}>{school}</option>
+                  ))}
+                </select>
+              )}
+              {errors.schoolName && <p className="text-sm text-red-600 mt-1">{errors.schoolName}</p>}
+            </div>
+
             {role === ROLE_ADMIN && (
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  After registration, you can create and manage schools from the admin dashboard.
+                  You can add more school details from your profile after registration.
                 </p>
               </div>
             )}
 
             {role === ROLE_TEACHER && (
-              <>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    School ID
-                  </label>
-                  <input
-                    name="schoolId"
-                    value={formData.schoolId}
-                    onChange={handleChange}
-                    type="text"
-                    placeholder="SCH-49A8X2"
-                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    School ID is required to join your organization
-                  </p>
-                  {errors.schoolId && <p className="text-sm text-red-600 mt-1">{errors.schoolId}</p>}
-                </div>
-
-                {showSchoolLookupPlaceholder && (
-                  <div className="border border-blue-200 bg-blue-50 rounded-lg p-3 text-sm text-blue-800">
-                    <div className="font-medium">School Lookup</div>
-                    <div className="mt-1 text-xs">School validation will appear here after backend integration</div>
-                  </div>
-                )}
-              </>
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-800">
+                  Your request will be sent to the school admin for approval.
+                </p>
+              </div>
             )}
 
             <button
