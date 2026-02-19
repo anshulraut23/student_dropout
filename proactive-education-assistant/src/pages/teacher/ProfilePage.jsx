@@ -35,7 +35,7 @@ export default function ProfilePage() {
         <h1 className="text-2xl font-semibold text-slate-900">My Profile</h1>
 
         {/* PROFILE HEADER */}
-        <div className="bg-slate-900 rounded-xl p-6 text-white flex flex-col sm:flex-row justify-between gap-4 items-center">
+        <div className="bg-white rounded-xl p-6 text-white flex flex-col sm:flex-row justify-between gap-4 items-center">
 
           <div className="flex items-center gap-4">
             <label className="cursor-pointer relative">

@@ -83,28 +83,28 @@ export const SubjectManagement = () => {
   const currentSubjects = selectedClass ? (subjects[selectedClass] || []) : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900">
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
             Subject Management
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-sm text-gray-500 mt-1">
             Select a class and manage its subjects
           </p>
         </div>
 
         {/* Class Selector */}
-        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Class <span className="text-red-500">*</span>
           </label>
           <div className="relative">
             <select
               value={selectedClass}
               onChange={(e) => setSelectedClass(e.target.value)}
-              className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-none"
+              className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white appearance-none"
             >
               <option value="">Choose a class</option>
               {classes.map((cls) => (
@@ -113,32 +113,32 @@ export const SubjectManagement = () => {
                 </option>
               ))}
             </select>
-            <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <FaChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-xs" />
           </div>
         </div>
 
         {/* Subjects Section */}
         {selectedClass ? (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <div className="flex items-center justify-between p-4 border-b border-gray-200">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
                   <FaBook className="text-blue-600" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-base font-semibold text-gray-900">
                     Subjects ({currentSubjects.length})
                   </h3>
-                  <p className="text-sm text-gray-500">
+                  <p className="text-xs text-gray-500">
                     {classes.find(c => c.id === parseInt(selectedClass))?.name}
                   </p>
                 </div>
               </div>
               <button
                 onClick={handleAddSubject}
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors"
               >
-                <FaPlus />
+                <FaPlus className="text-xs" />
                 Add Subject
               </button>
             </div>
@@ -148,12 +148,12 @@ export const SubjectManagement = () => {
                 <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FaBook className="text-2xl text-gray-400" />
                 </div>
-                <p className="text-gray-500 mb-4">No subjects added yet</p>
+                <p className="text-sm text-gray-500 mb-4">No subjects added yet</p>
                 <button
                   onClick={handleAddSubject}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-medium transition-colors"
                 >
-                  <FaPlus />
+                  <FaPlus className="text-xs" />
                   Add First Subject
                 </button>
               </div>
@@ -162,13 +162,13 @@ export const SubjectManagement = () => {
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                         Subject Name
                       </th>
-                      <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
                         Assigned Teacher
                       </th>
-                      <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase">
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">
                         Actions
                       </th>
                     </tr>
@@ -176,29 +176,29 @@ export const SubjectManagement = () => {
                   <tbody className="divide-y divide-gray-200">
                     {currentSubjects.map((subject) => (
                       <tr key={subject.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4">
-                          <p className="font-medium text-gray-900">{subject.name}</p>
+                        <td className="px-4 py-3">
+                          <p className="text-sm font-medium text-gray-900">{subject.name}</p>
                         </td>
-                        <td className="px-6 py-4">
-                          <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
+                        <td className="px-4 py-3">
+                          <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium border border-blue-200">
                             {subject.teacher}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="px-4 py-3 text-right">
+                          <div className="flex items-center justify-end gap-1">
                             <button
                               onClick={() => handleEditSubject(subject)}
                               className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
                               title="Edit Subject"
                             >
-                              <FaEdit />
+                              <FaEdit className="text-sm" />
                             </button>
                             <button
                               onClick={() => handleDeleteSubject(subject.id)}
                               className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
                               title="Delete Subject"
                             >
-                              <FaTrash />
+                              <FaTrash className="text-sm" />
                             </button>
                           </div>
                         </td>
@@ -210,11 +210,11 @@ export const SubjectManagement = () => {
             )}
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
+          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FaBook className="text-2xl text-gray-400" />
             </div>
-            <p className="text-gray-500">Please select a class to view and manage subjects</p>
+            <p className="text-sm text-gray-500">Please select a class to view and manage subjects</p>
           </div>
         )}
       </div>

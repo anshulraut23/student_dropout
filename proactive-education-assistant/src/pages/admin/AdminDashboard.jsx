@@ -11,8 +11,8 @@ export const AdminDashboard = () => {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-gray-600">
+          <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+          <p className="mt-3 text-sm text-gray-600">
             Loading dashboard...
           </p>
         </div>
@@ -21,15 +21,15 @@ export const AdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900">
-            Admin Dashboard
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
+            Dashboard Overview
           </h1>
-          <p className="text-gray-600 mt-2">
-            Welcome back! Here's your school overview.
+          <p className="text-sm text-gray-500 mt-1">
+            Monitor your school's performance and student risk levels
           </p>
         </div>
 
@@ -37,7 +37,7 @@ export const AdminDashboard = () => {
         {stats && <OverviewCards stats={stats} />}
 
         {/* Charts and Alerts */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-6">
           {/* Risk Distribution - Takes 1 column */}
           {riskDistribution.length > 0 && (
             <div className="lg:col-span-1">
@@ -45,7 +45,7 @@ export const AdminDashboard = () => {
             </div>
           )}
 
-          {/* Alerts - Takes 2 columns and spans full height */}
+          {/* Alerts - Takes 2 columns */}
           {alerts.length > 0 && (
             <div className="lg:col-span-2">
               <AlertsPanel alerts={alerts} />

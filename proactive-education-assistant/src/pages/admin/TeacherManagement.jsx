@@ -31,72 +31,74 @@ function TeacherManagement() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Teacher Management</h1>
-          <p className="text-gray-600 mt-1">Approve teachers and assign classes</p>
+    <div className="p-4 sm:p-6">
+      <div className="max-w-7xl mx-auto space-y-4">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Teacher Management</h1>
+            <p className="text-sm text-gray-500 mt-1">Approve teachers and assign classes</p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Refresh
+          </button>
         </div>
-        <button
-          onClick={handleRefresh}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Refresh
-        </button>
-      </div>
 
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-blue-500">
-          <p className="text-sm text-gray-600">Total Teachers</p>
-          <p className="text-2xl font-bold text-gray-900">{teachers.length}</p>
+        {/* Stats Summary */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white p-4 rounded-lg border border-gray-200 border-l-4 border-l-blue-500">
+            <p className="text-xs text-gray-500 font-medium mb-1">Total Teachers</p>
+            <p className="text-2xl font-semibold text-gray-900">{teachers.length}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-gray-200 border-l-4 border-l-amber-500">
+            <p className="text-xs text-gray-500 font-medium mb-1">Pending Approvals</p>
+            <p className="text-2xl font-semibold text-amber-600">
+              {teachers.filter(t => t.status === 'pending').length}
+            </p>
+          </div>
+          <div className="bg-white p-4 rounded-lg border border-gray-200 border-l-4 border-l-emerald-500">
+            <p className="text-xs text-gray-500 font-medium mb-1">Approved Teachers</p>
+            <p className="text-2xl font-semibold text-emerald-600">
+              {teachers.filter(t => t.status === 'approved').length}
+            </p>
+          </div>
         </div>
-        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-yellow-500">
-          <p className="text-sm text-gray-600">Pending Approvals</p>
-          <p className="text-2xl font-bold text-yellow-600">
-            {teachers.filter(t => t.status === 'pending').length}
-          </p>
-        </div>
-        <div className="bg-white p-4 rounded-lg shadow border-l-4 border-green-500">
-          <p className="text-sm text-gray-600">Approved Teachers</p>
-          <p className="text-2xl font-bold text-green-600">
-            {teachers.filter(t => t.status === 'approved').length}
-          </p>
-        </div>
-      </div>
 
-      {/* Teacher Table */}
-      <TeacherTable
-        teachers={teachers}
-        onApprove={handleApproval}
-        onAssignClasses={handleAssignClasses}
-      />
-
-      {/* Modals */}
-      {modalType === 'approval' && selectedTeacher && (
-        <TeacherApprovalModal
-          teacher={selectedTeacher}
-          classes={classes}
-          onClose={handleCloseModal}
-          onSuccess={handleRefresh}
+        {/* Teacher Table */}
+        <TeacherTable
+          teachers={teachers}
+          onApprove={handleApproval}
+          onAssignClasses={handleAssignClasses}
         />
-      )}
 
-      {modalType === 'assign' && selectedTeacher && (
-        <AssignClassModal
-          teacher={selectedTeacher}
-          classes={classes}
-          onClose={handleCloseModal}
-          onSuccess={handleRefresh}
-        />
-      )}
+        {/* Modals */}
+        {modalType === 'approval' && selectedTeacher && (
+          <TeacherApprovalModal
+            teacher={selectedTeacher}
+            classes={classes}
+            onClose={handleCloseModal}
+            onSuccess={handleRefresh}
+          />
+        )}
+
+        {modalType === 'assign' && selectedTeacher && (
+          <AssignClassModal
+            teacher={selectedTeacher}
+            classes={classes}
+            onClose={handleCloseModal}
+            onSuccess={handleRefresh}
+          />
+        )}
+      </div>
     </div>
   );
 }

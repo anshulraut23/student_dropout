@@ -7,59 +7,64 @@ export const OverviewCards = ({ stats }) => {
       value: stats.totalTeachers,
       icon: UserCheck,
       color: 'bg-blue-50',
-      textColor: 'text-blue-600',
+      iconColor: 'text-blue-600',
+      borderColor: 'border-blue-100',
     },
     {
       title: 'Total Classes',
       value: stats.totalClasses,
       icon: BookOpen,
-      color: 'bg-green-50',
-      textColor: 'text-green-600',
+      color: 'bg-emerald-50',
+      iconColor: 'text-emerald-600',
+      borderColor: 'border-emerald-100',
     },
     {
       title: 'Total Students',
       value: stats.totalStudents,
       icon: Users,
-      color: 'bg-purple-50',
-      textColor: 'text-purple-600',
+      color: 'bg-violet-50',
+      iconColor: 'text-violet-600',
+      borderColor: 'border-violet-100',
     },
     {
-      title: 'High Risk Students',
+      title: 'High Risk',
       value: stats.highRiskStudents,
       icon: AlertCircle,
-      color: 'bg-red-50',
-      textColor: 'text-red-600',
+      color: 'bg-rose-50',
+      iconColor: 'text-rose-600',
+      borderColor: 'border-rose-100',
     },
     {
-      title: 'Active Interventions',
+      title: 'Interventions',
       value: stats.activeInterventions,
       icon: Activity,
-      color: 'bg-yellow-50',
-      textColor: 'text-yellow-600',
+      color: 'bg-amber-50',
+      iconColor: 'text-amber-600',
+      borderColor: 'border-amber-100',
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6">
       {cards.map((card, index) => {
         const IconComponent = card.icon;
         return (
           <div
             key={index}
-            className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-shadow"
+            className={`bg-white border ${card.borderColor} rounded-lg p-4 hover:shadow-md transition-all`}
           >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-sm text-gray-600 font-medium mb-2">
-                  {card.title}
-                </p>
-                <p className="text-3xl font-semibold text-gray-900">
-                  {card.value}
-                </p>
+            <div className="flex items-start justify-between mb-3">
+              <div className={`w-10 h-10 ${card.color} rounded-lg flex items-center justify-center`}>
+                <IconComponent className={`${card.iconColor} w-5 h-5`} />
               </div>
-              <div className={`w-12 h-12 ${card.color} rounded-lg flex items-center justify-center`}>
-                <IconComponent className={`${card.textColor} w-6 h-6`} />
-              </div>
+            </div>
+            <div>
+              <p className="text-2xl font-semibold text-gray-900 mb-1">
+                {card.value}
+              </p>
+              <p className="text-xs text-gray-500 font-medium">
+                {card.title}
+              </p>
             </div>
           </div>
         );

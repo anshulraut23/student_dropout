@@ -11,7 +11,11 @@ const initialFormState = {
   email: "",
   password: "",
   confirmPassword: "",
-  schoolName: ""
+  schoolName: "",
+  schoolAddress: "",
+  schoolCity: "",
+  schoolState: "",
+  schoolPhone: ""
 };
 
 function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
@@ -78,6 +82,21 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
     if (!formData.schoolName.trim()) {
       nextErrors.schoolName = "School name is required.";
+    }
+
+    if (role === ROLE_ADMIN) {
+      if (!formData.schoolAddress.trim()) {
+        nextErrors.schoolAddress = "School address is required.";
+      }
+      if (!formData.schoolCity.trim()) {
+        nextErrors.schoolCity = "City is required.";
+      }
+      if (!formData.schoolState.trim()) {
+        nextErrors.schoolState = "State is required.";
+      }
+      if (!formData.schoolPhone.trim()) {
+        nextErrors.schoolPhone = "Phone number is required.";
+      }
     }
 
     return nextErrors;
@@ -283,9 +302,75 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
             </div>
 
             {role === ROLE_ADMIN && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    School Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="schoolAddress"
+                    value={formData.schoolAddress}
+                    onChange={handleChange}
+                    type="text"
+                    placeholder="123 Main Street"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                  {errors.schoolAddress && <p className="text-sm text-red-600 mt-1">{errors.schoolAddress}</p>}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      City <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      name="schoolCity"
+                      value={formData.schoolCity}
+                      onChange={handleChange}
+                      type="text"
+                      placeholder="Mumbai"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                    {errors.schoolCity && <p className="text-sm text-red-600 mt-1">{errors.schoolCity}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      State <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      name="schoolState"
+                      value={formData.schoolState}
+                      onChange={handleChange}
+                      type="text"
+                      placeholder="Maharashtra"
+                      className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                    />
+                    {errors.schoolState && <p className="text-sm text-red-600 mt-1">{errors.schoolState}</p>}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    School Phone <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    name="schoolPhone"
+                    value={formData.schoolPhone}
+                    onChange={handleChange}
+                    type="tel"
+                    placeholder="+91 9876543210"
+                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  />
+                  {errors.schoolPhone && <p className="text-sm text-red-600 mt-1">{errors.schoolPhone}</p>}
+                </div>
+              </>
+            )}
+
+            {role === ROLE_ADMIN && (
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  You can add more school details from your profile after registration.
+                  You can update school details from your profile after registration.
                 </p>
               </div>
             )}

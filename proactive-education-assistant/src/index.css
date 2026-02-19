@@ -168,10 +168,21 @@ table tbody td {
 }
 
 /* ========== NAVIGATION ========== */
-nav,
 header {
   background-color: var(--color-background);
   border-bottom: 1px solid var(--color-border);
+}
+
+/* Only apply background to nav elements NOT inside aside (sidebar) */
+nav:not(aside nav) {
+  background-color: var(--color-background);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* Ensure sidebar nav elements have no background */
+aside nav {
+  background-color: transparent;
+  border: none;
 }
 
 /* ========== UTILITIES ========== */
@@ -208,4 +219,25 @@ header {
 
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+
+/* ========== SIDEBAR OVERRIDE ========== */
+aside[style*="backgroundColor"] {
+  background-color: #1d2530 !important;
+  background: #1d2530 !important;
+}
+
+/* Ensure sidebar nav elements don't have white backgrounds */
+aside nav {
+  background-color: transparent !important;
+  border: none !important;
+}
+
+/* Sidebar links should not have white backgrounds */
+aside a {
+  background-color: transparent;
+}
+
+aside a:hover:not(.bg-blue-600) {
+  background-color: rgba(55, 65, 81, 0.5) !important;
 }

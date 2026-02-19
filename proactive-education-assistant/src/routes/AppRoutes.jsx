@@ -23,7 +23,6 @@ import MainLayout from "../layouts/MainLayout";
 import { AdminProvider } from "../context/AdminContext";
 import AdminLayout from "../layouts/AdminLayout";
 import AdminDashboard from "../pages/admin/AdminDashboard";
-import SchoolManagement from "../pages/admin/SchoolManagement";
 import TeacherManagement from "../pages/admin/TeacherManagement";
 import ClassManagement from "../pages/admin/ClassManagement";
 import SubjectManagement from "../pages/admin/SubjectManagement";
@@ -108,7 +107,6 @@ export default function AppRoutes() {
         >
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<AdminDashboard />} />
-          <Route path="schools" element={<SchoolManagement />} />
           <Route path="teachers" element={<TeacherManagement />} />
           <Route path="classes" element={<ClassManagement />} />
           <Route path="subjects" element={<SubjectManagement />} />

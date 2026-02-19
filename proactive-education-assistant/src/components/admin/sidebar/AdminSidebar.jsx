@@ -6,7 +6,7 @@ import {
   FaBook,
   FaChartBar,
   FaGraduationCap,
-  FaSchool
+  FaTimes
 } from 'react-icons/fa';
 
 function AdminSidebar({ onClose }) {
@@ -14,7 +14,6 @@ function AdminSidebar({ onClose }) {
 
   const menuItems = [
     { path: '/admin/dashboard', label: 'Dashboard', icon: FaChartLine },
-    { path: '/admin/schools', label: 'Schools', icon: FaSchool },
     { path: '/admin/teachers', label: 'Teachers', icon: FaUserTie },
     { path: '/admin/classes', label: 'Classes', icon: FaChalkboard },
     { path: '/admin/subjects', label: 'Subjects', icon: FaBook },
@@ -28,22 +27,30 @@ function AdminSidebar({ onClose }) {
   };
 
   return (
-    <aside className="w-64 bg-white border-r border-gray-200 h-screen flex flex-col">
+    <aside className="w-64 min-h-screen flex flex-col" style={{ backgroundColor: '#1d2530' }}>
       {/* Logo Section */}
-      <div className="h-16 flex items-center px-6 border-b border-gray-200">
+      <div className="h-16 flex items-center justify-between px-6 border-b flex-shrink-0" style={{ borderColor: '#2a3744' }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+          <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center shadow-lg">
             <FaGraduationCap className="text-xl text-white" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-gray-900">Admin Panel</h1>
-            <p className="text-xs text-gray-500">Management</p>
+            <h1 className="text-lg font-semibold text-white">Admin Panel</h1>
+            <p className="text-xs text-gray-400">Management</p>
           </div>
         </div>
+        
+        {/* Mobile Close Button */}
+        <button
+          onClick={onClose}
+          className="lg:hidden p-2 text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+        >
+          <FaTimes className="text-lg" />
+        </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
@@ -54,14 +61,14 @@ function AdminSidebar({ onClose }) {
               to={item.path}
               onClick={handleNavClick}
               className={`
-                flex items-center gap-3 px-4 py-3 rounded-lg transition-all
+                flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-sm font-medium
                 ${active 
-                  ? 'bg-blue-50 text-blue-700 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-50'
+                  ? 'bg-blue-600 text-white shadow-lg' 
+                  : 'text-gray-300 hover:bg-gray-700/50 hover:text-white'
                 }
               `}
             >
-              <Icon className={`w-5 h-5 ${active ? 'text-blue-600' : 'text-gray-500'}`} />
+              <Icon className="text-lg flex-shrink-0" />
               <span>{item.label}</span>
             </Link>
           );
@@ -69,9 +76,9 @@ function AdminSidebar({ onClose }) {
       </nav>
 
       {/* Footer Section */}
-      <div className="border-t border-gray-200 p-4">
-        <div className="bg-gray-50 rounded-lg p-3 text-center">
-          <p className="text-xs text-gray-600 font-medium">School Management</p>
+      <div className="border-t p-4 flex-shrink-0" style={{ borderColor: '#2a3744' }}>
+        <div className="rounded-lg p-3 text-center" style={{ backgroundColor: '#2a3744' }}>
+          <p className="text-xs text-gray-300 font-medium">School Management</p>
           <p className="text-xs text-gray-500 mt-1">Version 1.0.0</p>
         </div>
       </div>
