@@ -3,11 +3,13 @@ import { useAdmin } from '../../context/AdminContext';
 import TeacherTable from '../../components/admin/teachers/TeacherTable';
 import TeacherApprovalModal from '../../components/admin/teachers/TeacherApprovalModal';
 import AssignClassModal from '../../components/admin/teachers/AssignClassModal';
+import DebugPanel from '../../components/admin/DebugPanel';
 
 function TeacherManagement() {
   const { teachers, classes, loading, refreshTeachers } = useAdmin();
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [modalType, setModalType] = useState(null); // 'approval' or 'assign'
+  const [showDebug, setShowDebug] = useState(false);
 
   const handleApproval = (teacher) => {
     setSelectedTeacher(teacher);
@@ -45,13 +47,24 @@ function TeacherManagement() {
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Teacher Management</h1>
             <p className="text-sm text-gray-500 mt-1">Approve teachers and assign classes</p>
           </div>
-          <button
-            onClick={handleRefresh}
-            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            Refresh
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowDebug(!showDebug)}
+              className="px-4 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors font-medium"
+            >
+              {showDebug ? 'Hide' : 'Show'} Debug
+            </button>
+            <button
+              onClick={handleRefresh}
+              className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
+
+        {/* Debug Panel */}
+        {showDebug && <DebugPanel />}
 
         {/* Stats Summary */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

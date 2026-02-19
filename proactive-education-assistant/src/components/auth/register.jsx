@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "../LanguageSelector";
+import apiService from "../../services/apiService";
 
 const ROLE_ADMIN = "admin";
 const ROLE_TEACHER = "teacher";
@@ -12,6 +13,7 @@ const initialFormState = {
   password: "",
   confirmPassword: "",
   schoolName: "",
+  schoolId: "",
   schoolAddress: "",
   schoolCity: "",
   schoolState: "",
@@ -28,15 +30,30 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
   const [formData, setFormData] = useState(initialFormState);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [schools, setSchools] = useState([]);
+  const [loadingSchools, setLoadingSchools] = useState(false);
 
-  // Mock schools list for teacher registration
-  const schools = [
-    "Sunrise Public School",
-    "Green Valley High School",
-    "St. Mary's Academy",
-    "Delhi Public School",
-    "Modern International School"
-  ];
+  // Fetch schools for teacher registration
+  useEffect(() => {
+    if (role === ROLE_TEACHER) {
+      fetchSchools();
+    }
+  }, [role]);
+
+  const fetchSchools = async () => {
+    setLoadingSchools(true);
+    try {
+      const response = await apiService.getSchools();
+      if (response.success) {
+        setSchools(response.schools || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch schools:', error);
+      setErrors({ form: 'Failed to load schools. Please try again.' });
+    } finally {
+      setLoadingSchools(false);
+    }
+  };
 
   const handleRoleSelect = (nextRole) => {
     setRole(nextRole);
@@ -80,11 +97,11 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
       nextErrors.confirmPassword = "Passwords do not match.";
     }
 
-    if (!formData.schoolName.trim()) {
-      nextErrors.schoolName = "School name is required.";
-    }
-
+    // School validation - different for admin vs teacher
     if (role === ROLE_ADMIN) {
+      if (!formData.schoolName.trim()) {
+        nextErrors.schoolName = "School name is required.";
+      }
       if (!formData.schoolAddress.trim()) {
         nextErrors.schoolAddress = "School address is required.";
       }
@@ -96,6 +113,10 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
       }
       if (!formData.schoolPhone.trim()) {
         nextErrors.schoolPhone = "Phone number is required.";
+      }
+    } else if (role === ROLE_TEACHER) {
+      if (!formData.schoolId) {
+        nextErrors.schoolId = "Please select a school.";
       }
     }
 
@@ -113,19 +134,62 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
 
     setIsSubmitting(true);
     try {
-      // Store registration data
-      localStorage.setItem("token", "mock-token");
-      localStorage.setItem("role", role);
+      let response;
       
-      const targetRoute = role === ROLE_ADMIN ? "/admin/dashboard" : "/teacher/dashboard";
-      onClose();
-      navigate(targetRoute);
+      if (role === ROLE_ADMIN) {
+        // Admin registration
+        response = await apiService.registerAdmin({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          schoolName: formData.schoolName,
+          schoolAddress: formData.schoolAddress,
+          schoolCity: formData.schoolCity,
+          schoolState: formData.schoolState,
+          schoolPhone: formData.schoolPhone
+        });
+      } else {
+        // Teacher registration
+        response = await apiService.registerTeacher({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          schoolId: formData.schoolId
+        });
+      }
+
+      if (!response.success) {
+        setErrors({ form: response.error || "Unable to create account. Please try again." });
+        return;
+      }
+
+      // For admin, store token and redirect
+      if (role === ROLE_ADMIN && response.token) {
+        localStorage.setItem("token", response.token);
+        localStorage.setItem("role", role);
+        localStorage.setItem("school_id", response.school?.id || "");
+        localStorage.setItem("school_name", response.school?.name || "");
+        
+        window.dispatchEvent(new Event("localStorageUpdate"));
+        
+        const targetRoute = getDashboardRoute(role);
+        onClose();
+        navigate(targetRoute);
+      } else {
+        // For teacher, show success message and redirect to login
+        alert(response.message || "Registration successful! Please wait for admin approval.");
+        onClose();
+        onSwitchToLogin();
+      }
     } catch (error) {
-      setErrors({ form: "Unable to create account. Please try again." });
+      setErrors({ form: error.message || "Unable to create account. Please try again." });
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const getDashboardRoute = (userRole) =>
+    userRole === ROLE_ADMIN ? "/admin/dashboard" : "/teacher/dashboard";
 
   return (
     <div
@@ -287,18 +351,24 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
                 />
               ) : (
                 <select
-                  name="schoolName"
-                  value={formData.schoolName}
+                  name="schoolId"
+                  value={formData.schoolId}
                   onChange={handleChange}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  disabled={loadingSchools}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all disabled:opacity-50"
                 >
-                  <option value="">Select a school</option>
-                  {schools.map((school, index) => (
-                    <option key={index} value={school}>{school}</option>
+                  <option value="">
+                    {loadingSchools ? 'Loading schools...' : 'Select a school'}
+                  </option>
+                  {schools.map((school) => (
+                    <option key={school.id} value={school.id}>
+                      {school.name} - {school.city}, {school.state}
+                    </option>
                   ))}
                 </select>
               )}
               {errors.schoolName && <p className="text-sm text-red-600 mt-1">{errors.schoolName}</p>}
+              {errors.schoolId && <p className="text-sm text-red-600 mt-1">{errors.schoolId}</p>}
             </div>
 
             {role === ROLE_ADMIN && (

@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import {
-  getTeachers,
   getClasses,
   getSubjects,
   getAdminStats,
@@ -8,6 +7,7 @@ import {
   getRiskTrendData,
   getHighRiskAlerts,
 } from '../services/adminService';
+import apiService from '../services/apiService';
 
 const AdminContext = createContext();
 
@@ -34,15 +34,37 @@ export const AdminProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
+      // Fetch teachers from backend API
+      let teachersData = [];
+      try {
+        const response = await apiService.getAllTeachers();
+        console.log('Teachers API response:', response);
+        if (response.success) {
+          // Transform backend data to match frontend format
+          teachersData = response.teachers.map(teacher => ({
+            id: teacher.id,
+            name: teacher.name,
+            email: teacher.email,
+            subject: 'N/A', // Backend doesn't have subject yet
+            status: teacher.status,
+            joinedDate: new Date(teacher.createdAt).toLocaleDateString(),
+            assignedClasses: teacher.assignedClasses || [],
+            createdAt: teacher.createdAt
+          }));
+          console.log('Transformed teachers:', teachersData);
+        }
+      } catch (err) {
+        console.error('Error fetching teachers:', err);
+        // Continue with empty array if API fails
+      }
+
       const [
-        teachersData,
         classesData,
         statsData,
         riskDistData,
         riskTrendData,
         alertsData,
       ] = await Promise.all([
-        Promise.resolve(getTeachers()),
         Promise.resolve(getClasses()),
         Promise.resolve(getAdminStats()),
         Promise.resolve(getRiskDistribution()),
@@ -72,9 +94,25 @@ export const AdminProvider = ({ children }) => {
   }, []);
 
   // Refresh specific data
-  const refreshTeachers = useCallback(() => {
-    const teachersData = getTeachers();
-    setTeachers(teachersData);
+  const refreshTeachers = useCallback(async () => {
+    try {
+      const response = await apiService.getAllTeachers();
+      if (response.success) {
+        const teachersData = response.teachers.map(teacher => ({
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email,
+          subject: 'N/A', // Backend doesn't have subject yet
+          status: teacher.status,
+          joinedDate: new Date(teacher.createdAt).toLocaleDateString(),
+          assignedClasses: teacher.assignedClasses || [],
+          createdAt: teacher.createdAt
+        }));
+        setTeachers(teachersData);
+      }
+    } catch (err) {
+      console.error('Error refreshing teachers:', err);
+    }
   }, []);
 
   const refreshClasses = useCallback(() => {

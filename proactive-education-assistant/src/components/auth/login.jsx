@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "../LanguageSelector";
+import apiService from "../../services/apiService";
 
 const ROLE_ADMIN = "admin";
 const ROLE_TEACHER = "teacher";
@@ -19,37 +20,6 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
 
   const getDashboardRoute = (userRole) =>
     userRole === ROLE_ADMIN ? "/admin/dashboard" : "/teacher/dashboard";
-
-  const simulateLoginRequest = async ({ email: inputEmail, password: inputPassword }) => {
-    await new Promise((resolve) => setTimeout(resolve, 600));
-
-    if (inputEmail.includes("network")) {
-      return { ok: false, code: "NETWORK_ERROR", error: "Network error. Please try again." };
-    }
-
-    if (!inputEmail || !inputPassword) {
-      return { ok: false, code: "INVALID_CREDENTIALS", error: "Invalid credentials." };
-    }
-
-    if (inputEmail.includes("pending")) {
-      return { ok: false, code: "ACCOUNT_PENDING", error: "Account not approved yet." };
-    }
-
-    if (inputEmail.includes("inactive")) {
-      return { ok: false, code: "SCHOOL_INACTIVE", error: "School is inactive." };
-    }
-
-    const isAdmin = inputEmail.includes("admin");
-    return {
-      ok: true,
-      data: {
-        role: isAdmin ? ROLE_ADMIN : ROLE_TEACHER,
-        token: "demo-jwt-token",
-        school_id: "SCH-0000",
-        school_name: "Demo School"
-      }
-    };
-  };
 
   const storeAuthSession = ({ token, role, school_id, school_name }) => {
     const storage = rememberMe ? localStorage : sessionStorage;
@@ -70,31 +40,36 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
 
     setIsSubmitting(true);
     try {
-      const response = await simulateLoginRequest({ email, password });
+      const response = await apiService.login(email, password);
 
-      if (!response.ok) {
+      if (!response.success) {
         setErrorMessage(response.error || "Invalid credentials.");
         return;
       }
 
-      const { role, token, school_id, school_name } = response.data || {};
-      const resolvedRole = role;
+      const { token, user, school } = response;
+      const role = user.role;
 
-      if (resolvedRole !== ROLE_ADMIN && resolvedRole !== ROLE_TEACHER) {
+      if (role !== ROLE_ADMIN && role !== ROLE_TEACHER) {
         throw new Error("Invalid role from server.");
       }
 
-      storeAuthSession({ token, role: resolvedRole, school_id, school_name });
+      storeAuthSession({ 
+        token, 
+        role, 
+        school_id: school?.id || "", 
+        school_name: school?.name || "" 
+      });
       
       // Trigger custom event for route update
       window.dispatchEvent(new Event("localStorageUpdate"));
       
-      const targetRoute = getDashboardRoute(resolvedRole);
+      const targetRoute = getDashboardRoute(role);
       onClose();
       navigate(targetRoute);
 
     } catch (error) {
-      setErrorMessage("Unable to sign in. Please check your credentials.");
+      setErrorMessage(error.message || "Unable to sign in. Please check your credentials.");
     } finally {
       setIsSubmitting(false);
     }

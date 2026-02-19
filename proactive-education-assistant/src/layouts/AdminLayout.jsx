@@ -1,10 +1,29 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import AdminSidebar from '../components/admin/sidebar/AdminSidebar';
 import { useState } from 'react';
-import { FaBars, FaTimes, FaGraduationCap } from 'react-icons/fa';
+import { FaBars, FaTimes, FaGraduationCap, FaSignOutAlt } from 'react-icons/fa';
 
 function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Clear all session data
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('school_id');
+    localStorage.removeItem('school_name');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('role');
+    sessionStorage.removeItem('school_id');
+    sessionStorage.removeItem('school_name');
+    
+    // Dispatch event for route updates
+    window.dispatchEvent(new Event('localStorageUpdate'));
+    
+    // Redirect to home
+    navigate('/');
+  };
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -46,12 +65,23 @@ function AdminLayout() {
             </div>
           </div>
 
-          {/* User Info */}
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white text-xs font-semibold">AD</span>
+          {/* User Info & Logout */}
+          <div className="flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                <span className="text-white text-xs font-semibold">AD</span>
+              </div>
+              <span className="text-sm font-medium text-gray-700 hidden md:inline">Admin</span>
             </div>
-            <span className="text-sm font-medium text-gray-700 hidden md:inline">Admin</span>
+            
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+              title="Logout"
+            >
+              <FaSignOutAlt className="w-4 h-4" />
+              <span className="text-sm font-medium hidden sm:inline">Logout</span>
+            </button>
           </div>
         </header>
         

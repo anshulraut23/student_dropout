@@ -32,10 +32,19 @@ function Header() {
   }, []);
 
   const handleLogout = () => {
+    // Clear all session data
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('school_id');
+    localStorage.removeItem('school_name');
     sessionStorage.removeItem('token');
     sessionStorage.removeItem('role');
+    sessionStorage.removeItem('school_id');
+    sessionStorage.removeItem('school_name');
+    
+    // Dispatch event for route updates
+    window.dispatchEvent(new Event('localStorageUpdate'));
+    
     navigate('/');
   };
 
