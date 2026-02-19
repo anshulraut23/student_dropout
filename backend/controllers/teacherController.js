@@ -23,11 +23,19 @@ export const getAllTeachers = (req, res) => {
 
     // Get all classes for this school to find incharge assignments
     const allClasses = dataStore.getClassesBySchool(schoolId);
+    
+    // Get all subjects for this school to find teaching assignments
+    const allSubjects = dataStore.getSubjectsBySchool(schoolId);
 
     // Format response
     const formattedTeachers = teachers.map(teacher => {
       // Find the class where this teacher is the incharge
       const inchargeClass = allClasses.find(cls => cls.teacherId === teacher.id);
+      
+      // Find all subjects this teacher is teaching
+      const teachingSubjects = allSubjects
+        .filter(subject => subject.teacherId === teacher.id)
+        .map(subject => subject.name);
       
       return {
         id: teacher.id,
@@ -36,6 +44,7 @@ export const getAllTeachers = (req, res) => {
         status: teacher.status,
         assignedClasses: teacher.assignedClasses || [],
         inchargeClass: inchargeClass ? inchargeClass.name : null,
+        subjects: teachingSubjects,
         createdAt: teacher.createdAt
       };
     });

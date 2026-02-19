@@ -158,6 +158,44 @@ class ApiService {
       auth: true,
     });
   }
+
+  // Subject endpoints (admin only)
+  async getSubjects() {
+    return this.request('/subjects', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getSubjectsByClass(classId) {
+    return this.request(`/subjects/class/${classId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async createSubject(subjectData) {
+    return this.request('/subjects', {
+      method: 'POST',
+      body: JSON.stringify(subjectData),
+      auth: true,
+    });
+  }
+
+  async updateSubject(subjectId, subjectData) {
+    return this.request(`/subjects/${subjectId}`, {
+      method: 'PUT',
+      body: JSON.stringify(subjectData),
+      auth: true,
+    });
+  }
+
+  async deleteSubject(subjectId) {
+    return this.request(`/subjects/${subjectId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
 }
 
 export default new ApiService();

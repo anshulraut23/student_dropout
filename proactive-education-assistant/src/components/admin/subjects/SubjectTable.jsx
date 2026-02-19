@@ -1,86 +1,75 @@
-import { Edit2, Trash2, Plus } from 'lucide-react';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
-export const SubjectTable = ({ subjects, onEdit, onDelete, onAdd }) => {
-  if (subjects.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6">
-        <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">
-            No subjects found for this class
-          </p>
-          <button
-            onClick={onAdd}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            Add Subject
-          </button>
-        </div>
-      </div>
+function SubjectTable({ subjects, onEdit, onDelete }) {
+  const subjectList = Array.isArray(subjects) ? subjects : [];
+
+  const getStatusBadge = (status) => {
+    return status === 'active' ? (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+        Active
+      </span>
+    ) : (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
+        Inactive
+      </span>
     );
-  }
+  };
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-      <div className="flex items-center justify-between p-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Subjects ({subjects.length})
-        </h3>
-        <button
-          onClick={onAdd}
-          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Subject
-        </button>
-      </div>
-
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Subject Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Class
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Assigned Teacher
               </th>
-              <th className="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase">
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-200">
-            {subjects.map((subject) => (
-              <tr
-                key={subject.id}
-                className="hover:bg-gray-50 transition-colors"
-              >
+          <tbody className="bg-white divide-y divide-gray-200">
+            {subjectList.map((subject) => (
+              <tr key={subject.id} className="hover:bg-gray-50 transition-colors">
                 <td className="px-6 py-4">
-                  <p className="font-medium text-gray-900">
-                    {subject.name}
-                  </p>
+                  <div className="text-sm font-medium text-gray-900">{subject.name}</div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm font-medium border border-blue-200">
-                    {subject.teacher}
-                  </span>
+                  <div className="text-sm text-gray-600">{subject.className}</div>
                 </td>
-                <td className="px-6 py-4 text-right">
-                  <div className="flex items-center justify-end gap-2">
+                <td className="px-6 py-4">
+                  {subject.teacherName ? (
+                    <div className="text-sm text-gray-900">{subject.teacherName}</div>
+                  ) : (
+                    <span className="text-sm text-gray-400 italic">Not assigned</span>
+                  )}
+                </td>
+                <td className="px-6 py-4">
+                  {getStatusBadge(subject.status)}
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex gap-3">
                     <button
                       onClick={() => onEdit(subject)}
-                      className="p-2 hover:bg-blue-50 text-blue-600 rounded-lg transition-colors"
-                      title="Edit Subject"
+                      className="text-blue-600 hover:text-blue-700 flex items-center gap-1 font-medium text-sm"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <FaEdit /> Edit
                     </button>
                     <button
                       onClick={() => onDelete(subject.id)}
-                      className="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors"
-                      title="Delete Subject"
+                      className="text-red-600 hover:text-red-700 flex items-center gap-1 font-medium text-sm"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <FaTrash /> Delete
                     </button>
                   </div>
                 </td>
@@ -89,6 +78,14 @@ export const SubjectTable = ({ subjects, onEdit, onDelete, onAdd }) => {
           </tbody>
         </table>
       </div>
+
+      {subjectList.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-gray-500">No subjects found</p>
+        </div>
+      )}
     </div>
   );
-};
+}
+
+export default SubjectTable;

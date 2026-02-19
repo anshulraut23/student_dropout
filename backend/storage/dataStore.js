@@ -7,6 +7,7 @@ class DataStore {
     this.users = [];
     this.teacherRequests = [];
     this.classes = [];
+    this.subjects = [];
   }
 
   // School operations
@@ -104,6 +105,46 @@ class DataStore {
     const index = this.classes.findIndex(c => c.id === classId);
     if (index !== -1) {
       this.classes.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
+  // Subject operations
+  getSubjects() {
+    return this.subjects;
+  }
+
+  addSubject(subjectData) {
+    this.subjects.push(subjectData);
+    return subjectData;
+  }
+
+  getSubjectById(subjectId) {
+    return this.subjects.find(s => s.id === subjectId);
+  }
+
+  getSubjectsByClass(classId) {
+    return this.subjects.filter(s => s.classId === classId);
+  }
+
+  getSubjectsBySchool(schoolId) {
+    return this.subjects.filter(s => s.schoolId === schoolId);
+  }
+
+  updateSubject(subjectId, updates) {
+    const index = this.subjects.findIndex(s => s.id === subjectId);
+    if (index !== -1) {
+      this.subjects[index] = { ...this.subjects[index], ...updates };
+      return this.subjects[index];
+    }
+    return null;
+  }
+
+  deleteSubject(subjectId) {
+    const index = this.subjects.findIndex(s => s.id === subjectId);
+    if (index !== -1) {
+      this.subjects.splice(index, 1);
       return true;
     }
     return false;

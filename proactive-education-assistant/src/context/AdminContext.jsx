@@ -45,7 +45,10 @@ export const AdminProvider = ({ children }) => {
             id: teacher.id,
             name: teacher.name,
             email: teacher.email,
-            subject: 'N/A', // Backend doesn't have subject yet
+            subject: teacher.subjects && teacher.subjects.length > 0 
+              ? teacher.subjects.join(', ') 
+              : 'N/A',
+            subjects: teacher.subjects || [],
             status: teacher.status,
             joinedDate: new Date(teacher.createdAt).toLocaleDateString(),
             assignedClasses: teacher.assignedClasses || [],
@@ -115,7 +118,10 @@ export const AdminProvider = ({ children }) => {
           id: teacher.id,
           name: teacher.name,
           email: teacher.email,
-          subject: 'N/A', // Backend doesn't have subject yet
+          subject: teacher.subjects && teacher.subjects.length > 0 
+            ? teacher.subjects.join(', ') 
+            : 'N/A',
+          subjects: teacher.subjects || [],
           status: teacher.status,
           joinedDate: new Date(teacher.createdAt).toLocaleDateString(),
           assignedClasses: teacher.assignedClasses || [],
