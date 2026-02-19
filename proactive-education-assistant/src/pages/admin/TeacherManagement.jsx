@@ -97,7 +97,6 @@ function TeacherManagement() {
         {modalType === 'approval' && selectedTeacher && (
           <TeacherApprovalModal
             teacher={selectedTeacher}
-            classes={classes}
             onClose={handleCloseModal}
             onSuccess={handleRefresh}
           />
@@ -106,7 +105,6 @@ function TeacherManagement() {
         {modalType === 'assign' && selectedTeacher && (
           <AssignClassModal
             teacher={selectedTeacher}
-            classes={classes}
             onClose={handleCloseModal}
             onSuccess={handleRefresh}
           />

@@ -65,6 +65,20 @@ export const approveTeacher = (req, res) => {
       });
     }
 
+    // If classIds provided, update those classes to have this teacher as incharge
+    if (classIds.length > 0) {
+      classIds.forEach(classId => {
+        const classData = dataStore.getClassById(classId);
+        if (classData && classData.schoolId === req.user.schoolId) {
+          // Update class to have this teacher as incharge
+          dataStore.updateClass(classId, {
+            teacherId: teacherId,
+            updatedAt: new Date().toISOString()
+          });
+        }
+      });
+    }
+
     // Update request
     dataStore.updateRequest(teacherId, {
       status: 'approved',

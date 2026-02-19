@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { adminService } from '../../../services/adminService';
+import { useState, useEffect } from 'react';
+import apiService from '../../../services/apiService';
 import { FaTimes } from 'react-icons/fa';
 
 function AddEditClassModal({ classData, onClose, onSuccess }) {
@@ -7,22 +7,63 @@ function AddEditClassModal({ classData, onClose, onSuccess }) {
   
   const [formData, setFormData] = useState({
     name: classData?.name || '',
-    description: classData?.description || '',
     grade: classData?.grade || '',
-    attendanceType: classData?.attendanceType || 'common',
+    section: classData?.section || '',
     academicYear: classData?.academicYear || new Date().getFullYear() + '-' + (new Date().getFullYear() + 1),
-    classIncharge: classData?.classIncharge || '',
+    teacherId: classData?.teacherId || '',
+    attendanceMode: classData?.attendanceMode || 'daily',
   });
+  const [teachers, setTeachers] = useState([]);
+  const [allClasses, setAllClasses] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
-  // Mock teachers list - in real app, fetch from API
-  const teachers = [
-    'Mr. Rajesh Kumar',
-    'Ms. Priya Sharma',
-    'Dr. Amit Patel',
-    'Mrs. Sunita Desai',
-    'Mr. Vikram Singh'
-  ];
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [teachersResult, classesResult] = await Promise.all([
+        apiService.getAllTeachers(),
+        apiService.getClasses()
+      ]);
+
+      if (teachersResult.success) {
+        // Filter only approved teachers
+        const approvedTeachers = teachersResult.teachers.filter(t => t.status === 'approved');
+        setTeachers(approvedTeachers);
+      }
+
+      if (classesResult.success) {
+        setAllClasses(classesResult.classes || []);
+      }
+    } catch (err) {
+      console.error('Load data error:', err);
+      setError('Failed to load data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get available teachers (not assigned as incharge to other classes)
+  const getAvailableTeachers = () => {
+    return teachers.filter(teacher => {
+      // Find if this teacher is already an incharge of any class
+      const isInchargeOfOtherClass = allClasses.some(cls => 
+        cls.teacherId === teacher.id && cls.id !== classData?.id
+      );
+      
+      // Include teacher if:
+      // 1. Not incharge of any class, OR
+      // 2. Is the current incharge of THIS class (when editing)
+      return !isInchargeOfOtherClass || teacher.id === classData?.teacherId;
+    });
+  };
+
+  const availableTeachers = getAvailableTeachers();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -35,26 +76,28 @@ function AddEditClassModal({ classData, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.grade || !formData.attendanceType || !formData.academicYear || !formData.classIncharge) {
-      alert('Please fill in all required fields');
+    if (!formData.name || !formData.grade || !formData.attendanceMode || !formData.academicYear) {
+      setError('Please fill in all required fields');
       return;
     }
 
     setSaving(true);
+    setError('');
     try {
       let result;
       if (isEdit) {
-        result = await adminService.updateClass(classData.id, formData);
+        result = await apiService.updateClass(classData.id, formData);
       } else {
-        result = await adminService.addClass(formData);
+        result = await apiService.createClass(formData);
       }
 
       if (result.success) {
-        alert(isEdit ? 'Class updated successfully!' : 'Class added successfully!');
         onSuccess();
+      } else {
+        setError(result.error || 'Failed to save class');
       }
-    } catch (error) {
-      alert('Failed to save class: ' + error.message);
+    } catch (err) {
+      setError(err.message || 'Failed to save class');
     } finally {
       setSaving(false);
     }
@@ -62,9 +105,9 @@ function AddEditClassModal({ classData, onClose, onSuccess }) {
 
   return (
     <div className="fixed inset-0 bg-black/40 sm:bg-black/50 flex items-center justify-center z-50 p-3 sm:p-4">
-      <div className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-md sm:max-w-lg">
+      <div className="bg-white rounded-lg sm:rounded-xl shadow-xl w-full max-w-md sm:max-w-lg max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-6 border-b">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b sticky top-0 bg-white">
           <h2 className="text-lg sm:text-xl font-bold text-gray-900">
             {isEdit ? 'Edit Class' : 'Add New Class'}
           </h2>
@@ -78,6 +121,12 @@ function AddEditClassModal({ classData, onClose, onSuccess }) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+              {error}
+            </div>
+          )}
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Class Name <span className="text-red-500">*</span>
@@ -88,42 +137,61 @@ function AddEditClassModal({ classData, onClose, onSuccess }) {
               value={formData.name}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., Grade 7A"
+              placeholder="e.g., 8A"
               required
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Grade Level <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="number"
-              name="grade"
-              value={formData.grade}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., 7"
-              min="1"
-              max="12"
-              required
-            />
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Grade <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                name="grade"
+                value={formData.grade}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="e.g., 8"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Section
+              </label>
+              <input
+                type="text"
+                name="section"
+                value={formData.section}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="e.g., A"
+              />
+            </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Attendance Type <span className="text-red-500">*</span>
+              Attendance Mode <span className="text-red-500">*</span>
             </label>
             <select
-              name="attendanceType"
-              value={formData.attendanceType}
+              name="attendanceMode"
+              value={formData.attendanceMode}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
-              <option value="common">Common for all subjects</option>
-              <option value="subjectwise">Subject-wise</option>
+              <option value="daily">Daily (Incharge marks attendance)</option>
+              <option value="subject_wise">Subject-wise (Subject teachers mark attendance)</option>
             </select>
+            <p className="text-xs text-gray-500 mt-1">
+              {formData.attendanceMode === 'daily' 
+                ? 'Only class incharge can mark attendance once per day' 
+                : 'Subject teachers mark attendance for their respective subjects'}
+            </p>
           </div>
 
           <div>
@@ -143,34 +211,38 @@ function AddEditClassModal({ classData, onClose, onSuccess }) {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Class Incharge <span className="text-red-500">*</span>
+              Class Incharge
             </label>
-            <select
-              name="classIncharge"
-              value={formData.classIncharge}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
-            >
-              <option value="">Select a teacher</option>
-              {teachers.map((teacher, index) => (
-                <option key={index} value={teacher}>{teacher}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              rows="3"
-              placeholder="e.g., Morning batch for Grade 7 students"
-            />
+            {loading ? (
+              <div className="text-sm text-gray-500">Loading teachers...</div>
+            ) : (
+              <>
+                <select
+                  name="teacherId"
+                  value={formData.teacherId}
+                  onChange={handleChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">No incharge (assign later)</option>
+                  {availableTeachers.map((teacher) => (
+                    <option key={teacher.id} value={teacher.id}>
+                      {teacher.name} ({teacher.email})
+                      {teacher.id === classData?.teacherId ? ' - Current' : ''}
+                    </option>
+                  ))}
+                </select>
+                {availableTeachers.length === 0 && (
+                  <p className="text-xs text-amber-600 mt-1">
+                    No available teachers. All approved teachers are already assigned as incharge of other classes.
+                  </p>
+                )}
+                {availableTeachers.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Only teachers not assigned as incharge to other classes are shown.
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           {/* Footer */}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { adminService } from '../../services/adminService';
+import apiService from '../../services/apiService';
 import ClassTable from '../../components/admin/classes/ClassTable';
 import AddEditClassModal from '../../components/admin/classes/AddEditClassModal';
 import { FaPlus, FaSchool, FaCheckCircle, FaUsers } from 'react-icons/fa';
@@ -9,6 +9,7 @@ function ClassManagement() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     loadClasses();
@@ -16,11 +17,20 @@ function ClassManagement() {
 
   const loadClasses = async () => {
     setLoading(true);
-    const result = await adminService.getClasses();
-    if (result.success) {
-      setClasses(result.data);
+    setError('');
+    try {
+      const result = await apiService.getClasses();
+      if (result.success) {
+        setClasses(result.classes || []);
+      } else {
+        setError(result.error || 'Failed to load classes');
+      }
+    } catch (err) {
+      console.error('Load classes error:', err);
+      setError(err.message || 'Failed to load classes');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleAddClass = () => {
@@ -34,10 +44,16 @@ function ClassManagement() {
   };
 
   const handleDeactivate = async (classId) => {
-    if (window.confirm('Are you sure you want to deactivate this class?')) {
-      const result = await adminService.deactivateClass(classId);
-      if (result.success) {
-        loadClasses();
+    if (window.confirm('Are you sure you want to delete this class?')) {
+      try {
+        const result = await apiService.deleteClass(classId);
+        if (result.success) {
+          loadClasses();
+        } else {
+          alert(result.error || 'Failed to delete class');
+        }
+      } catch (err) {
+        alert(err.message || 'Failed to delete class');
       }
     }
   };
@@ -56,6 +72,16 @@ function ClassManagement() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          {error}
+        </div>
       </div>
     );
   }

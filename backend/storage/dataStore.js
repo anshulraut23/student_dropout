@@ -6,6 +6,7 @@ class DataStore {
     this.schools = [];
     this.users = [];
     this.teacherRequests = [];
+    this.classes = [];
   }
 
   // School operations
@@ -70,6 +71,42 @@ class DataStore {
       return this.teacherRequests[index];
     }
     return null;
+  }
+
+  // Class operations
+  getClasses() {
+    return this.classes;
+  }
+
+  addClass(classData) {
+    this.classes.push(classData);
+    return classData;
+  }
+
+  getClassById(classId) {
+    return this.classes.find(c => c.id === classId);
+  }
+
+  getClassesBySchool(schoolId) {
+    return this.classes.filter(c => c.schoolId === schoolId);
+  }
+
+  updateClass(classId, updates) {
+    const index = this.classes.findIndex(c => c.id === classId);
+    if (index !== -1) {
+      this.classes[index] = { ...this.classes[index], ...updates };
+      return this.classes[index];
+    }
+    return null;
+  }
+
+  deleteClass(classId) {
+    const index = this.classes.findIndex(c => c.id === classId);
+    if (index !== -1) {
+      this.classes.splice(index, 1);
+      return true;
+    }
+    return false;
   }
 }
 

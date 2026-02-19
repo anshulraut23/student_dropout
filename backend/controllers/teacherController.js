@@ -21,15 +21,24 @@ export const getAllTeachers = (req, res) => {
     const teachers = allUsers.filter(u => u.schoolId === schoolId && u.role === 'teacher');
     console.log('Filtered teachers:', teachers.length);
 
+    // Get all classes for this school to find incharge assignments
+    const allClasses = dataStore.getClassesBySchool(schoolId);
+
     // Format response
-    const formattedTeachers = teachers.map(teacher => ({
-      id: teacher.id,
-      name: teacher.fullName,
-      email: teacher.email,
-      status: teacher.status,
-      assignedClasses: teacher.assignedClasses || [],
-      createdAt: teacher.createdAt
-    }));
+    const formattedTeachers = teachers.map(teacher => {
+      // Find the class where this teacher is the incharge
+      const inchargeClass = allClasses.find(cls => cls.teacherId === teacher.id);
+      
+      return {
+        id: teacher.id,
+        name: teacher.fullName,
+        email: teacher.email,
+        status: teacher.status,
+        assignedClasses: teacher.assignedClasses || [],
+        inchargeClass: inchargeClass ? inchargeClass.name : null,
+        createdAt: teacher.createdAt
+      };
+    });
 
     res.json({
       success: true,

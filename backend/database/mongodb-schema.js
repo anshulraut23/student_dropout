@@ -83,6 +83,12 @@ const classSchema = new Schema({
   section: { type: String },
   academicYear: { type: String, required: true },
   teacherId: { type: Schema.Types.ObjectId, ref: 'User' },
+  attendanceMode: { 
+    type: String, 
+    required: true,
+    enum: ['daily', 'subject_wise'],
+    default: 'daily'
+  },
   status: { 
     type: String, 
     enum: ['active', 'inactive', 'archived'],

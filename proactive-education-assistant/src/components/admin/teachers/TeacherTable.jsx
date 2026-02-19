@@ -60,12 +60,15 @@ function TeacherTable({ teachers, onApprove, onAssignClasses }) {
                   {getStatusBadge(teacher.status)}
                 </td>
                 <td className="px-6 py-4">
-                  {teacher.assignedClasses.length > 0 ? (
-                    <div className="text-sm text-gray-900">
-                      {teacher.assignedClasses.join(', ')}
+                  {teacher.inchargeClass ? (
+                    <div className="text-sm">
+                      <span className="font-medium text-gray-900">{teacher.inchargeClass}</span>
+                      <span className="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                        Incharge
+                      </span>
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-400 italic">No classes assigned</span>
+                    <span className="text-sm text-gray-400 italic">No class assigned</span>
                   )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -83,9 +86,9 @@ function TeacherTable({ teachers, onApprove, onAssignClasses }) {
                       <button
                         onClick={() => onAssignClasses(teacher)}
                         className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
-                        title="Assign Classes"
+                        title={teacher.inchargeClass ? "Edit Class Assignment" : "Assign Class"}
                       >
-                        <FaUserPlus /> Assign
+                        <FaUserPlus /> {teacher.inchargeClass ? 'Edit' : 'Assign'}
                       </button>
                     )}
                   </div>

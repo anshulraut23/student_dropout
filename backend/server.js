@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
 import approvalRoutes from './routes/approvalRoutes.js';
 import teacherRoutes from './routes/teacherRoutes.js';
+import classRoutes from './routes/classRoutes.js';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/schools', schoolRoutes);
 app.use('/api/approvals', approvalRoutes);
 app.use('/api/teachers', teacherRoutes);
+app.use('/api/classes', classRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

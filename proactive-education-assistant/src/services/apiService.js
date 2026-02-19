@@ -120,6 +120,44 @@ class ApiService {
       auth: true,
     });
   }
+
+  // Class endpoints (admin only)
+  async getClasses() {
+    return this.request('/classes', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getClassById(classId) {
+    return this.request(`/classes/${classId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async createClass(classData) {
+    return this.request('/classes', {
+      method: 'POST',
+      body: JSON.stringify(classData),
+      auth: true,
+    });
+  }
+
+  async updateClass(classId, classData) {
+    return this.request(`/classes/${classId}`, {
+      method: 'PUT',
+      body: JSON.stringify(classData),
+      auth: true,
+    });
+  }
+
+  async deleteClass(classId) {
+    return this.request(`/classes/${classId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
 }
 
 export default new ApiService();

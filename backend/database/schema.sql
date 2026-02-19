@@ -54,6 +54,7 @@ CREATE TABLE classes (
     section VARCHAR(10),
     academic_year VARCHAR(20) NOT NULL,
     teacher_id UUID REFERENCES users(id) ON DELETE SET NULL,
+    attendance_mode VARCHAR(20) NOT NULL DEFAULT 'daily' CHECK (attendance_mode IN ('daily', 'subject_wise')),
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive', 'archived')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
