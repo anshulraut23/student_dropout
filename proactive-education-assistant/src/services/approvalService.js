@@ -1,38 +1,46 @@
 // Approval Service - Handles teacher approval and class assignment
+import apiService from './apiService';
 
 const delay = (ms = 500) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const approvalService = {
+  // Get pending teacher requests
+  async getPendingRequests() {
+    try {
+      return await apiService.getPendingRequests();
+    } catch (error) {
+      console.error('Get pending requests error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to get pending requests'
+      };
+    }
+  },
+
   // Approve a teacher
   async approveTeacher(teacherId, assignedClasses = []) {
-    await delay();
-    console.log(`Approving teacher ${teacherId} with classes:`, assignedClasses);
-    return {
-      success: true,
-      message: 'Teacher approved successfully',
-      data: {
-        id: teacherId,
-        status: 'approved',
-        assignedClasses,
-        approvedAt: new Date().toISOString()
-      }
-    };
+    try {
+      return await apiService.approveTeacher(teacherId, assignedClasses);
+    } catch (error) {
+      console.error('Approve teacher error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to approve teacher'
+      };
+    }
   },
 
   // Reject a teacher
   async rejectTeacher(teacherId, reason = '') {
-    await delay();
-    console.log(`Rejecting teacher ${teacherId}. Reason:`, reason);
-    return {
-      success: true,
-      message: 'Teacher rejected',
-      data: {
-        id: teacherId,
-        status: 'rejected',
-        rejectionReason: reason,
-        rejectedAt: new Date().toISOString()
-      }
-    };
+    try {
+      return await apiService.rejectTeacher(teacherId);
+    } catch (error) {
+      console.error('Reject teacher error:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to reject teacher'
+      };
+    }
   },
 
   // Assign classes to a teacher

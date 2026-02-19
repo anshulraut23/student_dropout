@@ -1,29 +1,51 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { approvalService } from '../../../services/approvalService';
+import apiService from '../../../services/apiService';
 import { FaTimes } from 'react-icons/fa';
 
-function TeacherApprovalModal({ teacher, classes, onClose, onSuccess }) {
-  const [selectedClasses, setSelectedClasses] = useState([]);
+function TeacherApprovalModal({ teacher, onClose, onSuccess }) {
+  const [classes, setClasses] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState('');
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectInput, setShowRejectInput] = useState(false);
+  const [loadingClasses, setLoadingClasses] = useState(true);
 
-  const handleClassToggle = (className) => {
-    setSelectedClasses(prev =>
-      prev.includes(className)
-        ? prev.filter(c => c !== className)
-        : [...prev, className]
-    );
-  };
+  // Fetch classes on mount
+  useEffect(() => {
+    const fetchClasses = async () => {
+      setLoadingClasses(true);
+      try {
+        const result = await apiService.getClasses();
+        if (result.success) {
+          // Filter to only show active classes without an incharge
+          const availableClasses = (result.classes || []).filter(
+            cls => cls.status === 'active' && !cls.teacherId
+          );
+          setClasses(availableClasses);
+        }
+      } catch (error) {
+        console.error('Failed to fetch classes:', error);
+      } finally {
+        setLoadingClasses(false);
+      }
+    };
+
+    fetchClasses();
+  }, []);
 
   const handleApprove = async () => {
     setApproving(true);
     try {
-      const result = await approvalService.approveTeacher(teacher.id, selectedClasses);
+      const result = await approvalService.approveTeacher(
+        teacher.id, 
+        selectedClassId ? [selectedClassId] : []
+      );
       if (result.success) {
         alert('Teacher approved successfully!');
-        onSuccess();
+        onSuccess(); // Refresh data
+        onClose(); // Close modal
       }
     } catch (error) {
       alert('Failed to approve teacher: ' + error.message);
@@ -43,7 +65,8 @@ function TeacherApprovalModal({ teacher, classes, onClose, onSuccess }) {
       const result = await approvalService.rejectTeacher(teacher.id, rejectionReason);
       if (result.success) {
         alert('Teacher rejected');
-        onSuccess();
+        onSuccess(); // Refresh data
+        onClose(); // Close modal
       }
     } catch (error) {
       alert('Failed to reject teacher: ' + error.message);
@@ -83,29 +106,41 @@ function TeacherApprovalModal({ teacher, classes, onClose, onSuccess }) {
             <>
               {/* Class Assignment */}
               <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Assign Classes (Optional)</h3>
-                <div className="space-y-2 max-h-48 overflow-y-auto">
-                  {classes.filter(c => c.status === 'active').map((cls) => (
-                    <label
-                      key={cls.id}
-                      className="flex items-center p-3 border rounded-lg hover:bg-gray-50 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedClasses.includes(cls.name)}
-                        onChange={() => handleClassToggle(cls.name)}
-                        className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <div>
-                        <p className="font-medium text-gray-900">{cls.name}</p>
-                        <p className="text-sm text-gray-500">{cls.description}</p>
-                      </div>
-                    </label>
-                  ))}
-                </div>
-                {selectedClasses.length > 0 && (
-                  <p className="text-sm text-gray-600 mt-2">
-                    Selected: {selectedClasses.join(', ')}
+                <h3 className="font-semibold text-gray-900 mb-3">
+                  Assign as Class Incharge (Optional)
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  You can assign this teacher as the incharge of a class. Only classes without an incharge are shown.
+                </p>
+                
+                {loadingClasses ? (
+                  <div className="flex items-center justify-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  </div>
+                ) : classes.length === 0 ? (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                    <p className="text-sm text-gray-500">
+                      No available classes. All classes already have an incharge assigned.
+                    </p>
+                  </div>
+                ) : (
+                  <select
+                    value={selectedClassId}
+                    onChange={(e) => setSelectedClassId(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">-- Select a class (optional) --</option>
+                    {classes.map((cls) => (
+                      <option key={cls.id} value={cls.id}>
+                        {cls.name} - Grade {cls.grade}{cls.section ? ` ${cls.section}` : ''} ({cls.academicYear})
+                      </option>
+                    ))}
+                  </select>
+                )}
+                
+                {selectedClassId && (
+                  <p className="text-sm text-blue-600 mt-2">
+                    Teacher will be assigned as incharge of the selected class
                   </p>
                 )}
               </div>

@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import {
-  getTeachers,
   getClasses,
   getSubjects,
   getAdminStats,
@@ -8,6 +7,7 @@ import {
   getRiskTrendData,
   getHighRiskAlerts,
 } from '../services/adminService';
+import apiService from '../services/apiService';
 
 const AdminContext = createContext();
 
@@ -34,16 +34,54 @@ export const AdminProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
+      // Fetch teachers from backend API
+      let teachersData = [];
+      try {
+        const response = await apiService.getAllTeachers();
+        console.log('Teachers API response:', response);
+        if (response.success) {
+          // Transform backend data to match frontend format
+          teachersData = response.teachers.map(teacher => ({
+            id: teacher.id,
+            name: teacher.name,
+            email: teacher.email,
+            subject: teacher.subjects && teacher.subjects.length > 0 
+              ? teacher.subjects.join(', ') 
+              : 'N/A',
+            subjects: teacher.subjects || [],
+            status: teacher.status,
+            joinedDate: new Date(teacher.createdAt).toLocaleDateString(),
+            assignedClasses: teacher.assignedClasses || [],
+            inchargeClass: teacher.inchargeClass || null,
+            createdAt: teacher.createdAt
+          }));
+          console.log('Transformed teachers:', teachersData);
+        }
+      } catch (err) {
+        console.error('Error fetching teachers:', err);
+        // Continue with empty array if API fails
+      }
+
+      // Fetch classes from backend API
+      let classesData = [];
+      try {
+        const response = await apiService.getClasses();
+        console.log('Classes API response:', response);
+        if (response.success) {
+          classesData = response.classes || [];
+          console.log('Classes data:', classesData);
+        }
+      } catch (err) {
+        console.error('Error fetching classes:', err);
+        // Continue with empty array if API fails
+      }
+
       const [
-        teachersData,
-        classesData,
         statsData,
         riskDistData,
         riskTrendData,
         alertsData,
       ] = await Promise.all([
-        Promise.resolve(getTeachers()),
-        Promise.resolve(getClasses()),
         Promise.resolve(getAdminStats()),
         Promise.resolve(getRiskDistribution()),
         Promise.resolve(getRiskTrendData()),
@@ -72,14 +110,40 @@ export const AdminProvider = ({ children }) => {
   }, []);
 
   // Refresh specific data
-  const refreshTeachers = useCallback(() => {
-    const teachersData = getTeachers();
-    setTeachers(teachersData);
+  const refreshTeachers = useCallback(async () => {
+    try {
+      const response = await apiService.getAllTeachers();
+      if (response.success) {
+        const teachersData = response.teachers.map(teacher => ({
+          id: teacher.id,
+          name: teacher.name,
+          email: teacher.email,
+          subject: teacher.subjects && teacher.subjects.length > 0 
+            ? teacher.subjects.join(', ') 
+            : 'N/A',
+          subjects: teacher.subjects || [],
+          status: teacher.status,
+          joinedDate: new Date(teacher.createdAt).toLocaleDateString(),
+          assignedClasses: teacher.assignedClasses || [],
+          inchargeClass: teacher.inchargeClass || null,
+          createdAt: teacher.createdAt
+        }));
+        setTeachers(teachersData);
+      }
+    } catch (err) {
+      console.error('Error refreshing teachers:', err);
+    }
   }, []);
 
-  const refreshClasses = useCallback(() => {
-    const classesData = getClasses();
-    setClasses(classesData);
+  const refreshClasses = useCallback(async () => {
+    try {
+      const response = await apiService.getClasses();
+      if (response.success) {
+        setClasses(response.classes || []);
+      }
+    } catch (err) {
+      console.error('Error refreshing classes:', err);
+    }
   }, []);
 
   const refreshSubjects = useCallback((classId) => {
