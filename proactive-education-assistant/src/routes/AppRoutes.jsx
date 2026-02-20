@@ -12,6 +12,8 @@ import StudentListPage from "../pages/teacher/StudentListPage";
 import StudentProfilePage from "../pages/teacher/StudentProfilePage";
 import ProfilePage from "../pages/teacher/ProfilePage";
 import DataEntryPage from "../pages/teacher/DataEntryPage";
+import AttendanceHistoryPage from "../pages/teacher/AttendanceHistoryPage";
+import AddExamPage from "../pages/teacher/AddExamPage";
 import GamificationPage from "../pages/teacher/GamificationPage";
 import AddStudentPage from "../pages/teacher/AddStudentPage";
 import MyClassesPage from "../pages/teacher/MyClassesPage";
@@ -126,7 +128,9 @@ export default function AppRoutes() {
             <Route path="/students" element={<StudentListPage />} />
             <Route path="/students/:id" element={<StudentProfilePage />} />
             <Route path="/add-student" element={<AddStudentPage />} />
+            <Route path="/add-exam" element={<AddExamPage />} />
             <Route path="/data-entry" element={<DataEntryPage />} />
+            <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
             <Route path="/gamification" element={<GamificationPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
@@ -140,7 +144,9 @@ export default function AppRoutes() {
           <Route path="/students" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/students/:id" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/add-student" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/add-exam" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/data-entry" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/attendance-history" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/gamification" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/profile" element={<Navigate to="/teacher/login" replace />} />
         </>
