@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import apiService from "../../services/apiService";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -11,19 +12,46 @@ export default function LoginPage() {
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [isOnline] = useState(true);
   const [syncQueueCount] = useState(2);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    const actualRole = role === "coordinator" ? "admin" : "teacher";
-    localStorage.setItem("token", "demo-teacher-token");
-    localStorage.setItem("role", actualRole);
-    localStorage.setItem("themeMode", isDarkMode ? "dark" : "light");
-    
-    window.dispatchEvent(new Event("localStorageUpdate"));
-    
-    if (actualRole === "admin") {
-      navigate("/admin/dashboard");
-    } else {
-      navigate("/teacher/dashboard");
+  const handleLogin = async () => {
+    // Validation
+    if (!email || !password) {
+      setError("Please enter email and password");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await apiService.login(email, password);
+      
+      if (result.success) {
+        const actualRole = result.user.role;
+        
+        // Store token and user info
+        localStorage.setItem("token", result.token);
+        localStorage.setItem("role", actualRole);
+        localStorage.setItem("themeMode", isDarkMode ? "dark" : "light");
+        
+        window.dispatchEvent(new Event("localStorageUpdate"));
+        
+        // Navigate based on role
+        if (actualRole === "admin") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/teacher/dashboard");
+        }
+      } else {
+        setError(result.error || "Login failed");
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.message || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -163,6 +191,24 @@ export default function LoginPage() {
 
           {/* Form */}
           <div className="space-y-5">
+            {/* Error Message */}
+            {error && (
+              <div 
+                className="p-3 rounded-lg border-2"
+                style={isDarkMode ? {
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  borderColor: 'rgba(239, 68, 68, 0.5)',
+                  color: '#FCA5A5'
+                } : {
+                  backgroundColor: '#FEE2E2',
+                  borderColor: '#EF4444',
+                  color: '#DC2626'
+                }}
+              >
+                <p className="text-sm font-medium">{error}</p>
+              </div>
+            )}
+
             {/* Role Selection */}
             <div>
               <label 
@@ -288,31 +334,42 @@ export default function LoginPage() {
           {/* Login Button */}
           <button 
             onClick={handleLogin}
-            className="w-full mt-6 font-semibold py-3 rounded-lg transition-all duration-200 shadow-lg"
+            disabled={loading}
+            className="w-full mt-6 font-semibold py-3 rounded-lg transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             style={isDarkMode ? {
               background: 'linear-gradient(135deg, #22D3EE 0%, #38BDF8 50%, #A78BFA 100%)',
               color: '#000000',
               boxShadow: '0 0 20px rgba(34, 211, 238, 0.3)',
-              cursor: 'pointer'
+              cursor: loading ? 'not-allowed' : 'pointer'
             } : {
               background: 'linear-gradient(135deg, #3B82F6 0%, #14B8A6 100%)',
               color: '#FFFFFF',
-              cursor: 'pointer'
+              cursor: loading ? 'not-allowed' : 'pointer'
             }}
             onMouseEnter={(e) => {
-              if (isDarkMode) {
+              if (isDarkMode && !loading) {
                 e.currentTarget.style.boxShadow = '0 0 30px rgba(34, 211, 238, 0.6)';
                 e.currentTarget.style.transform = 'scale(1.02)';
               }
             }}
             onMouseLeave={(e) => {
-              if (isDarkMode) {
+              if (isDarkMode && !loading) {
                 e.currentTarget.style.boxShadow = '0 0 20px rgba(34, 211, 238, 0.3)';
                 e.currentTarget.style.transform = 'scale(1)';
               }
             }}
           >
-            Login to Dashboard
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Logging in...
+              </span>
+            ) : (
+              'Login to Dashboard'
+            )}
           </button>
 
           {/* Guest Login Button */}

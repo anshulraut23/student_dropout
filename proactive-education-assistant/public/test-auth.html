@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .warning { color: #f59e0b; }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #2563eb;
+    }
+    pre {
+      background: #f3f4f6;
+      padding: 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔐 Authentication Test Tool</h1>
+  
+  <div class="card">
+    <h2>Token Status</h2>
+    <div id="tokenStatus"></div>
+  </div>
+  
+  <div class="card">
+    <h2>Actions</h2>
+    <button onclick="testMyClasses()">Test My Classes API</button>
+    <button onclick="testStudents()">Test Students API</button>
+    <button onclick="clearToken()">Clear Token</button>
+    <button onclick="location.reload()">Refresh</button>
+  </div>
+  
+  <div class="card">
+    <h2>API Test Results</h2>
+    <div id="apiResults"></div>
+  </div>
+  
+  <script>
+    function checkToken() {
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+      const statusDiv = document.getElementById('tokenStatus');
+      
+      if (!token) {
+        statusDiv.innerHTML = '<p class="error">❌ No token found in localStorage</p><p>Please login first at <a href="/teacher/login">Teacher Login</a></p>';
+        return null;
+      }
+      
+      try {
+        const parts = token.split('.');
+        if (parts.length !== 3) {
+          statusDiv.innerHTML = '<p class="error">❌ Invalid token format</p>';
+          return null;
+        }
+        
+        const payload = JSON.parse(atob(parts[1]));
+        const isExpired = Date.now() > payload.exp * 1000;
+        const expiresIn = Math.floor((payload.exp * 1000 - Date.now()) / 1000 / 60 / 60 / 24);
+        
+        statusDiv.innerHTML = `
+          <p class="success">✅ Token found</p>
+          <pre>${JSON.stringify(payload, null, 2)}</pre>
+          <p><strong>Role in localStorage:</strong> ${role}</p>
+          <p><strong>Expires:</strong> ${new Date(payload.exp * 1000).toLocaleString()}</p>
+          <p><strong>Time remaining:</strong> ${expiresIn} days</p>
+          <p class="${isExpired ? 'error' : 'success'}">
+            <strong>Status:</strong> ${isExpired ? '❌ EXPIRED - Please logout and login again' : '✅ VALID'}
+          </p>
+        `;
+        
+        return isExpired ? null : token;
+      } catch (e) {
+        statusDiv.innerHTML = `<p class="error">❌ Error parsing token: ${e.message}</p>`;
+        return null;
+      }
+    }
+    
+    async function testMyClasses() {
+      const resultsDiv = document.getElementById('apiResults');
+      const token = checkToken();
+      
+      if (!token) {
+        resultsDiv.innerHTML = '<p class="error">Cannot test API without valid token</p>';
+        return;
+      }
+      
+      resultsDiv.innerHTML = '<p>Testing My Classes API...</p>';
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/teachers/my-classes', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultsDiv.innerHTML = `
+            <p class="success">✅ My Classes API Success</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          resultsDiv.innerHTML = `
+            <p class="error">❌ My Classes API Failed (${response.status})</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `
+          <p class="error">❌ Network Error</p>
+          <pre>${error.message}</pre>
+          <p>Make sure backend is running on http://localhost:5000</p>
+        `;
+      }
+    }
+    
+    async function testStudents() {
+      const resultsDiv = document.getElementById('apiResults');
+      const token = checkToken();
+      
+      if (!token) {
+        resultsDiv.innerHTML = '<p class="error">Cannot test API without valid token</p>';
+        return;
+      }
+      
+      resultsDiv.innerHTML = '<p>Testing Students API...</p>';
+      
+      try {
+        const response = await fetch('http://localhost:5000/api/students', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultsDiv.innerHTML = `
+            <p class="success">✅ Students API Success</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          resultsDiv.innerHTML = `
+            <p class="error">❌ Students API Failed (${response.status})</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        }
+      } catch (error) {
+        resultsDiv.innerHTML = `
+          <p class="error">❌ Network Error</p>
+          <pre>${error.message}</pre>
+          <p>Make sure backend is running on http://localhost:5000</p>
+        `;
+      }
+    }
+    
+    function clearToken() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('role');
+      alert('Token cleared! Please login again.');
+      location.reload();
+    }
+    
+    // Check token on page load
+    checkToken();
+  </script>
+</body>
+</html>

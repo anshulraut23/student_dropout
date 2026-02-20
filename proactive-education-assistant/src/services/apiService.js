@@ -31,10 +31,23 @@ class ApiService {
   // Generic request handler
   async request(endpoint, options = {}) {
     try {
+      const headers = this.getHeaders(options.auth);
+      
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
-        headers: this.getHeaders(options.auth),
+        headers: {
+          ...headers,
+          ...(options.headers || {})
+        },
       });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        const text = await response.text();
+        console.error('Non-JSON response:', text);
+        throw new Error('Server returned non-JSON response');
+      }
 
       const data = await response.json();
 
@@ -199,6 +212,53 @@ class ApiService {
 
   async deleteSubject(subjectId) {
     return this.request(`/subjects/${subjectId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
+  // Student endpoints
+  async getStudents(classId = null) {
+    const query = classId ? `?classId=${classId}` : '';
+    return this.request(`/students${query}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getStudentById(studentId) {
+    return this.request(`/students/${studentId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async createStudent(studentData) {
+    return this.request('/students', {
+      method: 'POST',
+      body: JSON.stringify(studentData),
+      auth: true,
+    });
+  }
+
+  async createStudentsBulk(classId, students) {
+    return this.request('/students/bulk', {
+      method: 'POST',
+      body: JSON.stringify({ classId, students }),
+      auth: true,
+    });
+  }
+
+  async updateStudent(studentId, studentData) {
+    return this.request(`/students/${studentId}`, {
+      method: 'PUT',
+      body: JSON.stringify(studentData),
+      auth: true,
+    });
+  }
+
+  async deleteStudent(studentId) {
+    return this.request(`/students/${studentId}`, {
       method: 'DELETE',
       auth: true,
     });

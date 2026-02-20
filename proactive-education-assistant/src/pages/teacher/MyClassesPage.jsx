@@ -52,7 +52,7 @@ export default function MyClassesPage() {
   const inchargeClasses = classes.filter(c => c.role === 'incharge' || c.role === 'both');
   const subjectTeacherClasses = classes.filter(c => c.role === 'subject_teacher' || c.role === 'both');
 
-  const getRoleBadge = (role, isIncharge) => {
+  const getRoleBadge = (role) => {
     if (role === 'both') {
       return (
         <div className="flex flex-wrap gap-1">
@@ -66,11 +66,15 @@ export default function MyClassesPage() {
       );
     }
     
-    return role === 'incharge' || isIncharge ? (
-      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-        <FaUserTie className="mr-1" /> Class Incharge
-      </span>
-    ) : (
+    if (role === 'incharge') {
+      return (
+        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+          <FaUserTie className="mr-1" /> Class Incharge
+        </span>
+      );
+    }
+    
+    return (
       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
         <FaBook className="mr-1" /> Subject Teacher
       </span>
@@ -155,7 +159,7 @@ export default function MyClassesPage() {
                     </span>
                   </div>
                   <div className="mt-2">
-                    {getRoleBadge(classItem.role, classItem.isIncharge)}
+                    {getRoleBadge(classItem.role)}
                   </div>
                 </div>
                 <button
