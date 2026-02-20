@@ -77,20 +77,50 @@ export default function AttendanceTab() {
         classId: selectedClass,
         date: selectedDate,
         status,
-        markedBy: "teacher" // Will be set by backend from auth token
+        markedBy: "teacher"
       }));
 
-      const result = await apiService.createAttendanceBulk(attendanceRecords);
-      
-      if (result.success) {
-        setMessage({ type: "success", text: "Attendance saved successfully!" });
+      // Try to save to backend
+      try {
+        const result = await apiService.createAttendanceBulk(attendanceRecords);
+        
+        if (result.success) {
+          setMessage({ type: "success", text: "Attendance saved successfully!" });
+          setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+        } else {
+          setMessage({ type: "error", text: result.error || "Failed to save attendance" });
+        }
+      } catch (apiError) {
+        // If API is not available, save to localStorage as fallback
+        console.log('API not available, saving locally:', apiError);
+        
+        // Save to localStorage
+        const savedAttendance = JSON.parse(localStorage.getItem('attendanceRecords') || '[]');
+        const newRecord = {
+          id: Date.now().toString(),
+          date: selectedDate,
+          classId: selectedClass,
+          className: classes.find(c => c.id === selectedClass)?.name || 'Unknown Class',
+          records: attendanceRecords,
+          totalStudents: students.length,
+          presentCount: attendanceRecords.filter(r => r.status === 'present').length,
+          absentCount: attendanceRecords.filter(r => r.status === 'absent').length,
+          markedAt: new Date().toISOString()
+        };
+        newRecord.attendancePercentage = Math.round((newRecord.presentCount / newRecord.totalStudents) * 100);
+        
+        savedAttendance.unshift(newRecord);
+        localStorage.setItem('attendanceRecords', JSON.stringify(savedAttendance));
+        
+        setMessage({ 
+          type: "success", 
+          text: "Attendance saved locally! (Backend API not available)" 
+        });
         setTimeout(() => setMessage({ type: "", text: "" }), 3000);
-      } else {
-        setMessage({ type: "error", text: result.error || "Failed to save attendance" });
       }
     } catch (error) {
       console.error('Attendance submission error:', error);
-      setMessage({ type: "error", text: error.message || "Failed to save attendance" });
+      setMessage({ type: "error", text: "Failed to save attendance. Please try again." });
     } finally {
       setLoading(false);
     }

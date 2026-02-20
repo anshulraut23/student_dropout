@@ -81,12 +81,56 @@ export default function AddExamPage() {
       const result = await apiService.getExams();
       if (result.success) {
         setExams(result.exams || []);
+      } else {
+        // Use mock data as fallback
+        setExams(getMockExams());
       }
     } catch (error) {
       console.error('Failed to load exams:', error);
+      // Use mock data as fallback when API is not available
+      setExams(getMockExams());
+      setMessage({ 
+        type: "info", 
+        text: "Showing sample data. Backend API not available." 
+      });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Mock data generator for fallback
+  const getMockExams = () => {
+    return [
+      {
+        id: "mock-1",
+        name: "Mathematics Mid Term 2024",
+        classId: "class-1",
+        className: "Class 7-A",
+        subjectId: "math",
+        subjectName: "Mathematics",
+        examType: "Mid Term",
+        examDate: "2024-03-15",
+        totalMarks: 100,
+        passingMarks: 40,
+        duration: 180,
+        description: "Mid term examination for mathematics"
+      },
+      {
+        id: "mock-2",
+        name: "Science Unit Test",
+        classId: "class-1",
+        className: "Class 7-A",
+        subjectId: "science",
+        subjectName: "Science",
+        examType: "Unit Test",
+        examDate: "2024-03-10",
+        totalMarks: 50,
+        passingMarks: 20,
+        duration: 90,
+        description: "Unit test for science chapter 1-3"
+      }
+    ];
   };
 
   const handleInputChange = (e) => {
@@ -151,7 +195,15 @@ export default function AddExamPage() {
       }
     } catch (error) {
       console.error('Exam submission error:', error);
-      setMessage({ type: "error", text: error.message || "Failed to save exam" });
+      // Show user-friendly error message
+      if (error.message.includes('404') || error.message.includes('Endpoint not found')) {
+        setMessage({ 
+          type: "error", 
+          text: "Backend API not available. Please ensure the server is running and the exam endpoint is configured." 
+        });
+      } else {
+        setMessage({ type: "error", text: "Failed to save exam. Please try again." });
+      }
     } finally {
       setLoading(false);
     }

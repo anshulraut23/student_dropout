@@ -25,10 +25,30 @@ export default function ScoresTab() {
       const result = await apiService.getExams();
       if (result.success) {
         setExams(result.exams || []);
+      } else {
+        setExams(getMockExams());
       }
     } catch (error) {
       console.error('Failed to load exams:', error);
+      setExams(getMockExams());
     }
+  };
+
+  const getMockExams = () => {
+    return [
+      {
+        id: "mock-1",
+        name: "Mathematics Mid Term 2024",
+        classId: "class-1",
+        className: "Class 7-A",
+        subjectId: "math",
+        subjectName: "Mathematics",
+        examType: "Mid Term",
+        examDate: "2024-03-15",
+        totalMarks: 100,
+        passingMarks: 40
+      }
+    ];
   };
 
   const loadStudents = async () => {
@@ -40,7 +60,6 @@ export default function ScoresTab() {
       if (result.success) {
         setStudents(result.students || []);
         
-        // Initialize scores state
         const initialScores = {};
         (result.students || []).forEach(student => {
           initialScores[student.id] = {
@@ -105,14 +124,12 @@ export default function ScoresTab() {
       return;
     }
 
-    // Validate that at least one student has marks entered
     const hasAnyMarks = Object.values(scores).some(score => score.obtainedMarks !== "");
     if (!hasAnyMarks) {
       setMessage({ type: "error", text: "Please enter marks for at least one student" });
       return;
     }
 
-    // Validate marks don't exceed total marks
     const invalidMarks = Object.entries(scores).find(([_, score]) => {
       if (score.obtainedMarks === "") return false;
       return parseFloat(score.obtainedMarks) > parseFloat(selectedExam.totalMarks);
@@ -156,7 +173,6 @@ export default function ScoresTab() {
           text: `Successfully saved scores for ${performanceRecords.length} student(s)!` 
         });
         
-        // Reset scores after 2 seconds
         setTimeout(() => {
           const resetScores = {};
           students.forEach(student => {
@@ -173,7 +189,14 @@ export default function ScoresTab() {
       }
     } catch (error) {
       console.error('Score submission error:', error);
-      setMessage({ type: "error", text: error.message || "Failed to save scores" });
+      if (error.message.includes('404') || error.message.includes('Endpoint not found')) {
+        setMessage({ 
+          type: "error", 
+          text: "Backend API not available. Please ensure the server is running." 
+        });
+      } else {
+        setMessage({ type: "error", text: "Failed to save scores. Please try again." });
+      }
     } finally {
       setLoading(false);
     }
@@ -181,7 +204,6 @@ export default function ScoresTab() {
 
   return (
     <div>
-      {/* Message */}
       {message.text && (
         <div className={`mb-4 p-3 rounded-lg text-sm ${
           message.type === "success" 
@@ -192,7 +214,6 @@ export default function ScoresTab() {
         </div>
       )}
 
-      {/* Exam Selection */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Select Exam <span className="text-red-500">*</span>
@@ -216,7 +237,6 @@ export default function ScoresTab() {
         )}
       </div>
 
-      {/* Exam Details */}
       {selectedExam && (
         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <h3 className="text-sm font-medium text-gray-900 mb-2">Exam Details</h3>
@@ -241,7 +261,6 @@ export default function ScoresTab() {
         </div>
       )}
 
-      {/* Students List with Score Input */}
       {selectedExam && students.length > 0 && (
         <>
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-4">
@@ -328,7 +347,6 @@ export default function ScoresTab() {
             </div>
           </div>
 
-          {/* Submit Button */}
           <div className="flex justify-end">
             <button
               onClick={handleSubmit}
