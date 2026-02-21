@@ -1,10 +1,9 @@
 // Data Store - Supports multiple storage backends
-// Uses memory store by default (recommended for development)
+// Now using SQLite for persistent storage
 
-import memoryStore from './memoryStore.js';
-// Uncomment below if you have Visual Studio C++ tools installed for SQLite support:
-// import sqliteStore from './sqliteStore.js';
+import sqliteStore from './sqliteStore.js';
+// import memoryStore from './memoryStore.js'; // Uncomment to switch back to in-memory storage
 
-// Export the appropriate store based on DB_TYPE
-// For development, we use the memory store which doesn't require native dependencies
-export default memoryStore;
+// Export SQLite store for persistent data storage
+// Data will persist across server restarts until the database file is deleted
+export default sqliteStore;

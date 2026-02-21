@@ -72,6 +72,7 @@ export const markSingleAttendance = async (data, userId) => {
 
 /**
  * Mark attendance for multiple students (bulk)
+ * Handles both new attendance and updates to existing attendance
  */
 export const markBulkAttendance = async (data, userId) => {
   const { classId, subjectId, date, attendance } = data;
@@ -105,19 +106,6 @@ export const markBulkAttendance = async (data, userId) => {
         throw new Error(statusValidation.error);
       }
       
-      // Check for duplicate
-      const duplicateCheck = checkDuplicateAttendance(
-        dataStore, 
-        record.studentId, 
-        date, 
-        classId, 
-        subjectId
-      );
-      
-      if (duplicateCheck.isDuplicate) {
-        throw new Error('Attendance already marked');
-      }
-      
       // Verify student exists and belongs to the class
       const student = dataStore.getStudentById(record.studentId);
       if (!student) {
@@ -128,25 +116,49 @@ export const markBulkAttendance = async (data, userId) => {
         throw new Error('Student does not belong to this class');
       }
       
-      // Create attendance record
-      const attendanceId = generateId();
-      const attendanceRecord = {
-        id: attendanceId,
-        studentId: record.studentId,
-        classId,
-        subjectId: subjectId || null,
-        date,
-        status: record.status.toLowerCase(),
-        markedBy: userId,
-        markedAt: new Date().toISOString(),
-        notes: record.notes || null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
+      // Check for duplicate - if exists, update instead of creating new
+      const duplicateCheck = checkDuplicateAttendance(
+        dataStore, 
+        record.studentId, 
+        date, 
+        classId, 
+        subjectId
+      );
       
-      dataStore.addAttendance(attendanceRecord);
-      results.records.push(attendanceRecord);
-      results.marked++;
+      if (duplicateCheck.isDuplicate) {
+        // Update existing attendance record
+        const existingRecord = duplicateCheck.existingRecord;
+        const updates = {
+          status: record.status.toLowerCase(),
+          notes: record.notes || null,
+          updatedAt: new Date().toISOString(),
+          updatedBy: userId
+        };
+        
+        const updatedRecord = dataStore.updateAttendance(existingRecord.id, updates);
+        results.records.push(updatedRecord);
+        results.marked++;
+      } else {
+        // Create new attendance record
+        const attendanceId = generateId();
+        const attendanceRecord = {
+          id: attendanceId,
+          studentId: record.studentId,
+          classId,
+          subjectId: subjectId || null,
+          date,
+          status: record.status.toLowerCase(),
+          markedBy: userId,
+          markedAt: new Date().toISOString(),
+          notes: record.notes || null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        dataStore.addAttendance(attendanceRecord);
+        results.records.push(attendanceRecord);
+        results.marked++;
+      }
       
     } catch (error) {
       results.failed++;

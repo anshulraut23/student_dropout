@@ -37,7 +37,8 @@ export const validateAttendanceDate = (date) => {
     };
   }
   
-  const attendanceDate = new Date(date);
+  // Parse dates in local timezone to avoid timezone issues
+  const attendanceDate = new Date(date + 'T00:00:00');
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   
@@ -46,8 +47,11 @@ export const validateAttendanceDate = (date) => {
     return { valid: false, error: 'Invalid date' };
   }
   
-  // Check if date is not in the future
-  if (attendanceDate > today) {
+  // Allow today and past dates (add 1 day buffer for timezone differences)
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  
+  if (attendanceDate >= tomorrow) {
     return { 
       valid: false, 
       error: 'Cannot mark attendance for future dates' 
