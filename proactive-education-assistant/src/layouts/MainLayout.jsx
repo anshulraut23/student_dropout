@@ -9,7 +9,9 @@ import {
   FaClipboardList, 
   FaTrophy,
   FaBars,
-  FaTimes
+  FaTimes,
+  FaFileAlt,
+  FaHistory
 } from "react-icons/fa";
 import Header from "../components/layouts/Header";
 import DashboardFooter from "../components/layouts/DashboardFooter";
@@ -24,7 +26,9 @@ function MainLayout() {
     { path: "/my-classes", label: "My Classes", icon: FaChalkboard },
     { path: "/students", label: t("nav.students", "Students"), icon: FaUsers },
     { path: "/add-student", label: "Add Student", icon: FaUserPlus },
+    { path: "/add-exam", label: "Add Exam", icon: FaFileAlt },
     { path: "/data-entry", label: t("nav.dataEntry", "Data Entry"), icon: FaClipboardList },
+    { path: "/attendance-history", label: "Attendance History", icon: FaHistory },
     { path: "/gamification", label: "Progress", icon: FaTrophy },
   ];
 

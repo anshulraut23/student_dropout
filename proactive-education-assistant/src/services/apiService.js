@@ -263,6 +263,120 @@ class ApiService {
       auth: true,
     });
   }
+
+  // Exam endpoints
+  async getExams(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/exams${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getExamById(examId) {
+    return this.request(`/exams/${examId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async createExam(examData) {
+    return this.request('/exams', {
+      method: 'POST',
+      body: JSON.stringify(examData),
+      auth: true,
+    });
+  }
+
+  async updateExam(examId, examData) {
+    return this.request(`/exams/${examId}`, {
+      method: 'PUT',
+      body: JSON.stringify(examData),
+      auth: true,
+    });
+  }
+
+  async deleteExam(examId) {
+    return this.request(`/exams/${examId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
+  // Attendance endpoints
+  async createAttendance(attendanceData) {
+    return this.request('/attendance', {
+      method: 'POST',
+      body: JSON.stringify(attendanceData),
+      auth: true,
+    });
+  }
+
+  async createAttendanceBulk(attendanceRecords) {
+    return this.request('/attendance/bulk', {
+      method: 'POST',
+      body: JSON.stringify({ records: attendanceRecords }),
+      auth: true,
+    });
+  }
+
+  async getAttendance(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/attendance${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getAttendanceHistory(teacherId = null) {
+    const query = teacherId ? `?teacherId=${teacherId}` : '';
+    return this.request(`/attendance/history${query}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  // Performance/Scores endpoints
+  async createPerformanceRecord(performanceData) {
+    return this.request('/performance', {
+      method: 'POST',
+      body: JSON.stringify(performanceData),
+      auth: true,
+    });
+  }
+
+  async createPerformanceBulk(performanceRecords) {
+    return this.request('/performance/bulk', {
+      method: 'POST',
+      body: JSON.stringify({ records: performanceRecords }),
+      auth: true,
+    });
+  }
+
+  async getPerformanceRecords(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/performance${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  // Behaviour endpoints
+  async createBehaviourRecord(behaviourData) {
+    return this.request('/behaviour', {
+      method: 'POST',
+      body: JSON.stringify(behaviourData),
+      auth: true,
+    });
+  }
+
+  async getBehaviourRecords(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/behaviour${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
 }
 
 export default new ApiService();

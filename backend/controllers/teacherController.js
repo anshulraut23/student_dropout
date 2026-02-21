@@ -67,6 +67,10 @@ export const getMyClasses = (req, res) => {
   try {
     const { userId, schoolId } = req.user;
 
+    console.log('=== Get My Classes Debug ===');
+    console.log('Teacher userId:', userId);
+    console.log('Teacher schoolId:', schoolId);
+
     // Verify user is teacher
     if (req.user.role !== 'teacher') {
       return res.status(403).json({ 
@@ -79,15 +83,28 @@ export const getMyClasses = (req, res) => {
     const allClasses = dataStore.getClassesBySchool(schoolId);
     const allSubjects = dataStore.getSubjectsBySchool(schoolId);
 
+    console.log('Total classes in school:', allClasses.length);
+    console.log('Total subjects in school:', allSubjects.length);
+
     // Find classes where teacher is incharge
     const inchargeClassIds = new Set(
       allClasses
-        .filter(cls => cls.teacherId === userId)
+        .filter(cls => {
+          console.log(`Class ${cls.name} teacherId: ${cls.teacherId}, checking against: ${userId}`);
+          return cls.teacherId === userId;
+        })
         .map(cls => cls.id)
     );
 
+    console.log('Incharge class IDs:', Array.from(inchargeClassIds));
+
     // Find subjects where teacher is assigned
-    const teachingSubjects = allSubjects.filter(subject => subject.teacherId === userId);
+    const teachingSubjects = allSubjects.filter(subject => {
+      console.log(`Subject ${subject.name} teacherId: ${subject.teacherId}, checking against: ${userId}`);
+      return subject.teacherId === userId;
+    });
+
+    console.log('Teaching subjects:', teachingSubjects.length);
 
     // Group subjects by class
     const subjectsByClass = new Map();
@@ -103,13 +120,14 @@ export const getMyClasses = (req, res) => {
 
     // Build the classes list
     const myClasses = [];
-    const processedClassIds = new Set();
 
     // Get all unique class IDs (both incharge and subject teacher)
     const allClassIds = new Set([
       ...inchargeClassIds,
       ...subjectsByClass.keys()
     ]);
+
+    console.log('All class IDs for teacher:', Array.from(allClassIds));
 
     allClassIds.forEach(classId => {
       const classData = dataStore.getClassById(classId);
@@ -138,6 +156,9 @@ export const getMyClasses = (req, res) => {
         subjects: subjects
       });
     });
+
+    console.log('Final classes for teacher:', myClasses.length);
+    console.log('=== End Debug ===');
 
     res.json({
       success: true,
