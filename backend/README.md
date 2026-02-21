@@ -10,6 +10,13 @@ Backend server for the student dropout prevention education assistant applicatio
 - Role-based access control (Admin/Teacher)
 - Teacher approval/rejection by admin
 - School listing for teacher registration
+- Class management
+- Subject management
+- Student management
+- Attendance tracking (daily and subject-wise)
+- Exam management
+- Marks entry and management
+- Performance analytics
 
 ## Tech Stack
 
@@ -132,6 +139,146 @@ Content-Type: application/json
 #### Reject Teacher
 ```
 POST /api/approvals/reject/:teacherId
+Authorization: Bearer <admin-token>
+```
+
+### Exams
+
+#### Create Exam
+```
+POST /api/exams
+Authorization: Bearer <teacher/admin-token>
+Content-Type: application/json
+
+{
+  "name": "Mathematics Midterm Exam",
+  "type": "midterm",
+  "classId": "class-123",
+  "subjectId": "subject-456",
+  "totalMarks": 100,
+  "passingMarks": 40,
+  "weightage": 1.5,
+  "examDate": "2026-03-15",
+  "duration": 180,
+  "instructions": "Answer all questions",
+  "syllabusTopics": ["Algebra", "Geometry"]
+}
+```
+
+#### Get All Exams
+```
+GET /api/exams?classId=class-123&subjectId=subject-456&type=midterm&status=scheduled
+Authorization: Bearer <token>
+```
+
+#### Get Exam by ID
+```
+GET /api/exams/:examId
+Authorization: Bearer <token>
+```
+
+#### Update Exam
+```
+PUT /api/exams/:examId
+Authorization: Bearer <teacher/admin-token>
+Content-Type: application/json
+
+{
+  "name": "Updated Exam Name",
+  "examDate": "2026-03-16"
+}
+```
+
+#### Delete Exam
+```
+DELETE /api/exams/:examId
+Authorization: Bearer <admin-token>
+```
+
+#### Change Exam Status
+```
+POST /api/exams/:examId/status
+Authorization: Bearer <teacher/admin-token>
+Content-Type: application/json
+
+{
+  "status": "completed"
+}
+```
+
+### Marks
+
+#### Enter Single Student Marks
+```
+POST /api/marks
+Authorization: Bearer <teacher/admin-token>
+Content-Type: application/json
+
+{
+  "examId": "exam-789",
+  "studentId": "student-123",
+  "marksObtained": 85,
+  "status": "present",
+  "remarks": "Good performance"
+}
+```
+
+#### Enter Bulk Marks
+```
+POST /api/marks/bulk
+Authorization: Bearer <teacher/admin-token>
+Content-Type: application/json
+
+{
+  "examId": "exam-789",
+  "marks": [
+    {
+      "studentId": "student-123",
+      "marksObtained": 85,
+      "status": "present"
+    },
+    {
+      "studentId": "student-124",
+      "marksObtained": 72,
+      "status": "present"
+    }
+  ]
+}
+```
+
+#### Get Marks for Exam
+```
+GET /api/marks/exam/:examId
+Authorization: Bearer <token>
+```
+
+#### Get Marks for Student
+```
+GET /api/marks/student/:studentId?subjectId=subject-456&startDate=2026-01-01&endDate=2026-06-30
+Authorization: Bearer <token>
+```
+
+#### Update Marks
+```
+PUT /api/marks/:marksId
+Authorization: Bearer <teacher/admin-token>
+Content-Type: application/json
+
+{
+  "marksObtained": 87,
+  "remarks": "Updated after re-evaluation"
+}
+```
+
+#### Delete Marks
+```
+DELETE /api/marks/:marksId
+Authorization: Bearer <admin-token>
+```
+
+#### Verify Marks
+```
+POST /api/marks/:marksId/verify
 Authorization: Bearer <admin-token>
 ```
 

@@ -9,6 +9,8 @@ import classRoutes from './routes/classRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
+import examRoutes from './routes/examRoutes.js';
+import marksRoutes from './routes/marksRoutes.js';
 
 dotenv.config();
 
@@ -29,6 +31,8 @@ app.use('/api/classes', classRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/exams', examRoutes);
+app.use('/api/marks', marksRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -43,6 +47,8 @@ app.get('/api/debug/data', (req, res) => {
   const classes = dataStore.getClasses();
   const subjects = dataStore.getSubjects();
   const attendance = dataStore.getAttendance();
+  const exams = dataStore.getExams({});
+  const marks = dataStore.getMarks({});
   
   res.json({
     schools: schools.map(s => ({ id: s.id, name: s.name, adminId: s.adminId })),
@@ -76,6 +82,25 @@ app.get('/api/debug/data', (req, res) => {
       subjectId: a.subjectId,
       date: a.date,
       status: a.status
+    })),
+    exams: exams.map(e => ({
+      id: e.id,
+      name: e.name,
+      type: e.type,
+      classId: e.classId,
+      subjectId: e.subjectId,
+      totalMarks: e.totalMarks,
+      examDate: e.examDate,
+      status: e.status
+    })),
+    marks: marks.map(m => ({
+      id: m.id,
+      examId: m.examId,
+      studentId: m.studentId,
+      marksObtained: m.marksObtained,
+      percentage: m.percentage,
+      grade: m.grade,
+      status: m.status
     }))
   });
 });

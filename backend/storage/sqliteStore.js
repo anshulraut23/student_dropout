@@ -136,6 +136,88 @@ function initializeDatabase() {
     )
   `);
 
+  // Exams table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS exams (
+      id TEXT PRIMARY KEY,
+      schoolId TEXT NOT NULL,
+      name TEXT NOT NULL,
+      type TEXT NOT NULL,
+      classId TEXT NOT NULL,
+      subjectId TEXT NOT NULL,
+      totalMarks INTEGER NOT NULL,
+      passingMarks INTEGER NOT NULL,
+      weightage REAL DEFAULT 1.0,
+      examDate TEXT NOT NULL,
+      duration INTEGER,
+      instructions TEXT,
+      syllabusTopics TEXT,
+      createdBy TEXT NOT NULL,
+      status TEXT DEFAULT 'scheduled',
+      createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL,
+      FOREIGN KEY (schoolId) REFERENCES schools(id),
+      FOREIGN KEY (classId) REFERENCES classes(id),
+      FOREIGN KEY (subjectId) REFERENCES subjects(id),
+      FOREIGN KEY (createdBy) REFERENCES users(id)
+    )
+  `);
+
+  // Create indexes for exams
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_exams_school ON exams(schoolId);
+    CREATE INDEX IF NOT EXISTS idx_exams_class ON exams(classId);
+    CREATE INDEX IF NOT EXISTS idx_exams_subject ON exams(subjectId);
+    CREATE INDEX IF NOT EXISTS idx_exams_date ON exams(examDate);
+    CREATE INDEX IF NOT EXISTS idx_exams_status ON exams(status);
+  `);
+
+  // Marks table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS marks (
+      id TEXT PRIMARY KEY,
+      examId TEXT NOT NULL,
+      studentId TEXT NOT NULL,
+      marksObtained REAL NOT NULL,
+      grade TEXT,
+      gradePoint REAL,
+      percentage REAL,
+      status TEXT DEFAULT 'present',
+      remarks TEXT,
+      enteredBy TEXT NOT NULL,
+      enteredAt TEXT NOT NULL,
+      updatedBy TEXT,
+      updatedAt TEXT,
+      verifiedBy TEXT,
+      verifiedAt TEXT,
+      FOREIGN KEY (examId) REFERENCES exams(id),
+      FOREIGN KEY (studentId) REFERENCES students(id),
+      FOREIGN KEY (enteredBy) REFERENCES users(id),
+      UNIQUE(examId, studentId)
+    )
+  `);
+
+  // Create indexes for marks
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_marks_exam ON marks(examId);
+    CREATE INDEX IF NOT EXISTS idx_marks_student ON marks(studentId);
+    CREATE INDEX IF NOT EXISTS idx_marks_grade ON marks(grade);
+  `);
+
+  // Grade configuration table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS grade_config (
+      id TEXT PRIMARY KEY,
+      schoolId TEXT NOT NULL,
+      name TEXT NOT NULL,
+      isDefault INTEGER DEFAULT 0,
+      grades TEXT NOT NULL,
+      createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL,
+      FOREIGN KEY (schoolId) REFERENCES schools(id)
+    )
+  `);
+
   console.log('✅ SQLite database initialized at:', dbPath);
 }
 
@@ -636,6 +718,260 @@ class SQLiteStore {
   deleteAttendance(attendanceId) {
     const stmt = db.prepare('DELETE FROM attendance WHERE id = ?');
     const result = stmt.run(attendanceId);
+    return result.changes > 0;
+  }
+
+  // ==================== EXAM METHODS ====================
+
+  addExam(exam) {
+    const stmt = db.prepare(`
+      INSERT INTO exams (
+        id, schoolId, name, type, classId, subjectId, totalMarks, passingMarks,
+        weightage, examDate, duration, instructions, syllabusTopics, createdBy,
+        status, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    stmt.run(
+      exam.id,
+      exam.schoolId,
+      exam.name,
+      exam.type,
+      exam.classId,
+      exam.subjectId,
+      exam.totalMarks,
+      exam.passingMarks,
+      exam.weightage || 1.0,
+      exam.examDate,
+      exam.duration || null,
+      exam.instructions || null,
+      exam.syllabusTopics || null,
+      exam.createdBy,
+      exam.status || 'scheduled',
+      exam.createdAt,
+      exam.updatedAt
+    );
+    
+    return exam;
+  }
+
+  getExams() {
+    const stmt = db.prepare('SELECT * FROM exams ORDER BY examDate DESC');
+    return stmt.all();
+  }
+
+  getExamById(examId) {
+    const stmt = db.prepare('SELECT * FROM exams WHERE id = ?');
+    return stmt.get(examId);
+  }
+
+  getExamsByClass(classId) {
+    const stmt = db.prepare('SELECT * FROM exams WHERE classId = ? ORDER BY examDate DESC');
+    return stmt.all(classId);
+  }
+
+  getExamsBySubject(subjectId) {
+    const stmt = db.prepare('SELECT * FROM exams WHERE subjectId = ? ORDER BY examDate DESC');
+    return stmt.all(subjectId);
+  }
+
+  updateExam(examId, updates) {
+    const exam = this.getExamById(examId);
+    if (!exam) return null;
+
+    const updatedExam = { ...exam, ...updates, updatedAt: new Date().toISOString() };
+    
+    const stmt = db.prepare(`
+      UPDATE exams SET
+        name = ?, type = ?, classId = ?, subjectId = ?, totalMarks = ?,
+        passingMarks = ?, weightage = ?, examDate = ?, duration = ?,
+        instructions = ?, syllabusTopics = ?, status = ?, updatedAt = ?
+      WHERE id = ?
+    `);
+    
+    stmt.run(
+      updatedExam.name,
+      updatedExam.type,
+      updatedExam.classId,
+      updatedExam.subjectId,
+      updatedExam.totalMarks,
+      updatedExam.passingMarks,
+      updatedExam.weightage,
+      updatedExam.examDate,
+      updatedExam.duration,
+      updatedExam.instructions,
+      updatedExam.syllabusTopics,
+      updatedExam.status,
+      updatedExam.updatedAt,
+      examId
+    );
+    
+    return this.getExamById(examId);
+  }
+
+  deleteExam(examId) {
+    const stmt = db.prepare('DELETE FROM exams WHERE id = ?');
+    const result = stmt.run(examId);
+    return result.changes > 0;
+  }
+
+  // ==================== MARKS METHODS ====================
+
+  addMarks(marks) {
+    const stmt = db.prepare(`
+      INSERT INTO marks (
+        id, examId, studentId, marksObtained, grade, gradePoint, percentage,
+        status, remarks, enteredBy, enteredAt, updatedBy, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    stmt.run(
+      marks.id,
+      marks.examId,
+      marks.studentId,
+      marks.marksObtained,
+      marks.grade || null,
+      marks.gradePoint || null,
+      marks.percentage || null,
+      marks.status || 'present',
+      marks.remarks || null,
+      marks.enteredBy,
+      marks.enteredAt,
+      marks.updatedBy || null,
+      marks.updatedAt || null
+    );
+    
+    return marks;
+  }
+
+  getMarks() {
+    const stmt = db.prepare('SELECT * FROM marks');
+    return stmt.all();
+  }
+
+  getMarksById(marksId) {
+    const stmt = db.prepare('SELECT * FROM marks WHERE id = ?');
+    return stmt.get(marksId);
+  }
+
+  getMarksByExam(examId) {
+    const stmt = db.prepare('SELECT * FROM marks WHERE examId = ?');
+    return stmt.all(examId);
+  }
+
+  getMarksByStudent(studentId) {
+    const stmt = db.prepare('SELECT * FROM marks WHERE studentId = ? ORDER BY enteredAt DESC');
+    return stmt.all(studentId);
+  }
+
+  getMarksByExamAndStudent(examId, studentId) {
+    const stmt = db.prepare('SELECT * FROM marks WHERE examId = ? AND studentId = ?');
+    return stmt.get(examId, studentId);
+  }
+
+  updateMarks(marksId, updates) {
+    const marks = this.getMarksById(marksId);
+    if (!marks) return null;
+
+    const updatedMarks = { ...marks, ...updates, updatedAt: new Date().toISOString() };
+    
+    const stmt = db.prepare(`
+      UPDATE marks SET
+        marksObtained = ?, grade = ?, gradePoint = ?, percentage = ?,
+        status = ?, remarks = ?, updatedBy = ?, updatedAt = ?
+      WHERE id = ?
+    `);
+    
+    stmt.run(
+      updatedMarks.marksObtained,
+      updatedMarks.grade,
+      updatedMarks.gradePoint,
+      updatedMarks.percentage,
+      updatedMarks.status,
+      updatedMarks.remarks,
+      updatedMarks.updatedBy,
+      updatedMarks.updatedAt,
+      marksId
+    );
+    
+    return this.getMarksById(marksId);
+  }
+
+  verifyMarks(marksId, verifiedBy) {
+    const stmt = db.prepare(`
+      UPDATE marks SET
+        verifiedBy = ?, verifiedAt = ?
+      WHERE id = ?
+    `);
+    
+    stmt.run(verifiedBy, new Date().toISOString(), marksId);
+    return this.getMarksById(marksId);
+  }
+
+  deleteMarks(marksId) {
+    const stmt = db.prepare('DELETE FROM marks WHERE id = ?');
+    const result = stmt.run(marksId);
+    return result.changes > 0;
+  }
+
+  // ==================== GRADE CONFIG METHODS ====================
+
+  addGradeConfig(config) {
+    const stmt = db.prepare(`
+      INSERT INTO grade_config (
+        id, schoolId, name, isDefault, grades, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    stmt.run(
+      config.id,
+      config.schoolId,
+      config.name,
+      config.isDefault ? 1 : 0,
+      config.grades,
+      config.createdAt,
+      config.updatedAt
+    );
+    
+    return config;
+  }
+
+  getGradeConfigs(schoolId) {
+    const stmt = db.prepare('SELECT * FROM grade_config WHERE schoolId = ?');
+    return stmt.all(schoolId);
+  }
+
+  getDefaultGradeConfig(schoolId) {
+    const stmt = db.prepare('SELECT * FROM grade_config WHERE schoolId = ? AND isDefault = 1');
+    return stmt.get(schoolId);
+  }
+
+  updateGradeConfig(configId, updates) {
+    const config = db.prepare('SELECT * FROM grade_config WHERE id = ?').get(configId);
+    if (!config) return null;
+
+    const updatedConfig = { ...config, ...updates, updatedAt: new Date().toISOString() };
+    
+    const stmt = db.prepare(`
+      UPDATE grade_config SET
+        name = ?, isDefault = ?, grades = ?, updatedAt = ?
+      WHERE id = ?
+    `);
+    
+    stmt.run(
+      updatedConfig.name,
+      updatedConfig.isDefault ? 1 : 0,
+      updatedConfig.grades,
+      updatedConfig.updatedAt,
+      configId
+    );
+    
+    return db.prepare('SELECT * FROM grade_config WHERE id = ?').get(configId);
+  }
+
+  deleteGradeConfig(configId) {
+    const stmt = db.prepare('DELETE FROM grade_config WHERE id = ?');
+    const result = stmt.run(configId);
     return result.changes > 0;
   }
 }
