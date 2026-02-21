@@ -45,18 +45,14 @@ export const getSubjects = (req, res) => {
 export const getSubjectsByClass = (req, res) => {
   try {
     const { classId } = req.params;
-    const { schoolId } = req.user;
+    const { schoolId, role, userId } = req.user;  // Changed from 'id: userId' to 'userId'
 
-    // Verify user is admin
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ 
-        success: false, 
-        error: 'Only admins can view subjects' 
-      });
-    }
+    console.log('getSubjectsByClass called:', { classId, schoolId, role, userId });
 
-    // Verify class belongs to admin's school
+    // Verify class exists and belongs to user's school
     const classData = dataStore.getClassById(classId);
+    console.log('Class data:', classData);
+    
     if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({ 
         success: false, 
@@ -64,7 +60,29 @@ export const getSubjectsByClass = (req, res) => {
       });
     }
 
+    // Teachers can view subjects for classes they teach
+    // Admins can view all subjects in their school
+    if (role === 'teacher') {
+      const user = dataStore.getUserById(userId);
+      console.log('User data:', user);
+      console.log('Assigned classes:', user?.assignedClasses);
+      
+      const hasAccess = user?.assignedClasses?.some(
+        assignment => assignment.classId === classId
+      );
+      
+      console.log('Has access:', hasAccess);
+      
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          success: false, 
+          error: 'You do not have access to this class' 
+        });
+      }
+    }
+
     const subjects = dataStore.getSubjectsByClass(classId);
+    console.log('Subjects found:', subjects.length);
 
     // Enrich with teacher names
     const enrichedSubjects = subjects.map(subject => {
@@ -82,9 +100,11 @@ export const getSubjectsByClass = (req, res) => {
     });
   } catch (error) {
     console.error('Get subjects by class error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ 
       success: false, 
-      error: 'Failed to get subjects' 
+      error: 'Failed to get subjects',
+      details: error.message
     });
   }
 };

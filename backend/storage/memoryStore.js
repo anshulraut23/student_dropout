@@ -9,6 +9,7 @@ class MemoryStore {
     this.classes = [];
     this.subjects = [];
     this.students = [];
+    this.attendance = [];
   }
 
   // Schools
@@ -194,6 +195,82 @@ class MemoryStore {
     return true;
   }
 
+  // Attendance
+  addAttendance(attendance) {
+    this.attendance.push(attendance);
+    return attendance;
+  }
+
+  getAttendance() {
+    return [...this.attendance];
+  }
+
+  getAttendanceById(id) {
+    return this.attendance.find(a => a.id === id);
+  }
+
+  getAttendanceByStudent(studentId, filters = {}) {
+    let records = this.attendance.filter(a => a.studentId === studentId);
+    
+    if (filters.startDate) {
+      records = records.filter(a => new Date(a.date) >= new Date(filters.startDate));
+    }
+    if (filters.endDate) {
+      records = records.filter(a => new Date(a.date) <= new Date(filters.endDate));
+    }
+    if (filters.subjectId) {
+      records = records.filter(a => a.subjectId === filters.subjectId);
+    }
+    if (filters.classId) {
+      records = records.filter(a => a.classId === filters.classId);
+    }
+    
+    return records;
+  }
+
+  getAttendanceByClass(classId, filters = {}) {
+    let records = this.attendance.filter(a => a.classId === classId);
+    
+    if (filters.date) {
+      records = records.filter(a => a.date === filters.date);
+    }
+    if (filters.startDate) {
+      records = records.filter(a => new Date(a.date) >= new Date(filters.startDate));
+    }
+    if (filters.endDate) {
+      records = records.filter(a => new Date(a.date) <= new Date(filters.endDate));
+    }
+    if (filters.subjectId) {
+      records = records.filter(a => a.subjectId === filters.subjectId);
+    }
+    if (filters.status) {
+      records = records.filter(a => a.status === filters.status);
+    }
+    
+    return records;
+  }
+
+  getAttendanceByDate(date, classId, subjectId = null) {
+    return this.attendance.filter(a => 
+      a.date === date && 
+      a.classId === classId && 
+      (subjectId ? a.subjectId === subjectId : a.subjectId === null)
+    );
+  }
+
+  updateAttendance(id, updates) {
+    const attendance = this.attendance.find(a => a.id === id);
+    if (attendance) {
+      Object.assign(attendance, updates);
+    }
+    return attendance;
+  }
+
+  deleteAttendance(id) {
+    this.attendance = this.attendance.filter(a => a.id !== id);
+    return true;
+  }
+
   // Clear all data
   clear() {
     this.schools = [];
@@ -202,6 +279,7 @@ class MemoryStore {
     this.classes = [];
     this.subjects = [];
     this.students = [];
+    this.attendance = [];
   }
 }
 
