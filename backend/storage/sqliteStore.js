@@ -238,7 +238,6 @@ function initializeDatabase() {
       totalMarks INTEGER NOT NULL,
       passingMarks INTEGER NOT NULL,
       weightage REAL NOT NULL,
-      orderSequence INTEGER NOT NULL,
       isActive INTEGER DEFAULT 1,
       createdAt TEXT NOT NULL,
       updatedAt TEXT NOT NULL,
@@ -250,7 +249,6 @@ function initializeDatabase() {
   db.exec(`
     CREATE INDEX IF NOT EXISTS idx_exam_templates_school ON exam_templates(schoolId);
     CREATE INDEX IF NOT EXISTS idx_exam_templates_active ON exam_templates(isActive);
-    CREATE INDEX IF NOT EXISTS idx_exam_templates_order ON exam_templates(orderSequence);
   `);
 
   // Exam Periods table (NEW - for scheduling exams)
@@ -1044,8 +1042,8 @@ class SQLiteStore {
     const stmt = db.prepare(`
       INSERT INTO exam_templates (
         id, schoolId, name, type, description, totalMarks, passingMarks,
-        weightage, orderSequence, isActive, createdAt, updatedAt
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        weightage, isActive, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     
     stmt.run(
@@ -1057,7 +1055,6 @@ class SQLiteStore {
       template.totalMarks,
       template.passingMarks,
       template.weightage,
-      template.orderSequence,
       template.isActive !== undefined ? (template.isActive ? 1 : 0) : 1,
       template.createdAt,
       template.updatedAt
@@ -1080,7 +1077,7 @@ class SQLiteStore {
       params.push(filters.type);
     }
 
-    query += ' ORDER BY orderSequence ASC';
+    query += ' ORDER BY createdAt DESC';
 
     const stmt = db.prepare(query);
     return stmt.all(...params).map(t => ({
@@ -1111,7 +1108,7 @@ class SQLiteStore {
     const stmt = db.prepare(`
       UPDATE exam_templates SET
         name = ?, type = ?, description = ?, totalMarks = ?, passingMarks = ?,
-        weightage = ?, orderSequence = ?, isActive = ?, updatedAt = ?
+        weightage = ?, isActive = ?, updatedAt = ?
       WHERE id = ?
     `);
 
@@ -1122,7 +1119,6 @@ class SQLiteStore {
       updatedTemplate.totalMarks,
       updatedTemplate.passingMarks,
       updatedTemplate.weightage,
-      updatedTemplate.orderSequence,
       updatedTemplate.isActive ? 1 : 0,
       updatedTemplate.updatedAt,
       templateId

@@ -9,9 +9,8 @@ import { generateId } from '../utils/helpers.js';
 export async function createTemplate(templateData, userId) {
   // Validation
   if (!templateData.name || !templateData.type || !templateData.totalMarks || 
-      !templateData.passingMarks || templateData.weightage === undefined || 
-      !templateData.orderSequence) {
-    throw new Error('Name, type, total marks, passing marks, weightage, and order sequence are required');
+      !templateData.passingMarks || templateData.weightage === undefined) {
+    throw new Error('Name, type, total marks, passing marks, and weightage are required');
   }
 
   if (templateData.passingMarks >= templateData.totalMarks) {
@@ -35,7 +34,6 @@ export async function createTemplate(templateData, userId) {
     totalMarks: parseInt(templateData.totalMarks),
     passingMarks: parseInt(templateData.passingMarks),
     weightage: parseFloat(templateData.weightage),
-    orderSequence: parseInt(templateData.orderSequence),
     isActive: templateData.isActive !== undefined ? templateData.isActive : true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -166,7 +164,6 @@ export async function updateTemplate(templateId, updates, userId) {
   if (updates.totalMarks) updates.totalMarks = parseInt(updates.totalMarks);
   if (updates.passingMarks) updates.passingMarks = parseInt(updates.passingMarks);
   if (updates.weightage !== undefined) updates.weightage = parseFloat(updates.weightage);
-  if (updates.orderSequence) updates.orderSequence = parseInt(updates.orderSequence);
 
   const updatedTemplate = dataStore.updateExamTemplate(templateId, updates);
   return updatedTemplate;
@@ -258,10 +255,6 @@ export function validateTemplateData(data) {
 
   if (data.weightage === undefined || data.weightage < 0 || data.weightage > 1) {
     errors.push('Weightage must be between 0 and 1');
-  }
-
-  if (!data.orderSequence || data.orderSequence < 1) {
-    errors.push('Order sequence must be 1 or greater');
   }
 
   return {
