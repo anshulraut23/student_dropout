@@ -66,7 +66,7 @@ export const createExam = async (req, res) => {
 export const getExams = async (req, res) => {
   try {
     const { classId, subjectId, type, status, startDate, endDate } = req.query;
-    const { schoolId } = req.user;
+    const { schoolId, role, userId } = req.user;
 
     // Build filters
     const filters = { schoolId };
@@ -78,7 +78,30 @@ export const getExams = async (req, res) => {
     if (endDate) filters.endDate = endDate;
 
     // Get exams
-    const exams = dataStore.getExams(filters);
+    let exams = dataStore.getExams(filters);
+
+    // For teachers, filter to only show exams for subjects they teach
+    if (role === 'teacher') {
+      const user = dataStore.getUserById(userId);
+      const assignedClasses = user.assignedClasses || [];
+      
+      // Get all subject IDs the teacher teaches
+      const teacherSubjectIds = assignedClasses
+        .filter(assignment => assignment.subjectId)
+        .map(assignment => assignment.subjectId);
+      
+      // Also get subjects where teacher is assigned directly
+      const allSubjects = dataStore.getSubjects();
+      const directSubjects = allSubjects.filter(s => s.teacherId === userId);
+      directSubjects.forEach(s => {
+        if (!teacherSubjectIds.includes(s.id)) {
+          teacherSubjectIds.push(s.id);
+        }
+      });
+
+      // Filter exams to only those for teacher's subjects
+      exams = exams.filter(exam => teacherSubjectIds.includes(exam.subjectId));
+    }
 
     // Enrich with class and subject names, and marks statistics
     const enrichedExams = exams.map(exam => {
@@ -91,6 +114,8 @@ export const getExams = async (req, res) => {
         id: exam.id,
         name: exam.name,
         type: exam.type,
+        classId: exam.classId,
+        subjectId: exam.subjectId,
         className: classData ? classData.name : 'Unknown',
         subjectName: subject ? subject.name : 'Unknown',
         examDate: exam.examDate,

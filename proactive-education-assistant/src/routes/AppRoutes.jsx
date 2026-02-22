@@ -13,7 +13,7 @@ import StudentProfilePage from "../pages/teacher/StudentProfilePage";
 import ProfilePage from "../pages/teacher/ProfilePage";
 import DataEntryPage from "../pages/teacher/DataEntryPage";
 import AttendanceHistoryPage from "../pages/teacher/AttendanceHistoryPage";
-import AddExamPage from "../pages/teacher/AddExamPage";
+import MarksEntryPage from "../pages/teacher/MarksEntryPage";
 import GamificationPage from "../pages/teacher/GamificationPage";
 import AddStudentPage from "../pages/teacher/AddStudentPage";
 import MyClassesPage from "../pages/teacher/MyClassesPage";
@@ -28,6 +28,7 @@ import AdminDashboard from "../pages/admin/AdminDashboard";
 import TeacherManagement from "../pages/admin/TeacherManagement";
 import ClassManagement from "../pages/admin/ClassManagement";
 import SubjectManagement from "../pages/admin/SubjectManagement";
+import ExamTemplateManagement from "../pages/admin/ExamTemplateManagement";
 import Analytics from "../pages/admin/Analytics";
 
 export default function AppRoutes() {
@@ -112,6 +113,7 @@ export default function AppRoutes() {
           <Route path="teachers" element={<TeacherManagement />} />
           <Route path="classes" element={<ClassManagement />} />
           <Route path="subjects" element={<SubjectManagement />} />
+          <Route path="exam-templates" element={<ExamTemplateManagement />} />
           <Route path="analytics" element={<Analytics />} />
         </Route>
       ) : (
@@ -128,7 +130,7 @@ export default function AppRoutes() {
             <Route path="/students" element={<StudentListPage />} />
             <Route path="/students/:id" element={<StudentProfilePage />} />
             <Route path="/add-student" element={<AddStudentPage />} />
-            <Route path="/add-exam" element={<AddExamPage />} />
+            <Route path="/teacher/marks/entry/:examId" element={<MarksEntryPage />} />
             <Route path="/data-entry" element={<DataEntryPage />} />
             <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
             <Route path="/gamification" element={<GamificationPage />} />
@@ -144,7 +146,7 @@ export default function AppRoutes() {
           <Route path="/students" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/students/:id" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/add-student" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/add-exam" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/teacher/marks/entry/:examId" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/data-entry" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/attendance-history" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/gamification" element={<Navigate to="/teacher/login" replace />} />

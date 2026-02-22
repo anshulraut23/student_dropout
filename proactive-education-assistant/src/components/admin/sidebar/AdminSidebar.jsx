@@ -6,7 +6,9 @@ import {
   FaBook,
   FaChartBar,
   FaGraduationCap,
-  FaTimes
+  FaTimes,
+  FaFileAlt,
+  FaCalendarAlt
 } from 'react-icons/fa';
 
 function AdminSidebar({ onClose }) {
@@ -17,6 +19,7 @@ function AdminSidebar({ onClose }) {
     { path: '/admin/teachers', label: 'Teachers', icon: FaUserTie },
     { path: '/admin/classes', label: 'Classes', icon: FaChalkboard },
     { path: '/admin/subjects', label: 'Subjects', icon: FaBook },
+    { path: '/admin/exam-templates', label: 'Exam Templates', icon: FaFileAlt },
     { path: '/admin/analytics', label: 'Analytics', icon: FaChartBar },
   ];
 

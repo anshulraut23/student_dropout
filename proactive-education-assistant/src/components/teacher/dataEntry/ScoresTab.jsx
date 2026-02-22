@@ -232,7 +232,7 @@ export default function ScoresTab() {
         </select>
         {exams.length === 0 && (
           <p className="text-xs text-yellow-600 mt-2">
-            No exams available. Please create an exam first from the "Add Exam" page.
+            No exams available. Exams are created by admin through exam periods.
           </p>
         )}
       </div>

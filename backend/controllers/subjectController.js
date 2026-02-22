@@ -65,13 +65,17 @@ export const getSubjectsByClass = (req, res) => {
     if (role === 'teacher') {
       const user = dataStore.getUserById(userId);
       console.log('User data:', user);
-      console.log('Assigned classes:', user?.assignedClasses);
       
-      const hasAccess = user?.assignedClasses?.some(
-        assignment => assignment.classId === classId
-      );
+      // Check if teacher teaches any subject in this class OR is class incharge
+      const allSubjects = dataStore.getSubjectsByClass(classId);
+      const teachesSubjectInClass = allSubjects.some(subject => subject.teacherId === userId);
+      const isClassIncharge = classData.teacherId === userId;
       
-      console.log('Has access:', hasAccess);
+      const hasAccess = teachesSubjectInClass || isClassIncharge;
+      
+      console.log('Teaches subject in class:', teachesSubjectInClass);
+      console.log('Is class incharge:', isClassIncharge);
+      console.log('Final has access:', hasAccess);
       
       if (!hasAccess) {
         return res.status(403).json({ 
@@ -84,8 +88,15 @@ export const getSubjectsByClass = (req, res) => {
     const subjects = dataStore.getSubjectsByClass(classId);
     console.log('Subjects found:', subjects.length);
 
+    // For teachers, filter to only show subjects they teach
+    let filteredSubjects = subjects;
+    if (role === 'teacher') {
+      filteredSubjects = subjects.filter(subject => subject.teacherId === userId);
+      console.log('Filtered subjects for teacher:', filteredSubjects.length);
+    }
+
     // Enrich with teacher names
-    const enrichedSubjects = subjects.map(subject => {
+    const enrichedSubjects = filteredSubjects.map(subject => {
       const teacher = subject.teacherId ? dataStore.getUserById(subject.teacherId) : null;
       
       return {

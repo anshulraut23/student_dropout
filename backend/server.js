@@ -11,6 +11,8 @@ import studentRoutes from './routes/studentRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
 import examRoutes from './routes/examRoutes.js';
 import marksRoutes from './routes/marksRoutes.js';
+import examTemplateRoutes from './routes/examTemplateRoutes.js';
+import examPeriodRoutes from './routes/examPeriodRoutes.js';
 
 dotenv.config();
 
@@ -33,6 +35,8 @@ app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/marks', marksRoutes);
+app.use('/api/exam-templates', examTemplateRoutes);
+app.use('/api/exam-periods', examPeriodRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

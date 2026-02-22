@@ -303,6 +303,167 @@ class ApiService {
     });
   }
 
+  async changeExamStatus(examId, status) {
+    return this.request(`/exams/${examId}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+      auth: true,
+    });
+  }
+
+  // Exam Templates endpoints (Admin only)
+  async getExamTemplates(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/exam-templates${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getExamTemplateById(templateId) {
+    return this.request(`/exam-templates/${templateId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async createExamTemplate(templateData) {
+    return this.request('/exam-templates', {
+      method: 'POST',
+      body: JSON.stringify(templateData),
+      auth: true,
+    });
+  }
+
+  async updateExamTemplate(templateId, templateData) {
+    return this.request(`/exam-templates/${templateId}`, {
+      method: 'PUT',
+      body: JSON.stringify(templateData),
+      auth: true,
+    });
+  }
+
+  async deleteExamTemplate(templateId) {
+    return this.request(`/exam-templates/${templateId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
+  async toggleExamTemplateStatus(templateId) {
+    return this.request(`/exam-templates/${templateId}/toggle`, {
+      method: 'POST',
+      auth: true,
+    });
+  }
+
+  // Exam Periods endpoints (Admin only)
+  async getExamPeriods(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/exam-periods${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getExamPeriodById(periodId) {
+    return this.request(`/exam-periods/${periodId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async createExamPeriod(periodData) {
+    return this.request('/exam-periods', {
+      method: 'POST',
+      body: JSON.stringify(periodData),
+      auth: true,
+    });
+  }
+
+  async updateExamPeriod(periodId, periodData) {
+    return this.request(`/exam-periods/${periodId}`, {
+      method: 'PUT',
+      body: JSON.stringify(periodData),
+      auth: true,
+    });
+  }
+
+  async deleteExamPeriod(periodId) {
+    return this.request(`/exam-periods/${periodId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
+  async generateExamsForPeriod(periodId) {
+    return this.request(`/exam-periods/${periodId}/generate-exams`, {
+      method: 'POST',
+      auth: true,
+    });
+  }
+
+  async getExamsByPeriod(periodId) {
+    return this.request(`/exam-periods/${periodId}/exams`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  // Marks endpoints
+  async enterSingleMarks(marksData) {
+    return this.request('/marks', {
+      method: 'POST',
+      body: JSON.stringify(marksData),
+      auth: true,
+    });
+  }
+
+  async enterBulkMarks(bulkData) {
+    return this.request('/marks/bulk', {
+      method: 'POST',
+      body: JSON.stringify(bulkData),
+      auth: true,
+    });
+  }
+
+  async getMarksByExam(examId) {
+    return this.request(`/marks/exam/${examId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getMarksByStudent(studentId, params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/marks/student/${studentId}${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async updateMarks(marksId, updates) {
+    return this.request(`/marks/${marksId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+      auth: true,
+    });
+  }
+
+  async deleteMarks(marksId) {
+    return this.request(`/marks/${marksId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
+  async verifyMarks(marksId) {
+    return this.request(`/marks/${marksId}/verify`, {
+      method: 'POST',
+      auth: true,
+    });
+  }
+
   // Attendance endpoints
   
   /**
