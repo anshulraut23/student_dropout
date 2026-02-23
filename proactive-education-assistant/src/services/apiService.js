@@ -304,33 +304,96 @@ class ApiService {
   }
 
   // Attendance endpoints
-  async createAttendance(attendanceData) {
-    return this.request('/attendance', {
+  
+  /**
+   * Mark attendance for a single student
+   */
+  async markAttendance(attendanceData) {
+    return this.request('/attendance/mark', {
       method: 'POST',
       body: JSON.stringify(attendanceData),
       auth: true,
     });
   }
 
-  async createAttendanceBulk(attendanceRecords) {
-    return this.request('/attendance/bulk', {
+  /**
+   * Mark bulk attendance for multiple students
+   */
+  async markBulkAttendance(bulkData) {
+    return this.request('/attendance/mark-bulk', {
       method: 'POST',
-      body: JSON.stringify({ records: attendanceRecords }),
+      body: JSON.stringify(bulkData),
       auth: true,
     });
   }
 
-  async getAttendance(filters = {}) {
-    const query = new URLSearchParams(filters).toString();
-    return this.request(`/attendance${query ? '?' + query : ''}`, {
+  /**
+   * Get attendance for a class
+   * @param {string} classId - Class ID
+   * @param {object} params - Query parameters (date, startDate, endDate, subjectId)
+   */
+  async getClassAttendance(classId, params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/attendance/class/${classId}${query ? '?' + query : ''}`, {
       method: 'GET',
       auth: true,
     });
   }
 
-  async getAttendanceHistory(teacherId = null) {
-    const query = teacherId ? `?teacherId=${teacherId}` : '';
-    return this.request(`/attendance/history${query}`, {
+  /**
+   * Get attendance for a student
+   * @param {string} studentId - Student ID
+   * @param {object} params - Query parameters (startDate, endDate, subjectId)
+   */
+  async getStudentAttendance(studentId, params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/attendance/student/${studentId}${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  /**
+   * Update attendance record
+   */
+  async updateAttendance(attendanceId, updates) {
+    return this.request(`/attendance/${attendanceId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+      auth: true,
+    });
+  }
+
+  /**
+   * Delete attendance record (admin only)
+   */
+  async deleteAttendance(attendanceId) {
+    return this.request(`/attendance/${attendanceId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
+  /**
+   * Get attendance statistics for a class
+   * @param {string} classId - Class ID
+   * @param {object} params - Query parameters (startDate, endDate, subjectId)
+   */
+  async getAttendanceStatistics(classId, params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/attendance/statistics/class/${classId}${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  /**
+   * Get attendance report
+   * @param {object} params - Query parameters (classId, studentId, startDate, endDate, subjectId, format)
+   */
+  async getAttendanceReport(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    return this.request(`/attendance/report${query ? '?' + query : ''}`, {
       method: 'GET',
       auth: true,
     });

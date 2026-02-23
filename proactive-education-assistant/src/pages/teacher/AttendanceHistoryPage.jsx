@@ -43,17 +43,93 @@ export default function AttendanceHistoryPage() {
   const loadAttendanceHistory = async () => {
     setLoading(true);
     try {
-      const result = await apiService.getAttendanceHistory();
-      if (result.success) {
-        setAttendanceHistory(result.history || []);
-      } else {
-        // Load from localStorage as fallback
-        loadFromLocalStorage();
+      // Get attendance statistics for all classes
+      const classesResult = await apiService.getMyClasses();
+      if (!classesResult.success) {
+        throw new Error('Failed to load classes');
+      }
+
+      const allHistory = [];
+      
+      // Get attendance for each class
+      for (const cls of classesResult.classes || []) {
+        try {
+          // Get last 30 days of attendance
+          const endDate = new Date().toISOString().split('T')[0];
+          const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+          
+          const response = await apiService.getClassAttendance(cls.id, {
+            startDate,
+            endDate
+          });
+          
+          if (response.success && response.attendance) {
+            // Group by date
+            const byDate = {};
+            response.attendance.forEach(record => {
+              if (!byDate[record.date]) {
+                byDate[record.date] = {
+                  date: record.date,
+                  classId: cls.id,
+                  className: cls.name,
+                  students: []
+                };
+              }
+              byDate[record.date].students.push({
+                name: record.studentName,
+                enrollmentNo: record.enrollmentNo,
+                status: record.status
+              });
+            });
+            
+            // Convert to array and calculate stats
+            Object.values(byDate).forEach(dateRecord => {
+              const totalStudents = dateRecord.students.length;
+              const presentCount = dateRecord.students.filter(s => s.status === 'present').length;
+              const absentCount = dateRecord.students.filter(s => s.status === 'absent').length;
+              const attendancePercentage = totalStudents > 0 
+                ? Math.round((presentCount / totalStudents) * 100) 
+                : 0;
+              
+              allHistory.push({
+                id: `${dateRecord.classId}-${dateRecord.date}`,
+                date: dateRecord.date,
+                className: dateRecord.className,
+                classId: dateRecord.classId,
+                totalStudents,
+                presentCount,
+                absentCount,
+                attendancePercentage,
+                markedBy: "Teacher",
+                markedAt: dateRecord.date,
+                students: dateRecord.students
+              });
+            });
+          }
+        } catch (error) {
+          console.error(`Failed to load attendance for class ${cls.id}:`, error);
+        }
+      }
+      
+      // Sort by date (most recent first)
+      allHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      setAttendanceHistory(allHistory);
+      
+      if (allHistory.length === 0) {
+        setMessage({ 
+          type: "info", 
+          text: "No attendance records found. Start marking attendance to see history." 
+        });
+        setTimeout(() => setMessage({ type: "", text: "" }), 3000);
       }
     } catch (error) {
       console.error('Failed to load attendance history:', error);
-      // Load from localStorage as fallback
-      loadFromLocalStorage();
+      setMessage({ 
+        type: "error", 
+        text: "Failed to load attendance history. Please try again." 
+      });
+      setTimeout(() => setMessage({ type: "", text: "" }), 3000);
     } finally {
       setLoading(false);
     }

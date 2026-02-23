@@ -8,6 +8,8 @@ import teacherRoutes from './routes/teacherRoutes.js';
 import classRoutes from './routes/classRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
+import attendanceRoutes from './routes/attendanceRoutes.js';
+import { seedDefaultDataIfEmpty } from './utils/bootstrapSeed.js';
 
 dotenv.config();
 
@@ -27,6 +29,7 @@ app.use('/api/teachers', teacherRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/students', studentRoutes);
+app.use('/api/attendance', attendanceRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -40,6 +43,7 @@ app.get('/api/debug/data', (req, res) => {
   const requests = dataStore.getRequests();
   const classes = dataStore.getClasses();
   const subjects = dataStore.getSubjects();
+  const attendance = dataStore.getAttendance();
   
   res.json({
     schools: schools.map(s => ({ id: s.id, name: s.name, adminId: s.adminId })),
@@ -65,6 +69,14 @@ app.get('/api/debug/data', (req, res) => {
       classId: s.classId,
       teacherId: s.teacherId,
       schoolId: s.schoolId
+    })),
+    attendance: attendance.map(a => ({
+      id: a.id,
+      studentId: a.studentId,
+      classId: a.classId,
+      subjectId: a.subjectId,
+      date: a.date,
+      status: a.status
     }))
   });
 });
@@ -90,6 +102,13 @@ app.use((req, res) => {
     path: req.path
   });
 });
+
+const seedResult = await seedDefaultDataIfEmpty();
+if (seedResult.seeded) {
+  console.log('🌱 Seeded default in-memory users for local development');
+  console.log(`   Admin: ${seedResult.credentials.admin} / ${seedResult.credentials.password}`);
+  console.log(`   Teacher: ${seedResult.credentials.teachers[0]} / ${seedResult.credentials.password}`);
+}
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

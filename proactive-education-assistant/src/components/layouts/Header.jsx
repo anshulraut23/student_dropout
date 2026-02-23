@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUserCircle, FaGraduationCap, FaBell, FaWifi, FaSignOutAlt } from "react-icons/fa";
+import { FaUserCircle, FaBell, FaWifi, FaSignOutAlt, FaMoon, FaSun } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "../LanguageSelector";
+import logoImage from "../../assets/logo.png";
+import { useTheme } from "../../context/ThemeContext";
 
 function Header() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -48,15 +51,18 @@ function Header() {
     navigate('/');
   };
 
+  const handleLogoClick = (event) => {
+    event.preventDefault();
+    window.location.reload();
+  };
+
   return (
     <header className="fixed top-0 left-0 lg:left-64 right-0 z-300">
       <div className="h-16 px-4 sm:px-6 flex items-center justify-between">
         
         {/* Left - Logo (Desktop only) */}
-        <Link to="/dashboard" className="hidden lg:flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-600 flex items-center justify-center rounded-lg shadow-md">
-            <FaGraduationCap className="text-white text-xl" />
-          </div>
+        <Link to="/dashboard" onClick={handleLogoClick} className="hidden lg:flex items-center gap-3">
+          <img src={logoImage} alt="Logo" className="w-28 h-15 object-contain" />
           <div>
             <h1 className="text-lg font-semibold text-gray-900">
               {t('app.brand_full', 'Proactive Education')}
@@ -72,6 +78,18 @@ function Header() {
 
         {/* Right */}
         <div className="flex items-center gap-2 sm:gap-3">
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100 transition-colors"
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? <FaSun className="text-sm" /> : <FaMoon className="text-sm" />}
+            <span className="text-xs font-medium hidden md:inline">
+              {theme === 'dark' ? 'Light' : 'Dark'}
+            </span>
+          </button>
+
           {/* Online/Offline Status */}
           <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200">
             <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-red-500'}`}></div>
