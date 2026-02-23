@@ -1,0 +1,258 @@
+/* Horizon Theme - Button Styles */
+
+/* Primary Button */
+.horizon-btn-primary {
+  background: var(--sky);
+  color: var(--white);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  padding: 0.85rem 2rem;
+}
+
+.horizon-btn-primary:hover:not(:disabled) {
+  background: var(--sky-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 111, 181, 0.3);
+}
+
+.horizon-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.horizon-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Secondary Button (Accent) */
+.horizon-btn-secondary {
+  background: var(--accent);
+  color: var(--text);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  padding: 0.85rem 2rem;
+}
+
+.horizon-btn-secondary:hover:not(:disabled) {
+  background: #d89400;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(240, 165, 0, 0.4);
+}
+
+.horizon-btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.horizon-btn-secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Outline Button */
+.horizon-btn-outline {
+  background: transparent;
+  color: var(--sky);
+  border: 1.5px solid var(--sky);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  padding: 0.85rem 2rem;
+}
+
+.horizon-btn-outline:hover:not(:disabled) {
+  background: var(--sky);
+  color: var(--white);
+}
+
+.horizon-btn-outline:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.horizon-btn-outline:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Ghost Button (for dark backgrounds) */
+.horizon-btn-ghost {
+  background: transparent;
+  color: var(--white);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  padding: 0.85rem 2rem;
+}
+
+.horizon-btn-ghost:hover:not(:disabled) {
+  border-color: var(--white);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.horizon-btn-ghost:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.horizon-btn-ghost:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Danger Button */
+.horizon-btn-danger {
+  background: #dc2626;
+  color: var(--white);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  padding: 0.85rem 2rem;
+}
+
+.horizon-btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+}
+
+.horizon-btn-danger:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.horizon-btn-danger:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Success Button */
+.horizon-btn-success {
+  background: #16a34a;
+  color: var(--white);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+  padding: 0.85rem 2rem;
+}
+
+.horizon-btn-success:hover:not(:disabled) {
+  background: #15803d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+}
+
+.horizon-btn-success:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.horizon-btn-success:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button Sizes */
+.horizon-btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.horizon-btn-md {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9375rem;
+}
+
+.horizon-btn-lg {
+  padding: 1rem 2.5rem;
+  font-size: 1rem;
+}
+
+/* Icon Buttons */
+.horizon-btn-icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.horizon-btn-icon-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.horizon-btn-icon-lg {
+  width: 48px;
+  height: 48px;
+}
+
+/* Button Group */
+.horizon-btn-group {
+  display: inline-flex;
+  gap: 0.5rem;
+}
+
+.horizon-btn-group-attached {
+  display: inline-flex;
+}
+
+.horizon-btn-group-attached > button:not(:first-child) {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  margin-left: -1px;
+}
+
+.horizon-btn-group-attached > button:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Loading State */
+.horizon-btn-loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.horizon-btn-loading::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  left: 50%;
+  margin-left: -8px;
+  margin-top: -8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: horizon-btn-spin 0.6s linear infinite;
+}
+
+@keyframes horizon-btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Full Width Button */
+.horizon-btn-block {
+  width: 100%;
+  display: block;
+}
