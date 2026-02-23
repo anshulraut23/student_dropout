@@ -201,28 +201,19 @@ export default function ScoresTab() {
 
     try {
       const marksArray = Object.entries(scores)
-      // Use the marks API instead of performance API
-      const marksRecords = Object.entries(scores)
         .filter(([_, score]) => score.obtainedMarks !== "")
         .map(([studentId, score]) => ({
           studentId,
           marksObtained: parseFloat(score.obtainedMarks),
-          remarks: score.remarks || ""
-        }));
-
-      const result = await apiService.enterBulkMarks({
-        examId: selectedExam.id,
-        marks: marksArray
-      });
           status: 'present',
           remarks: score.remarks || ""
         }));
 
-      console.log('Submitting marks:', { examId: selectedExam.id, marks: marksRecords });
+      console.log('Submitting marks:', { examId: selectedExam.id, marks: marksArray });
 
       const result = await apiService.enterBulkMarks({
         examId: selectedExam.id,
-        marks: marksRecords
+        marks: marksArray
       });
       
       console.log('Marks submission result:', result);
@@ -230,8 +221,7 @@ export default function ScoresTab() {
       if (result.success) {
         setMessage({ 
           type: "success", 
-          text: `✅ ${isEditMode ? 'Updated' : 'Saved'} marks successfully! ${result.entered} student${result.entered !== 1 ? 's' : ''} processed.` 
-          text: `Successfully saved scores for ${result.entered} student(s)!${result.failed > 0 ? ` (${result.failed} failed)` : ''}` 
+          text: `✅ ${isEditMode ? 'Updated' : 'Saved'} marks successfully! ${result.entered} student${result.entered !== 1 ? 's' : ''} processed.${result.failed > 0 ? ` (${result.failed} failed)` : ''}` 
         });
         
         // Refresh to show as "already entered"
@@ -245,7 +235,6 @@ export default function ScoresTab() {
       }
     } catch (error) {
       console.error('Score submission error:', error);
-      setMessage({ type: "error", text: error.message || "Failed to save marks. Please try again." });
       if (error.message.includes('404') || error.message.includes('Endpoint not found')) {
         setMessage({ 
           type: "error", 
@@ -257,7 +246,7 @@ export default function ScoresTab() {
           text: "Cannot connect to backend server. Please check if it's running." 
         });
       } else {
-        setMessage({ type: "error", text: "Failed to save scores: " + error.message });
+        setMessage({ type: "error", text: "Failed to save marks: " + error.message });
       }
     } finally {
       setLoading(false);
