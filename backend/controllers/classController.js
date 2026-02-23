@@ -2,7 +2,7 @@ import dataStore from '../storage/dataStore.js';
 import { generateId } from '../utils/helpers.js';
 
 // Get all classes for a school
-export const getClasses = (req, res) => {
+export const getClasses = async (req, res) => {
   try {
     const { schoolId } = req.user;
 
@@ -14,16 +14,16 @@ export const getClasses = (req, res) => {
       });
     }
 
-    const classes = dataStore.getClassesBySchool(schoolId);
+    const classes = await dataStore.getClassesBySchool(schoolId);
 
     // Enrich with teacher names
-    const enrichedClasses = classes.map(cls => {
-      const teacher = cls.teacherId ? dataStore.getUserById(cls.teacherId) : null;
+    const enrichedClasses = await Promise.all(classes.map(async cls => {
+      const teacher = cls.teacherId ? await dataStore.getUserById(cls.teacherId) : null;
       return {
         ...cls,
         inchargeName: teacher ? teacher.fullName : null
       };
-    });
+    }));
 
     res.json({
       success: true,
@@ -39,12 +39,12 @@ export const getClasses = (req, res) => {
 };
 
 // Get single class by ID
-export const getClassById = (req, res) => {
+export const getClassById = async (req, res) => {
   try {
     const { classId } = req.params;
     const { schoolId } = req.user;
 
-    const classData = dataStore.getClassById(classId);
+    const classData = await dataStore.getClassById(classId);
 
     if (!classData) {
       return res.status(404).json({ 
@@ -62,7 +62,7 @@ export const getClassById = (req, res) => {
     }
 
     // Enrich with teacher name
-    const teacher = classData.teacherId ? dataStore.getUserById(classData.teacherId) : null;
+    const teacher = classData.teacherId ? await dataStore.getUserById(classData.teacherId) : null;
     const enrichedClass = {
       ...classData,
       inchargeName: teacher ? teacher.fullName : null
@@ -82,7 +82,7 @@ export const getClassById = (req, res) => {
 };
 
 // Create new class
-export const createClass = (req, res) => {
+export const createClass = async (req, res) => {
   try {
     const { schoolId } = req.user;
     const { name, grade, section, academicYear, teacherId, attendanceMode } = req.body;
@@ -113,7 +113,7 @@ export const createClass = (req, res) => {
 
     // If teacherId provided, verify teacher exists and is approved
     if (teacherId) {
-      const teacher = dataStore.getUserById(teacherId);
+      const teacher = await dataStore.getUserById(teacherId);
       if (!teacher) {
         return res.status(400).json({ 
           success: false, 
@@ -140,7 +140,8 @@ export const createClass = (req, res) => {
       }
 
       // Check if teacher is already incharge of another class
-      const existingClass = dataStore.getClassesBySchool(schoolId).find(
+      const allClasses = await dataStore.getClassesBySchool(schoolId);
+      const existingClass = allClasses.find(
         cls => cls.teacherId === teacherId && cls.status === 'active'
       );
       if (existingClass) {
@@ -167,10 +168,10 @@ export const createClass = (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    dataStore.addClass(newClass);
+    await dataStore.addClass(newClass);
 
     // Get teacher name for response
-    const teacher = teacherId ? dataStore.getUserById(teacherId) : null;
+    const teacher = teacherId ? await dataStore.getUserById(teacherId) : null;
 
     res.status(201).json({
       success: true,
@@ -190,7 +191,7 @@ export const createClass = (req, res) => {
 };
 
 // Update class
-export const updateClass = (req, res) => {
+export const updateClass = async (req, res) => {
   try {
     const { classId } = req.params;
     const { schoolId } = req.user;
@@ -204,7 +205,7 @@ export const updateClass = (req, res) => {
       });
     }
 
-    const existingClass = dataStore.getClassById(classId);
+    const existingClass = await dataStore.getClassById(classId);
 
     if (!existingClass) {
       return res.status(404).json({ 
@@ -231,7 +232,7 @@ export const updateClass = (req, res) => {
 
     // If teacherId provided, verify teacher
     if (teacherId) {
-      const teacher = dataStore.getUserById(teacherId);
+      const teacher = await dataStore.getUserById(teacherId);
       if (!teacher) {
         return res.status(400).json({ 
           success: false, 
@@ -246,7 +247,8 @@ export const updateClass = (req, res) => {
       }
 
       // Check if teacher is already incharge of another class (excluding current class)
-      const existingClass = dataStore.getClassesBySchool(schoolId).find(
+      const allClasses = await dataStore.getClassesBySchool(schoolId);
+      const existingClass = allClasses.find(
         cls => cls.teacherId === teacherId && cls.id !== classId && cls.status === 'active'
       );
       if (existingClass) {
@@ -269,10 +271,10 @@ export const updateClass = (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    const updatedClass = dataStore.updateClass(classId, updates);
+    const updatedClass = await dataStore.updateClass(classId, updates);
 
     // Get teacher name for response
-    const teacher = updatedClass.teacherId ? dataStore.getUserById(updatedClass.teacherId) : null;
+    const teacher = updatedClass.teacherId ? await dataStore.getUserById(updatedClass.teacherId) : null;
 
     res.json({
       success: true,
@@ -292,7 +294,7 @@ export const updateClass = (req, res) => {
 };
 
 // Delete class
-export const deleteClass = (req, res) => {
+export const deleteClass = async (req, res) => {
   try {
     const { classId } = req.params;
     const { schoolId } = req.user;
@@ -305,7 +307,7 @@ export const deleteClass = (req, res) => {
       });
     }
 
-    const existingClass = dataStore.getClassById(classId);
+    const existingClass = await dataStore.getClassById(classId);
 
     if (!existingClass) {
       return res.status(404).json({ 
@@ -322,7 +324,7 @@ export const deleteClass = (req, res) => {
       });
     }
 
-    dataStore.deleteClass(classId);
+    await dataStore.deleteClass(classId);
 
     res.json({
       success: true,

@@ -570,9 +570,19 @@ class ApiService {
   }
 
   async createPerformanceBulk(performanceRecords) {
-    return this.request('/performance/bulk', {
+    // Map performance records to marks format
+    const marks = performanceRecords.map(record => ({
+      studentId: record.studentId,
+      marksObtained: record.obtainedMarks,
+      remarks: record.remarks
+    }));
+
+    return this.request('/marks/bulk', {
       method: 'POST',
-      body: JSON.stringify({ records: performanceRecords }),
+      body: JSON.stringify({ 
+        examId: performanceRecords[0]?.examId,
+        marks 
+      }),
       auth: true,
     });
   }

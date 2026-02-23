@@ -238,13 +238,13 @@ export const getExamDetails = async (examId) => {
  * Check if teacher is authorized to manage exam
  */
 export const checkTeacherAuthorization = async (teacherId, examId) => {
-  const teacher = dataStore.getUserById(teacherId);
+  const teacher = await dataStore.getUserById(teacherId);
 
   if (!teacher || teacher.role !== 'teacher') {
     return false;
   }
 
-  const exam = dataStore.getExamById(examId);
+  const exam = await dataStore.getExamById(examId);
 
   if (!exam) {
     return false;
@@ -256,7 +256,7 @@ export const checkTeacherAuthorization = async (teacherId, examId) => {
   }
 
   // Check if teacher is assigned to this subject
-  const subject = dataStore.getSubjectById(exam.subjectId);
+  const subject = await dataStore.getSubjectById(exam.subjectId);
 
   if (!subject) {
     return false;

@@ -96,11 +96,11 @@ export const validateMarksData = (data, exam) => {
 /**
  * Check for duplicate marks entry
  */
-export const checkDuplicateMarks = (dataStore, examId, studentId) => {
-  const existing = dataStore.getMarksByExamAndStudent(examId, studentId);
+export const checkDuplicateMarks = async (dataStore, examId, studentId) => {
+  const existing = await dataStore.getMarksByExamAndStudent(examId, studentId);
   
   return {
     isDuplicate: !!existing,
-    existingMarks: existing
+    existingRecord: existing
   };
 };

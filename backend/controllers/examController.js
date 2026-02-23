@@ -24,7 +24,7 @@ export const createExam = async (req, res) => {
     // Authorization check (skip for admin)
     if (role !== 'admin') {
       // For teachers, verify they teach this subject
-      const subject = dataStore.getSubjectById(examData.subjectId);
+      const subject = await dataStore.getSubjectById(examData.subjectId);
       if (!subject || subject.teacherId !== userId) {
         return res.status(403).json({
           success: false,
@@ -37,8 +37,8 @@ export const createExam = async (req, res) => {
     const exam = await examService.createExam(examData, userId);
 
     // Enrich response
-    const classData = dataStore.getClassById(exam.classId);
-    const subject = dataStore.getSubjectById(exam.subjectId);
+    const classData = await dataStore.getClassById(exam.classId);
+    const subject = await dataStore.getSubjectById(exam.subjectId);
 
     res.status(201).json({
       success: true,
@@ -78,11 +78,11 @@ export const getExams = async (req, res) => {
     if (endDate) filters.endDate = endDate;
 
     // Get exams
-    let exams = dataStore.getExams(filters);
+    let exams = await dataStore.getExams(filters);
 
     // For teachers, filter to only show exams for subjects they teach
     if (role === 'teacher') {
-      const user = dataStore.getUserById(userId);
+      const user = await dataStore.getUserById(userId);
       const assignedClasses = user.assignedClasses || [];
       
       // Get all subject IDs the teacher teaches
@@ -91,7 +91,7 @@ export const getExams = async (req, res) => {
         .map(assignment => assignment.subjectId);
       
       // Also get subjects where teacher is assigned directly
-      const allSubjects = dataStore.getSubjects();
+      const allSubjects = await dataStore.getSubjects();
       const directSubjects = allSubjects.filter(s => s.teacherId === userId);
       directSubjects.forEach(s => {
         if (!teacherSubjectIds.includes(s.id)) {
@@ -104,11 +104,11 @@ export const getExams = async (req, res) => {
     }
 
     // Enrich with class and subject names, and marks statistics
-    const enrichedExams = exams.map(exam => {
-      const classData = dataStore.getClassById(exam.classId);
-      const subject = dataStore.getSubjectById(exam.subjectId);
-      const marks = dataStore.getMarksByExam(exam.id);
-      const students = dataStore.getStudentsByClass(exam.classId);
+    const enrichedExams = await Promise.all(exams.map(async exam => {
+      const classData = await dataStore.getClassById(exam.classId);
+      const subject = await dataStore.getSubjectById(exam.subjectId);
+      const marks = await dataStore.getMarksByExam(exam.id);
+      const students = await dataStore.getStudentsByClass(exam.classId);
 
       return {
         id: exam.id,
@@ -126,7 +126,7 @@ export const getExams = async (req, res) => {
         totalStudents: students.length,
         createdAt: exam.createdAt
       };
-    });
+    }));
 
     res.json({
       success: true,
@@ -162,9 +162,9 @@ export const getExamById = async (req, res) => {
     }
 
     // Enrich with names
-    const classData = dataStore.getClassById(examDetails.classId);
-    const subject = dataStore.getSubjectById(examDetails.subjectId);
-    const createdByUser = dataStore.getUserById(examDetails.createdBy);
+    const classData = await dataStore.getClassById(examDetails.classId);
+    const subject = await dataStore.getSubjectById(examDetails.subjectId);
+    const createdByUser = await dataStore.getUserById(examDetails.createdBy);
 
     res.json({
       success: true,
@@ -195,7 +195,7 @@ export const updateExam = async (req, res) => {
     const { userId, role, schoolId } = req.user;
 
     // Get existing exam
-    const existingExam = dataStore.getExamById(examId);
+    const existingExam = await dataStore.getExamById(examId);
     if (!existingExam) {
       return res.status(404).json({
         success: false,
@@ -226,8 +226,8 @@ export const updateExam = async (req, res) => {
     const updatedExam = await examService.updateExam(examId, updates, userId);
 
     // Enrich response
-    const classData = dataStore.getClassById(updatedExam.classId);
-    const subject = dataStore.getSubjectById(updatedExam.subjectId);
+    const classData = await dataStore.getClassById(updatedExam.classId);
+    const subject = await dataStore.getSubjectById(updatedExam.subjectId);
 
     res.json({
       success: true,
@@ -266,7 +266,7 @@ export const deleteExam = async (req, res) => {
     }
 
     // Get existing exam
-    const existingExam = dataStore.getExamById(examId);
+    const existingExam = await dataStore.getExamById(examId);
     if (!existingExam) {
       return res.status(404).json({
         success: false,
@@ -316,7 +316,7 @@ export const changeExamStatus = async (req, res) => {
     }
 
     // Get existing exam
-    const existingExam = dataStore.getExamById(examId);
+    const existingExam = await dataStore.getExamById(examId);
     if (!existingExam) {
       return res.status(404).json({
         success: false,

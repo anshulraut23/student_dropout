@@ -129,8 +129,8 @@ export const validateBulkAttendance = (attendanceArray) => {
 /**
  * Check for duplicate attendance
  */
-export const checkDuplicateAttendance = (dataStore, studentId, date, classId, subjectId = null) => {
-  const existing = dataStore.getAttendanceByDate(date, classId, subjectId);
+export const checkDuplicateAttendance = async (dataStore, studentId, date, classId, subjectId = null) => {
+  const existing = await dataStore.getAttendanceByDate(date, classId, subjectId);
   const duplicate = existing.find(a => a.studentId === studentId);
   
   if (duplicate) {

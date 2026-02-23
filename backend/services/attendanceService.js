@@ -27,7 +27,7 @@ export const markSingleAttendance = async (data, userId) => {
   }
   
   // Check for duplicate
-  const duplicateCheck = checkDuplicateAttendance(
+  const duplicateCheck = await checkDuplicateAttendance(
     dataStore, 
     studentId, 
     date, 
@@ -40,7 +40,7 @@ export const markSingleAttendance = async (data, userId) => {
   }
   
   // Verify student exists and belongs to the class
-  const student = dataStore.getStudentById(studentId);
+  const student = await dataStore.getStudentById(studentId);
   if (!student) {
     throw new Error('Student not found');
   }
@@ -65,7 +65,7 @@ export const markSingleAttendance = async (data, userId) => {
     updatedAt: new Date().toISOString()
   };
   
-  dataStore.addAttendance(attendance);
+  await dataStore.addAttendance(attendance);
   
   return attendance;
 };
@@ -84,7 +84,7 @@ export const markBulkAttendance = async (data, userId) => {
   }
   
   // Verify class exists
-  const classData = dataStore.getClassById(classId);
+  const classData = await dataStore.getClassById(classId);
   if (!classData) {
     throw new Error('Class not found');
   }
@@ -107,7 +107,7 @@ export const markBulkAttendance = async (data, userId) => {
       }
       
       // Verify student exists and belongs to the class
-      const student = dataStore.getStudentById(record.studentId);
+      const student = await dataStore.getStudentById(record.studentId);
       if (!student) {
         throw new Error('Student not found');
       }
@@ -117,7 +117,7 @@ export const markBulkAttendance = async (data, userId) => {
       }
       
       // Check for duplicate - if exists, update instead of creating new
-      const duplicateCheck = checkDuplicateAttendance(
+      const duplicateCheck = await checkDuplicateAttendance(
         dataStore, 
         record.studentId, 
         date, 
@@ -135,7 +135,7 @@ export const markBulkAttendance = async (data, userId) => {
           updatedBy: userId
         };
         
-        const updatedRecord = dataStore.updateAttendance(existingRecord.id, updates);
+        const updatedRecord = await dataStore.updateAttendance(existingRecord.id, updates);
         results.records.push(updatedRecord);
         results.marked++;
       } else {
@@ -155,7 +155,7 @@ export const markBulkAttendance = async (data, userId) => {
           updatedAt: new Date().toISOString()
         };
         
-        dataStore.addAttendance(attendanceRecord);
+        await dataStore.addAttendance(attendanceRecord);
         results.records.push(attendanceRecord);
         results.marked++;
       }
@@ -176,7 +176,7 @@ export const markBulkAttendance = async (data, userId) => {
  * Update attendance record
  */
 export const updateAttendanceRecord = async (attendanceId, updates, userId) => {
-  const attendance = dataStore.getAttendanceById(attendanceId);
+  const attendance = await dataStore.getAttendanceById(attendanceId);
   
   if (!attendance) {
     throw new Error('Attendance record not found');
@@ -195,7 +195,7 @@ export const updateAttendanceRecord = async (attendanceId, updates, userId) => {
   updates.updatedAt = new Date().toISOString();
   updates.updatedBy = userId;
   
-  const updatedAttendance = dataStore.updateAttendance(attendanceId, updates);
+  const updatedAttendance = await dataStore.updateAttendance(attendanceId, updates);
   
   return updatedAttendance;
 };
@@ -204,13 +204,13 @@ export const updateAttendanceRecord = async (attendanceId, updates, userId) => {
  * Check if teacher is authorized to mark attendance
  */
 export const checkTeacherAuthorization = async (teacherId, classId, subjectId = null) => {
-  const teacher = dataStore.getUserById(teacherId);
+  const teacher = await dataStore.getUserById(teacherId);
   
   if (!teacher || teacher.role !== 'teacher') {
     return false;
   }
   
-  const classData = dataStore.getClassById(classId);
+  const classData = await dataStore.getClassById(classId);
   
   if (!classData) {
     return false;
@@ -228,7 +228,7 @@ export const checkTeacherAuthorization = async (teacherId, classId, subjectId = 
   }
   
   // For subject-wise attendance mode
-  const subject = dataStore.getSubjectById(subjectId);
+  const subject = await dataStore.getSubjectById(subjectId);
   
   if (!subject) {
     return false;

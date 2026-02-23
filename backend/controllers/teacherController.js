@@ -1,7 +1,7 @@
 import dataStore from '../storage/dataStore.js';
 
 // Get all teachers for a school (admin only)
-export const getAllTeachers = (req, res) => {
+export const getAllTeachers = async (req, res) => {
   try {
     const { schoolId } = req.user;
 
@@ -14,7 +14,7 @@ export const getAllTeachers = (req, res) => {
     }
 
     // Get all users for this school with role 'teacher'
-    const allUsers = dataStore.getUsers();
+    const allUsers = await dataStore.getUsers();
     console.log('All users:', allUsers.length);
     console.log('Admin schoolId:', schoolId);
     
@@ -22,10 +22,10 @@ export const getAllTeachers = (req, res) => {
     console.log('Filtered teachers:', teachers.length);
 
     // Get all classes for this school to find incharge assignments
-    const allClasses = dataStore.getClassesBySchool(schoolId);
+    const allClasses = await dataStore.getClassesBySchool(schoolId);
     
     // Get all subjects for this school to find teaching assignments
-    const allSubjects = dataStore.getSubjectsBySchool(schoolId);
+    const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
 
     // Format response
     const formattedTeachers = teachers.map(teacher => {
@@ -63,7 +63,7 @@ export const getAllTeachers = (req, res) => {
 };
 
 // Get teacher's own classes (for teacher dashboard)
-export const getMyClasses = (req, res) => {
+export const getMyClasses = async (req, res) => {
   try {
     const { userId, schoolId } = req.user;
 
@@ -80,8 +80,8 @@ export const getMyClasses = (req, res) => {
     }
 
     // Get all classes and subjects for this school
-    const allClasses = dataStore.getClassesBySchool(schoolId);
-    const allSubjects = dataStore.getSubjectsBySchool(schoolId);
+    const allClasses = await dataStore.getClassesBySchool(schoolId);
+    const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
 
     console.log('Total classes in school:', allClasses.length);
     console.log('Total subjects in school:', allSubjects.length);
@@ -129,9 +129,9 @@ export const getMyClasses = (req, res) => {
 
     console.log('All class IDs for teacher:', Array.from(allClassIds));
 
-    allClassIds.forEach(classId => {
-      const classData = dataStore.getClassById(classId);
-      if (!classData) return;
+    for (const classId of allClassIds) {
+      const classData = await dataStore.getClassById(classId);
+      if (!classData) continue;
 
       const isIncharge = inchargeClassIds.has(classId);
       const subjects = subjectsByClass.get(classId) || [];
@@ -155,7 +155,7 @@ export const getMyClasses = (req, res) => {
         isIncharge: isIncharge,
         subjects: subjects
       });
-    });
+    }
 
     console.log('Final classes for teacher:', myClasses.length);
     console.log('=== End Debug ===');

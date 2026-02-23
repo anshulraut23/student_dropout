@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-local-jwt-secret';
+
 export const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -13,10 +15,10 @@ export const authenticateToken = (req, res, next) => {
     return res.status(401).json({ success: false, error: 'Access token required' });
   }
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, user) => {
     if (err) {
       console.log('❌ Token verification failed:', err.message);
-      console.log('JWT_SECRET exists:', !!process.env.JWT_SECRET);
+      console.log('JWT secret configured:', !!process.env.JWT_SECRET);
       return res.status(403).json({ success: false, error: 'Invalid or expired token' });
     }
     console.log('✅ Token valid for user:', user.userId, 'role:', user.role);

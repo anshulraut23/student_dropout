@@ -46,9 +46,9 @@ export const enterSingleMarks = async (req, res) => {
     );
 
     // Enrich response
-    const student = dataStore.getStudentById(studentId);
-    const exam = dataStore.getExamById(examId);
-    const subject = exam ? dataStore.getSubjectById(exam.subjectId) : null;
+    const student = await dataStore.getStudentById(studentId);
+    const exam = await dataStore.getExamById(examId);
+    const subject = exam ? await dataStore.getSubjectById(exam.subjectId) : null;
 
     res.status(201).json({
       success: true,
@@ -127,7 +127,7 @@ export const getMarksByExam = async (req, res) => {
     const { schoolId } = req.user;
 
     // Get exam
-    const exam = dataStore.getExamById(examId);
+    const exam = await dataStore.getExamById(examId);
     if (!exam) {
       return res.status(404).json({
         success: false,
@@ -144,14 +144,14 @@ export const getMarksByExam = async (req, res) => {
     }
 
     // Get marks
-    const marks = dataStore.getMarksByExam(examId);
+    const marks = await dataStore.getMarksByExam(examId);
 
     // Get students in the class
-    const students = dataStore.getStudentsByClass(exam.classId);
+    const students = await dataStore.getStudentsByClass(exam.classId);
 
     // Enrich marks with student details
-    const enrichedMarks = marks.map(m => {
-      const student = dataStore.getStudentById(m.studentId);
+    const enrichedMarks = await Promise.all(marks.map(async m => {
+      const student = await dataStore.getStudentById(m.studentId);
       return {
         id: m.id,
         studentId: m.studentId,
@@ -167,7 +167,7 @@ export const getMarksByExam = async (req, res) => {
         verifiedBy: m.verifiedBy,
         verifiedAt: m.verifiedAt
       };
-    });
+    }));
 
     // Calculate statistics
     const presentMarks = marks.filter(m => m.status === 'present');
@@ -223,7 +223,7 @@ export const getMarksByStudent = async (req, res) => {
     const { schoolId } = req.user;
 
     // Verify student exists and belongs to user's school
-    const student = dataStore.getStudentById(studentId);
+    const student = await dataStore.getStudentById(studentId);
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -231,7 +231,7 @@ export const getMarksByStudent = async (req, res) => {
       });
     }
 
-    const classData = dataStore.getClassById(student.classId);
+    const classData = await dataStore.getClassById(student.classId);
     if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({
         success: false,
@@ -276,7 +276,7 @@ export const updateMarks = async (req, res) => {
     const { userId, role, schoolId } = req.user;
 
     // Get existing marks
-    const existingMarks = dataStore.getMarksById(marksId);
+    const existingMarks = await dataStore.getMarksById(marksId);
     if (!existingMarks) {
       return res.status(404).json({
         success: false,
@@ -285,7 +285,7 @@ export const updateMarks = async (req, res) => {
     }
 
     // Get exam to verify school
-    const exam = dataStore.getExamById(existingMarks.examId);
+    const exam = await dataStore.getExamById(existingMarks.examId);
     if (!exam || exam.schoolId !== schoolId) {
       return res.status(403).json({
         success: false,
@@ -308,7 +308,7 @@ export const updateMarks = async (req, res) => {
     const updatedMarks = await marksService.updateMarks(marksId, updates, userId);
 
     // Enrich response
-    const student = dataStore.getStudentById(updatedMarks.studentId);
+    const student = await dataStore.getStudentById(updatedMarks.studentId);
 
     res.json({
       success: true,
@@ -346,7 +346,7 @@ export const deleteMarks = async (req, res) => {
     }
 
     // Get existing marks
-    const existingMarks = dataStore.getMarksById(marksId);
+    const existingMarks = await dataStore.getMarksById(marksId);
     if (!existingMarks) {
       return res.status(404).json({
         success: false,
@@ -355,7 +355,7 @@ export const deleteMarks = async (req, res) => {
     }
 
     // Get exam to verify school
-    const exam = dataStore.getExamById(existingMarks.examId);
+    const exam = await dataStore.getExamById(existingMarks.examId);
     if (!exam || exam.schoolId !== schoolId) {
       return res.status(403).json({
         success: false,
@@ -397,7 +397,7 @@ export const verifyMarks = async (req, res) => {
     }
 
     // Get existing marks
-    const existingMarks = dataStore.getMarksById(marksId);
+    const existingMarks = await dataStore.getMarksById(marksId);
     if (!existingMarks) {
       return res.status(404).json({
         success: false,
@@ -406,7 +406,7 @@ export const verifyMarks = async (req, res) => {
     }
 
     // Get exam to verify school
-    const exam = dataStore.getExamById(existingMarks.examId);
+    const exam = await dataStore.getExamById(existingMarks.examId);
     if (!exam || exam.schoolId !== schoolId) {
       return res.status(403).json({
         success: false,

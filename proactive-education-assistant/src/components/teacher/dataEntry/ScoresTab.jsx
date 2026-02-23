@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaSpinner, FaCheck } from "react-icons/fa";
+import { FaSpinner, FaCheck, FaEdit } from "react-icons/fa";
 import apiService from "../../../services/apiService";
 
 export default function ScoresTab() {
@@ -9,6 +9,10 @@ export default function ScoresTab() {
   const [scores, setScores] = useState({});
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [isMarksEntered, setIsMarksEntered] = useState(false);
+  const [existingMarks, setExistingMarks] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [marksStats, setMarksStats] = useState(null);
 
   useEffect(() => {
     loadExams();
@@ -17,8 +21,60 @@ export default function ScoresTab() {
   useEffect(() => {
     if (selectedExam) {
       loadStudents();
+      checkExistingMarks();
     }
   }, [selectedExam]);
+
+  const checkExistingMarks = async () => {
+    if (!selectedExam) return;
+
+    try {
+      const result = await apiService.getMarksByExam(selectedExam.id);
+      
+      if (result.success && result.marks && result.marks.length > 0) {
+        setIsMarksEntered(true);
+        setExistingMarks(result.marks);
+        setMarksStats(result.statistics);
+        console.log('Existing marks found:', result.marks.length);
+      } else {
+        setIsMarksEntered(false);
+        setExistingMarks([]);
+        setMarksStats(null);
+        console.log('No existing marks found');
+      }
+    } catch (error) {
+      console.error('Error checking existing marks:', error);
+      setIsMarksEntered(false);
+      setExistingMarks([]);
+    }
+  };
+
+  const loadExistingMarksForEdit = () => {
+    const marksMap = {};
+    existingMarks.forEach(mark => {
+      marksMap[mark.studentId] = {
+        obtainedMarks: mark.marksObtained || mark.marks_obtained || "",
+        remarks: mark.remarks || ""
+      };
+    });
+    setScores(marksMap);
+    setIsEditMode(true);
+    setIsMarksEntered(false); // Hide the banner when editing
+  };
+
+  const cancelEdit = () => {
+    setIsEditMode(false);
+    setIsMarksEntered(true);
+    // Reset scores to empty
+    const initialScores = {};
+    students.forEach(student => {
+      initialScores[student.id] = {
+        obtainedMarks: "",
+        remarks: ""
+      };
+    });
+    setScores(initialScores);
+  };
 
   const loadExams = async () => {
     try {
@@ -144,59 +200,37 @@ export default function ScoresTab() {
     setMessage({ type: "", text: "" });
 
     try {
-      const performanceRecords = Object.entries(scores)
+      const marksArray = Object.entries(scores)
         .filter(([_, score]) => score.obtainedMarks !== "")
-        .map(([studentId, score]) => {
-          const obtainedMarks = parseFloat(score.obtainedMarks);
-          const percentage = parseFloat(calculatePercentage(obtainedMarks));
-          
-          return {
-            studentId,
-            classId: selectedExam.classId,
-            subjectId: selectedExam.subjectId,
-            examId: selectedExam.id,
-            examType: selectedExam.examType,
-            examDate: selectedExam.examDate,
-            maxMarks: selectedExam.totalMarks,
-            obtainedMarks,
-            percentage,
-            grade: calculateGrade(obtainedMarks),
-            remarks: score.remarks || ""
-          };
-        });
+        .map(([studentId, score]) => ({
+          studentId,
+          marksObtained: parseFloat(score.obtainedMarks),
+          remarks: score.remarks || ""
+        }));
 
-      const result = await apiService.createPerformanceBulk(performanceRecords);
+      const result = await apiService.enterBulkMarks({
+        examId: selectedExam.id,
+        marks: marksArray
+      });
       
       if (result.success) {
         setMessage({ 
           type: "success", 
-          text: `Successfully saved scores for ${performanceRecords.length} student(s)!` 
+          text: `✅ ${isEditMode ? 'Updated' : 'Saved'} marks successfully! ${result.entered} student${result.entered !== 1 ? 's' : ''} processed.` 
         });
         
+        // Refresh to show as "already entered"
+        await checkExistingMarks();
+        
         setTimeout(() => {
-          const resetScores = {};
-          students.forEach(student => {
-            resetScores[student.id] = {
-              obtainedMarks: "",
-              remarks: ""
-            };
-          });
-          setScores(resetScores);
           setMessage({ type: "", text: "" });
-        }, 2000);
+        }, 3000);
       } else {
-        setMessage({ type: "error", text: result.error || "Failed to save scores" });
+        setMessage({ type: "error", text: result.error || "Failed to save marks" });
       }
     } catch (error) {
       console.error('Score submission error:', error);
-      if (error.message.includes('404') || error.message.includes('Endpoint not found')) {
-        setMessage({ 
-          type: "error", 
-          text: "Backend API not available. Please ensure the server is running." 
-        });
-      } else {
-        setMessage({ type: "error", text: "Failed to save scores. Please try again." });
-      }
+      setMessage({ type: "error", text: error.message || "Failed to save marks. Please try again." });
     } finally {
       setLoading(false);
     }
@@ -261,7 +295,46 @@ export default function ScoresTab() {
         </div>
       )}
 
-      {selectedExam && students.length > 0 && (
+      {/* Marks Already Entered Banner */}
+      {isMarksEntered && !isEditMode && selectedExam && students.length > 0 && (
+        <div className="mb-4 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-green-800">Marks Already Entered</h3>
+                <p className="text-xs text-green-700 mt-1">
+                  Marks for this exam have been recorded.
+                  {marksStats && (
+                    <>
+                      <br />
+                      <span className="font-medium">
+                        Entered: {marksStats.marksEntered}/{marksStats.totalStudents} | 
+                        Average: {marksStats.averagePercentage?.toFixed(1)}% | 
+                        Pass: {marksStats.passCount} | 
+                        Fail: {marksStats.failCount}
+                      </span>
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={loadExistingMarksForEdit}
+              className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <FaEdit />
+              Edit Marks
+            </button>
+          </div>
+        </div>
+      )}
+
+      {selectedExam && students.length > 0 && (isEditMode || !isMarksEntered) && (
         <>
           <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-4">
             <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
@@ -347,7 +420,15 @@ export default function ScoresTab() {
             </div>
           </div>
 
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-3">
+            {isEditMode && (
+              <button
+                onClick={cancelEdit}
+                className="px-6 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+            )}
             <button
               onClick={handleSubmit}
               disabled={loading}
@@ -356,12 +437,12 @@ export default function ScoresTab() {
               {loading ? (
                 <>
                   <FaSpinner className="animate-spin" />
-                  Saving Scores...
+                  {isEditMode ? 'Updating...' : 'Saving...'}
                 </>
               ) : (
                 <>
                   <FaCheck />
-                  Save All Scores
+                  {isEditMode ? 'Update Marks' : 'Save All Scores'}
                 </>
               )}
             </button>

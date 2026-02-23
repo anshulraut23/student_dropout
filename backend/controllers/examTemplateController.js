@@ -23,18 +23,18 @@ export const getTemplates = async (req, res) => {
     if (isActive !== undefined) filters.isActive = isActive === 'true';
     if (type) filters.type = type;
 
-    const templates = examTemplateService.getTemplates(schoolId, filters);
+    const templates = await examTemplateService.getTemplates(schoolId, filters);
 
     // Get usage statistics for each template
-    const templatesWithUsage = templates.map(template => {
-      const usage = examTemplateService.getTemplateUsage(template.id);
+    const templatesWithUsage = await Promise.all(templates.map(async template => {
+      const usage = await examTemplateService.getTemplateUsage(template.id);
       return {
         ...template,
         periodsCount: usage.periodsCount,
         examsCount: usage.examsCount,
         isUsed: usage.isUsed
       };
-    });
+    }));
 
     res.json({
       success: true,
@@ -67,7 +67,7 @@ export const getTemplateById = async (req, res) => {
       });
     }
 
-    const template = examTemplateService.getTemplateById(templateId);
+    const template = await examTemplateService.getTemplateById(templateId);
 
     // Verify template belongs to user's school
     if (template.schoolId !== schoolId) {
@@ -78,7 +78,7 @@ export const getTemplateById = async (req, res) => {
     }
 
     // Get usage statistics
-    const usage = examTemplateService.getTemplateUsage(templateId);
+    const usage = await examTemplateService.getTemplateUsage(templateId);
 
     res.json({
       success: true,
@@ -161,7 +161,7 @@ export const updateTemplate = async (req, res) => {
       });
     }
 
-    const existingTemplate = examTemplateService.getTemplateById(templateId);
+    const existingTemplate = await examTemplateService.getTemplateById(templateId);
 
     // Verify template belongs to user's school
     if (existingTemplate.schoolId !== schoolId) {
@@ -204,7 +204,7 @@ export const deleteTemplate = async (req, res) => {
       });
     }
 
-    const template = examTemplateService.getTemplateById(templateId);
+    const template = await examTemplateService.getTemplateById(templateId);
 
     // Verify template belongs to user's school
     if (template.schoolId !== schoolId) {
@@ -246,7 +246,7 @@ export const toggleTemplateStatus = async (req, res) => {
       });
     }
 
-    const template = examTemplateService.getTemplateById(templateId);
+    const template = await examTemplateService.getTemplateById(templateId);
 
     // Verify template belongs to user's school
     if (template.schoolId !== schoolId) {

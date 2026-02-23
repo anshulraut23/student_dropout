@@ -16,13 +16,13 @@ export const enterMarks = async (marksData, userId) => {
   }
 
   // Get exam details
-  const exam = dataStore.getExamById(marksData.examId);
+  const exam = await dataStore.getExamById(marksData.examId);
   if (!exam) {
     throw new Error('Exam not found');
   }
 
   // Verify student exists and belongs to the exam's class
-  const student = dataStore.getStudentById(marksData.studentId);
+  const student = await dataStore.getStudentById(marksData.studentId);
   if (!student) {
     throw new Error('Student not found');
   }
@@ -32,7 +32,7 @@ export const enterMarks = async (marksData, userId) => {
   }
 
   // Check for duplicate
-  const duplicateCheck = checkDuplicateMarks(dataStore, marksData.examId, marksData.studentId);
+  const duplicateCheck = await checkDuplicateMarks(dataStore, marksData.examId, marksData.studentId);
   if (duplicateCheck.isDuplicate) {
     throw new Error('Marks already entered for this student in this exam');
   }
@@ -74,7 +74,7 @@ export const enterMarks = async (marksData, userId) => {
     verifiedAt: null
   };
 
-  dataStore.addMarks(marks);
+  await dataStore.addMarks(marks);
 
   return marks;
 };
@@ -86,7 +86,7 @@ export const enterBulkMarks = async (bulkData, userId) => {
   const { examId, marks } = bulkData;
 
   // Verify exam exists
-  const exam = dataStore.getExamById(examId);
+  const exam = await dataStore.getExamById(examId);
   if (!exam) {
     throw new Error('Exam not found');
   }
@@ -103,7 +103,7 @@ export const enterBulkMarks = async (bulkData, userId) => {
 
     try {
       // Check for duplicate - if exists, update instead of creating new
-      const duplicateCheck = checkDuplicateMarks(dataStore, examId, record.studentId);
+      const duplicateCheck = await checkDuplicateMarks(dataStore, examId, record.studentId);
 
       if (duplicateCheck.isDuplicate) {
         // Update existing marks
@@ -137,7 +137,7 @@ export const enterBulkMarks = async (bulkData, userId) => {
           updatedAt: new Date().toISOString()
         };
 
-        const updatedMarks = dataStore.updateMarks(existingMarks.id, updates);
+        const updatedMarks = await dataStore.updateMarks(existingMarks.id, updates);
         results.records.push(updatedMarks);
         results.entered++;
       } else {
@@ -170,7 +170,7 @@ export const enterBulkMarks = async (bulkData, userId) => {
  * Update marks record
  */
 export const updateMarks = async (marksId, updates, userId) => {
-  const marks = dataStore.getMarksById(marksId);
+  const marks = await dataStore.getMarksById(marksId);
 
   if (!marks) {
     throw new Error('Marks record not found');
@@ -182,7 +182,7 @@ export const updateMarks = async (marksId, updates, userId) => {
   }
 
   // Get exam details for recalculation
-  const exam = dataStore.getExamById(marks.examId);
+  const exam = await dataStore.getExamById(marks.examId);
   if (!exam) {
     throw new Error('Exam not found');
   }
@@ -219,7 +219,7 @@ export const updateMarks = async (marksId, updates, userId) => {
   updates.updatedBy = userId;
   updates.updatedAt = new Date().toISOString();
 
-  const updatedMarks = dataStore.updateMarks(marksId, updates);
+  const updatedMarks = await dataStore.updateMarks(marksId, updates);
 
   return updatedMarks;
 };
@@ -228,7 +228,7 @@ export const updateMarks = async (marksId, updates, userId) => {
  * Verify marks (admin only)
  */
 export const verifyMarks = async (marksId, userId) => {
-  const marks = dataStore.getMarksById(marksId);
+  const marks = await dataStore.getMarksById(marksId);
 
   if (!marks) {
     throw new Error('Marks record not found');
@@ -238,7 +238,7 @@ export const verifyMarks = async (marksId, userId) => {
     throw new Error('Marks already verified');
   }
 
-  const updatedMarks = dataStore.verifyMarks(marksId, userId);
+  const updatedMarks = await dataStore.verifyMarks(marksId, userId);
 
   return updatedMarks;
 };
@@ -247,7 +247,7 @@ export const verifyMarks = async (marksId, userId) => {
  * Delete marks record
  */
 export const deleteMarks = async (marksId, userId) => {
-  const marks = dataStore.getMarksById(marksId);
+  const marks = await dataStore.getMarksById(marksId);
 
   if (!marks) {
     throw new Error('Marks record not found');
@@ -258,7 +258,7 @@ export const deleteMarks = async (marksId, userId) => {
     throw new Error('Cannot delete verified marks. Please contact admin.');
   }
 
-  dataStore.deleteMarks(marksId);
+  await dataStore.deleteMarks(marksId);
 
   return true;
 };
@@ -267,32 +267,38 @@ export const deleteMarks = async (marksId, userId) => {
  * Get student performance summary
  */
 export const getStudentPerformance = async (studentId, filters = {}) => {
-  const student = dataStore.getStudentById(studentId);
+  const student = await dataStore.getStudentById(studentId);
   if (!student) {
     throw new Error('Student not found');
   }
 
   // Get all marks for the student
-  let marks = dataStore.getMarksByStudent(studentId);
+  let marks = await dataStore.getMarksByStudent(studentId);
 
   // Apply filters
   if (filters.subjectId) {
-    marks = marks.filter(m => {
-      const exam = dataStore.getExamById(m.examId);
-      return exam && exam.subjectId === filters.subjectId;
-    });
+    const filteredMarks = [];
+    for (const m of marks) {
+      const exam = await dataStore.getExamById(m.examId);
+      if (exam && exam.subjectId === filters.subjectId) {
+        filteredMarks.push(m);
+      }
+    }
+    marks = filteredMarks;
   }
 
   if (filters.startDate || filters.endDate) {
-    marks = marks.filter(m => {
-      const exam = dataStore.getExamById(m.examId);
-      if (!exam) return false;
+    const filteredMarks = [];
+    for (const m of marks) {
+      const exam = await dataStore.getExamById(m.examId);
+      if (!exam) continue;
 
-      if (filters.startDate && exam.examDate < filters.startDate) return false;
-      if (filters.endDate && exam.examDate > filters.endDate) return false;
+      if (filters.startDate && exam.examDate < filters.startDate) continue;
+      if (filters.endDate && exam.examDate > filters.endDate) continue;
 
-      return true;
-    });
+      filteredMarks.push(m);
+    }
+    marks = filteredMarks;
   }
 
   // Calculate summary
@@ -317,9 +323,9 @@ export const getStudentPerformance = async (studentId, filters = {}) => {
   }
 
   // Enrich marks with exam details
-  const enrichedMarks = marks.map(m => {
-    const exam = dataStore.getExamById(m.examId);
-    const subject = exam ? dataStore.getSubjectById(exam.subjectId) : null;
+  const enrichedMarks = await Promise.all(marks.map(async m => {
+    const exam = await dataStore.getExamById(m.examId);
+    const subject = exam ? await dataStore.getSubjectById(exam.subjectId) : null;
 
     return {
       ...m,
@@ -329,7 +335,7 @@ export const getStudentPerformance = async (studentId, filters = {}) => {
       subjectName: subject ? subject.name : 'Unknown',
       totalMarks: exam ? exam.totalMarks : 0
     };
-  });
+  }));
 
   return {
     student: {

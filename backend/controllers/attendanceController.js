@@ -45,10 +45,10 @@ export const markAttendance = async (req, res) => {
     );
 
     // Enrich response with names
-    const student = dataStore.getStudentById(studentId);
-    const classData = dataStore.getClassById(classId);
-    const subject = subjectId ? dataStore.getSubjectById(subjectId) : null;
-    const markedByUser = dataStore.getUserById(userId);
+    const student = await dataStore.getStudentById(studentId);
+    const classData = await dataStore.getClassById(classId);
+    const subject = subjectId ? await dataStore.getSubjectById(subjectId) : null;
+    const markedByUser = await dataStore.getUserById(userId);
 
     res.status(201).json({
       success: true,
@@ -137,7 +137,7 @@ export const getClassAttendance = async (req, res) => {
     const { schoolId } = req.user;
 
     // Verify class belongs to user's school
-    const classData = dataStore.getClassById(classId);
+    const classData = await dataStore.getClassById(classId);
     if (!classData) {
       return res.status(404).json({
         success: false,
@@ -154,13 +154,13 @@ export const getClassAttendance = async (req, res) => {
 
     // If specific date requested, get attendance for that date
     if (date) {
-      const attendanceData = attendanceCalculator.getAttendanceForDate(
+      const attendanceData = await attendanceCalculator.getAttendanceForDate(
         classId,
         date,
         subjectId
       );
 
-      const subject = subjectId ? dataStore.getSubjectById(subjectId) : null;
+      const subject = subjectId ? await dataStore.getSubjectById(subjectId) : null;
 
       return res.json({
         success: true,
@@ -186,12 +186,31 @@ export const getClassAttendance = async (req, res) => {
     if (endDate) filters.endDate = endDate;
     if (subjectId) filters.subjectId = subjectId;
 
-    const records = dataStore.getAttendanceByClass(classId, filters);
+    console.log('Fetching attendance records with filters:', filters);
+    const records = await dataStore.getAttendanceByClass(classId, filters);
+    console.log(`Found ${records.length} attendance records`);
+
+    // Get unique student IDs and subject IDs
+    const studentIds = [...new Set(records.map(r => r.studentId))];
+    const subjectIds = [...new Set(records.map(r => r.subjectId).filter(Boolean))];
+    
+    console.log(`Fetching ${studentIds.length} unique students and ${subjectIds.length} unique subjects...`);
+    
+    // Fetch all students and subjects in batch
+    const students = await Promise.all(studentIds.map(id => dataStore.getStudentById(id)));
+    const subjects = subjectIds.length > 0 
+      ? await Promise.all(subjectIds.map(id => dataStore.getSubjectById(id)))
+      : [];
+    
+    // Create lookup maps
+    const studentMap = new Map(students.map(s => [s.id, s]));
+    const subjectMap = new Map(subjects.map(s => [s.id, s]));
 
     // Enrich records with student names
+    console.log('Enriching records with student names...');
     const enrichedRecords = records.map(record => {
-      const student = dataStore.getStudentById(record.studentId);
-      const subject = record.subjectId ? dataStore.getSubjectById(record.subjectId) : null;
+      const student = studentMap.get(record.studentId);
+      const subject = record.subjectId ? subjectMap.get(record.subjectId) : null;
 
       return {
         id: record.id,
@@ -201,10 +220,11 @@ export const getClassAttendance = async (req, res) => {
         enrollmentNo: student ? student.enrollmentNo : 'N/A',
         status: record.status,
         subjectName: subject ? subject.name : null,
-        markedAt: record.markedAt,
+        markedAt: record.createdAt,
         notes: record.notes
       };
     });
+    console.log(`Enriched ${enrichedRecords.length} records successfully`);
 
     res.json({
       success: true,
@@ -215,6 +235,12 @@ export const getClassAttendance = async (req, res) => {
     });
   } catch (error) {
     console.error('Get class attendance error:', error);
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      code: error.code
+    });
     res.status(500).json({
       success: false,
       error: 'Failed to get class attendance'
@@ -233,7 +259,7 @@ export const getStudentAttendance = async (req, res) => {
     const { schoolId } = req.user;
 
     // Verify student exists and belongs to user's school
-    const student = dataStore.getStudentById(studentId);
+    const student = await dataStore.getStudentById(studentId);
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -288,7 +314,7 @@ export const updateAttendance = async (req, res) => {
     const { userId, role, schoolId } = req.user;
 
     // Get existing attendance record
-    const existingAttendance = dataStore.getAttendanceById(attendanceId);
+    const existingAttendance = await dataStore.getAttendanceById(attendanceId);
     if (!existingAttendance) {
       return res.status(404).json({
         success: false,
@@ -333,9 +359,9 @@ export const updateAttendance = async (req, res) => {
     );
 
     // Enrich response
-    const student = dataStore.getStudentById(updatedAttendance.studentId);
+    const student = await dataStore.getStudentById(updatedAttendance.studentId);
     const subject = updatedAttendance.subjectId 
-      ? dataStore.getSubjectById(updatedAttendance.subjectId) 
+      ? await dataStore.getSubjectById(updatedAttendance.subjectId) 
       : null;
 
     res.json({
@@ -375,7 +401,7 @@ export const deleteAttendance = async (req, res) => {
     }
 
     // Get existing attendance record
-    const existingAttendance = dataStore.getAttendanceById(attendanceId);
+    const existingAttendance = await dataStore.getAttendanceById(attendanceId);
     if (!existingAttendance) {
       return res.status(404).json({
         success: false,
@@ -384,7 +410,7 @@ export const deleteAttendance = async (req, res) => {
     }
 
     // Verify class belongs to user's school
-    const classData = dataStore.getClassById(existingAttendance.classId);
+    const classData = await dataStore.getClassById(existingAttendance.classId);
     if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({
         success: false,
@@ -393,7 +419,7 @@ export const deleteAttendance = async (req, res) => {
     }
 
     // Delete attendance
-    dataStore.deleteAttendance(attendanceId);
+    await dataStore.deleteAttendance(attendanceId);
 
     res.json({
       success: true,
@@ -419,7 +445,7 @@ export const getAttendanceStatistics = async (req, res) => {
     const { schoolId } = req.user;
 
     // Verify class belongs to user's school
-    const classData = dataStore.getClassById(classId);
+    const classData = await dataStore.getClassById(classId);
     if (!classData) {
       return res.status(404).json({
         success: false,
@@ -453,7 +479,7 @@ export const getAttendanceStatistics = async (req, res) => {
       subjectId
     );
 
-    const subject = subjectId ? dataStore.getSubjectById(subjectId) : null;
+    const subject = subjectId ? await dataStore.getSubjectById(subjectId) : null;
 
     res.json({
       success: true,
@@ -505,7 +531,7 @@ export const getAttendanceReport = async (req, res) => {
 
     // Verify access to requested data
     if (classId) {
-      const classData = dataStore.getClassById(classId);
+      const classData = await dataStore.getClassById(classId);
       if (!classData || classData.schoolId !== schoolId) {
         return res.status(403).json({
           success: false,
@@ -515,14 +541,14 @@ export const getAttendanceReport = async (req, res) => {
     }
 
     if (studentId) {
-      const student = dataStore.getStudentById(studentId);
+      const student = await dataStore.getStudentById(studentId);
       if (!student) {
         return res.status(404).json({
           success: false,
           error: 'Student not found'
         });
       }
-      const classData = dataStore.getClassById(student.classId);
+      const classData = await dataStore.getClassById(student.classId);
       if (!classData || classData.schoolId !== schoolId) {
         return res.status(403).json({
           success: false,
