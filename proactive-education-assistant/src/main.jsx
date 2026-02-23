@@ -17,6 +17,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import "./App.css"; // Import Horizon theme
 import "./i18n"; // ✅ IMPORTANT
 import { ThemeProvider } from "./context/ThemeContext";
 

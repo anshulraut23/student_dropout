@@ -1,8 +1,8 @@
 // Data Store - Supports multiple storage backends
-// Using in-memory storage for compatibility during development
+// Using PostgreSQL (Supabase) for production
 
-// import sqliteStore from './sqliteStore.js';
+import postgresStore from './postgresStore.js';
 import memoryStore from './memoryStore.js';
 
-// Export in-memory store (non-persistent)
-export default memoryStore;
+// Export PostgreSQL store for production
+export default postgresStore;

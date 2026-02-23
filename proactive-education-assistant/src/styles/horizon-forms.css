@@ -1,0 +1,72 @@
+/* Horizon Theme - Form Styles */
+
+.horizon-form-input,
+.horizon-form-select,
+.horizon-form-textarea {
+  border: 1.5px solid rgba(26, 111, 181, 0.15);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--white);
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.horizon-form-input:focus,
+.horizon-form-select:focus,
+.horizon-form-textarea:focus {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.1);
+  outline: none;
+}
+
+.horizon-form-input:disabled,
+.horizon-form-select:disabled,
+.horizon-form-textarea:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.horizon-form-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  font-family: var(--font-body);
+}
+
+.horizon-form-error {
+  font-size: 0.875rem;
+  color: #dc2626;
+  margin-top: 0.25rem;
+}
+
+.horizon-form-info {
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+
+.horizon-form-info.info {
+  background: rgba(26, 111, 181, 0.1);
+  border: 1px solid rgba(26, 111, 181, 0.2);
+  color: var(--sky-deep);
+}
+
+.horizon-form-info.warning {
+  background: rgba(240, 165, 0, 0.1);
+  border: 1px solid rgba(240, 165, 0, 0.3);
+  color: #d89400;
+}
+
+.horizon-form-info.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.horizon-required {
+  color: #dc2626;
+}

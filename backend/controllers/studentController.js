@@ -2,7 +2,7 @@ import dataStore from '../storage/dataStore.js';
 import { generateId } from '../utils/helpers.js';
 
 // Get students (filtered by class if provided)
-export const getStudents = (req, res) => {
+export const getStudents = async (req, res) => {
   try {
     const { schoolId, role } = req.user;
     const { classId } = req.query;
@@ -11,7 +11,7 @@ export const getStudents = (req, res) => {
 
     if (classId) {
       // Get students for specific class
-      const classData = dataStore.getClassById(classId);
+      const classData = await dataStore.getClassById(classId);
       
       if (!classData) {
         return res.status(404).json({ 
@@ -28,26 +28,26 @@ export const getStudents = (req, res) => {
         });
       }
 
-      students = dataStore.getStudentsByClass(classId);
+      students = await dataStore.getStudentsByClass(classId);
     } else {
       // Get all students for the school
-      const allStudents = dataStore.getStudents();
-      const schoolClasses = dataStore.getClassesBySchool(schoolId);
+      const allStudents = await dataStore.getStudents();
+      const schoolClasses = await dataStore.getClassesBySchool(schoolId);
       const schoolClassIds = new Set(schoolClasses.map(c => c.id));
       
       students = allStudents.filter(s => schoolClassIds.has(s.classId));
     }
 
     // Enrich with class information
-    const enrichedStudents = students.map(student => {
-      const classData = dataStore.getClassById(student.classId);
+    const enrichedStudents = await Promise.all(students.map(async student => {
+      const classData = await dataStore.getClassById(student.classId);
       return {
         ...student,
         className: classData ? classData.name : null,
         grade: classData ? classData.grade : null,
         section: classData ? classData.section : null
       };
-    });
+    }));
 
     res.json({
       success: true,
@@ -63,12 +63,12 @@ export const getStudents = (req, res) => {
 };
 
 // Get single student by ID
-export const getStudentById = (req, res) => {
+export const getStudentById = async (req, res) => {
   try {
     const { studentId } = req.params;
     const { schoolId } = req.user;
 
-    const student = dataStore.getStudentById(studentId);
+    const student = await dataStore.getStudentById(studentId);
 
     if (!student) {
       return res.status(404).json({ 
@@ -78,7 +78,7 @@ export const getStudentById = (req, res) => {
     }
 
     // Verify student's class belongs to user's school
-    const classData = dataStore.getClassById(student.classId);
+    const classData = await dataStore.getClassById(student.classId);
     if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({ 
         success: false, 
@@ -108,7 +108,7 @@ export const getStudentById = (req, res) => {
 };
 
 // Create new student
-export const createStudent = (req, res) => {
+export const createStudent = async (req, res) => {
   try {
     const { schoolId, userId, role } = req.user;
     const { 
@@ -134,7 +134,7 @@ export const createStudent = (req, res) => {
     }
 
     // Verify class exists and belongs to user's school
-    const classData = dataStore.getClassById(classId);
+    const classData = await dataStore.getClassById(classId);
     if (!classData) {
       return res.status(400).json({ 
         success: false, 
@@ -151,8 +151,8 @@ export const createStudent = (req, res) => {
 
     // If teacher, verify they are authorized for this class
     if (role === 'teacher') {
-      const allClasses = dataStore.getClassesBySchool(schoolId);
-      const allSubjects = dataStore.getSubjectsBySchool(schoolId);
+      const allClasses = await dataStore.getClassesBySchool(schoolId);
+      const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
       
       const isIncharge = allClasses.some(cls => cls.id === classId && cls.teacherId === userId);
       const teachesInClass = allSubjects.some(sub => sub.classId === classId && sub.teacherId === userId);
@@ -166,8 +166,8 @@ export const createStudent = (req, res) => {
     }
 
     // Check for duplicate enrollment number in the same school
-    const allStudents = dataStore.getStudents();
-    const schoolClasses = dataStore.getClassesBySchool(schoolId);
+    const allStudents = await dataStore.getStudents();
+    const schoolClasses = await dataStore.getClassesBySchool(schoolId);
     const schoolClassIds = new Set(schoolClasses.map(c => c.id));
     
     const duplicateStudent = allStudents.find(s => 
@@ -202,7 +202,7 @@ export const createStudent = (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    dataStore.addStudent(newStudent);
+    await dataStore.addStudent(newStudent);
 
     res.status(201).json({
       success: true,
@@ -224,7 +224,7 @@ export const createStudent = (req, res) => {
 };
 
 // Create multiple students (bulk upload)
-export const createStudentsBulk = (req, res) => {
+export const createStudentsBulk = async (req, res) => {
   try {
     const { schoolId, userId, role } = req.user;
     const { students, classId } = req.body;
@@ -245,7 +245,7 @@ export const createStudentsBulk = (req, res) => {
     }
 
     // Verify class exists and belongs to user's school
-    const classData = dataStore.getClassById(classId);
+    const classData = await dataStore.getClassById(classId);
     if (!classData) {
       return res.status(400).json({ 
         success: false, 
@@ -262,8 +262,8 @@ export const createStudentsBulk = (req, res) => {
 
     // If teacher, verify they are authorized for this class
     if (role === 'teacher') {
-      const allClasses = dataStore.getClassesBySchool(schoolId);
-      const allSubjects = dataStore.getSubjectsBySchool(schoolId);
+      const allClasses = await dataStore.getClassesBySchool(schoolId);
+      const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
       
       const isIncharge = allClasses.some(cls => cls.id === classId && cls.teacherId === userId);
       const teachesInClass = allSubjects.some(sub => sub.classId === classId && sub.teacherId === userId);
@@ -277,8 +277,8 @@ export const createStudentsBulk = (req, res) => {
     }
 
     // Get existing enrollment numbers for this school
-    const allStudents = dataStore.getStudents();
-    const schoolClasses = dataStore.getClassesBySchool(schoolId);
+    const allStudents = await dataStore.getStudents();
+    const schoolClasses = await dataStore.getClassesBySchool(schoolId);
     const schoolClassIds = new Set(schoolClasses.map(c => c.id));
     const existingEnrollmentNos = new Set(
       allStudents
@@ -289,7 +289,7 @@ export const createStudentsBulk = (req, res) => {
     const createdStudents = [];
     const errors = [];
 
-    students.forEach((studentData, index) => {
+    for (const [index, studentData] of students.entries()) {
       try {
         // Validate required fields
         if (!studentData.name || !studentData.enrollmentNo) {
@@ -297,7 +297,7 @@ export const createStudentsBulk = (req, res) => {
             row: index + 1,
             error: 'Name and enrollment number are required'
           });
-          return;
+          continue;
         }
 
         // Check for duplicate enrollment number
@@ -307,7 +307,7 @@ export const createStudentsBulk = (req, res) => {
             enrollmentNo: studentData.enrollmentNo,
             error: 'Enrollment number already exists'
           });
-          return;
+          continue;
         }
 
         // Create student
@@ -330,7 +330,7 @@ export const createStudentsBulk = (req, res) => {
           updatedAt: new Date().toISOString()
         };
 
-        dataStore.addStudent(newStudent);
+        await dataStore.addStudent(newStudent);
         existingEnrollmentNos.add(studentData.enrollmentNo.toLowerCase());
         createdStudents.push(newStudent);
       } catch (err) {
@@ -339,7 +339,7 @@ export const createStudentsBulk = (req, res) => {
           error: err.message
         });
       }
-    });
+    }
 
     res.status(201).json({
       success: true,
@@ -359,13 +359,13 @@ export const createStudentsBulk = (req, res) => {
 };
 
 // Update student
-export const updateStudent = (req, res) => {
+export const updateStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
     const { schoolId, userId, role } = req.user;
     const updates = req.body;
 
-    const student = dataStore.getStudentById(studentId);
+    const student = await dataStore.getStudentById(studentId);
 
     if (!student) {
       return res.status(404).json({ 
@@ -375,7 +375,7 @@ export const updateStudent = (req, res) => {
     }
 
     // Verify student's class belongs to user's school
-    const classData = dataStore.getClassById(student.classId);
+    const classData = await dataStore.getClassById(student.classId);
     if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({ 
         success: false, 
@@ -385,8 +385,8 @@ export const updateStudent = (req, res) => {
 
     // If teacher, verify they are authorized for this class
     if (role === 'teacher') {
-      const allClasses = dataStore.getClassesBySchool(schoolId);
-      const allSubjects = dataStore.getSubjectsBySchool(schoolId);
+      const allClasses = await dataStore.getClassesBySchool(schoolId);
+      const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
       
       const isIncharge = allClasses.some(cls => cls.id === student.classId && cls.teacherId === userId);
       const teachesInClass = allSubjects.some(sub => sub.classId === student.classId && sub.teacherId === userId);
@@ -400,7 +400,7 @@ export const updateStudent = (req, res) => {
     }
 
     // Update student
-    const updatedStudent = dataStore.updateStudent(studentId, {
+    const updatedStudent = await dataStore.updateStudent(studentId, {
       ...updates,
       updatedAt: new Date().toISOString()
     });
@@ -425,12 +425,12 @@ export const updateStudent = (req, res) => {
 };
 
 // Delete student
-export const deleteStudent = (req, res) => {
+export const deleteStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
     const { schoolId } = req.user;
 
-    const student = dataStore.getStudentById(studentId);
+    const student = await dataStore.getStudentById(studentId);
 
     if (!student) {
       return res.status(404).json({ 
@@ -440,7 +440,7 @@ export const deleteStudent = (req, res) => {
     }
 
     // Verify student's class belongs to user's school
-    const classData = dataStore.getClassById(student.classId);
+    const classData = await dataStore.getClassById(student.classId);
     if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({ 
         success: false, 
@@ -449,7 +449,7 @@ export const deleteStudent = (req, res) => {
     }
 
     // For now, we'll just mark as inactive instead of deleting
-    dataStore.updateStudent(studentId, {
+    await dataStore.updateStudent(studentId, {
       status: 'inactive',
       updatedAt: new Date().toISOString()
     });

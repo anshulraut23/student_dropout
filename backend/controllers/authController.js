@@ -33,7 +33,7 @@ export const registerAdmin = async (req, res) => {
     }
 
     // Check for duplicate email
-    const existingUser = dataStore.getUserByEmail(email);
+    const existingUser = await dataStore.getUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -74,8 +74,8 @@ export const registerAdmin = async (req, res) => {
     school.adminId = userId;
 
     // Save to data store
-    dataStore.addSchool(school);
-    dataStore.addUser(user);
+    await dataStore.addSchool(school);
+    await dataStore.addUser(user);
 
     // Generate JWT token
     const token = jwt.sign(
@@ -142,7 +142,7 @@ export const registerTeacher = async (req, res) => {
     }
 
     // Check for duplicate email
-    const existingUser = dataStore.getUserByEmail(email);
+    const existingUser = await dataStore.getUserByEmail(email);
     if (existingUser) {
       return res.status(400).json({ 
         success: false, 
@@ -151,7 +151,7 @@ export const registerTeacher = async (req, res) => {
     }
 
     // Verify school exists
-    const school = dataStore.getSchoolById(schoolId);
+    const school = await dataStore.getSchoolById(schoolId);
     if (!school) {
       return res.status(400).json({ 
         success: false, 
@@ -185,8 +185,8 @@ export const registerTeacher = async (req, res) => {
     };
 
     // Save to data store
-    dataStore.addUser(user);
-    dataStore.addRequest(request);
+    await dataStore.addUser(user);
+    await dataStore.addRequest(request);
 
     res.status(201).json({
       success: true,
@@ -227,7 +227,7 @@ export const login = async (req, res) => {
     }
 
     // Find user
-    const user = dataStore.getUserByEmail(email);
+    const user = await dataStore.getUserByEmail(email);
     if (!user) {
       return res.status(401).json({ 
         success: false, 
@@ -260,7 +260,7 @@ export const login = async (req, res) => {
     }
 
     // Get school info
-    const school = dataStore.getSchoolById(user.schoolId);
+    const school = await dataStore.getSchoolById(user.schoolId);
 
     // Generate JWT token
     const token = jwt.sign(
@@ -296,9 +296,9 @@ export const login = async (req, res) => {
 };
 
 // Get current user
-export const getCurrentUser = (req, res) => {
+export const getCurrentUser = async (req, res) => {
   try {
-    const user = dataStore.getUserById(req.user.userId);
+    const user = await dataStore.getUserById(req.user.userId);
     if (!user) {
       return res.status(404).json({ 
         success: false, 
@@ -306,7 +306,7 @@ export const getCurrentUser = (req, res) => {
       });
     }
 
-    const school = dataStore.getSchoolById(user.schoolId);
+    const school = await dataStore.getSchoolById(user.schoolId);
 
     res.json({
       success: true,

@@ -10,6 +10,10 @@ class MemoryStore {
     this.subjects = [];
     this.students = [];
     this.attendance = [];
+    this.examTemplates = [];
+    this.examPeriods = [];
+    this.exams = [];
+    this.marks = [];
   }
 
   // Schools
@@ -271,6 +275,157 @@ class MemoryStore {
     return true;
   }
 
+  // Exam Templates
+  addExamTemplate(template) {
+    this.examTemplates.push(template);
+    return template;
+  }
+
+  getExamTemplates() {
+    return [...this.examTemplates];
+  }
+
+  getExamTemplateById(id) {
+    return this.examTemplates.find(t => t.id === id);
+  }
+
+  getExamTemplatesBySchool(schoolId) {
+    return this.examTemplates.filter(t => t.schoolId === schoolId);
+  }
+
+  updateExamTemplate(id, updates) {
+    const template = this.examTemplates.find(t => t.id === id);
+    if (template) {
+      Object.assign(template, updates);
+    }
+    return template;
+  }
+
+  deleteExamTemplate(id) {
+    this.examTemplates = this.examTemplates.filter(t => t.id !== id);
+    return true;
+  }
+
+  toggleExamTemplateStatus(id) {
+    const template = this.examTemplates.find(t => t.id === id);
+    if (template) {
+      template.isActive = !template.isActive;
+    }
+    return template;
+  }
+
+  // Exam Periods
+  addExamPeriod(period) {
+    this.examPeriods.push(period);
+    return period;
+  }
+
+  getExamPeriods() {
+    return [...this.examPeriods];
+  }
+
+  getExamPeriodById(id) {
+    return this.examPeriods.find(p => p.id === id);
+  }
+
+  getExamPeriodsBySchool(schoolId) {
+    return this.examPeriods.filter(p => p.schoolId === schoolId);
+  }
+
+  updateExamPeriod(id, updates) {
+    const period = this.examPeriods.find(p => p.id === id);
+    if (period) {
+      Object.assign(period, updates);
+    }
+    return period;
+  }
+
+  deleteExamPeriod(id) {
+    this.examPeriods = this.examPeriods.filter(p => p.id !== id);
+    return true;
+  }
+
+  // Exams
+  addExam(exam) {
+    this.exams.push(exam);
+    return exam;
+  }
+
+  getExams(filters = {}) {
+    let results = [...this.exams];
+    
+    if (filters.classId) {
+      results = results.filter(e => e.classId === filters.classId);
+    }
+    if (filters.subjectId) {
+      results = results.filter(e => e.subjectId === filters.subjectId);
+    }
+    if (filters.schoolId) {
+      results = results.filter(e => e.schoolId === filters.schoolId);
+    }
+    if (filters.status) {
+      results = results.filter(e => e.status === filters.status);
+    }
+    
+    return results;
+  }
+
+  getExamById(id) {
+    return this.exams.find(e => e.id === id);
+  }
+
+  updateExam(id, updates) {
+    const exam = this.exams.find(e => e.id === id);
+    if (exam) {
+      Object.assign(exam, updates);
+    }
+    return exam;
+  }
+
+  deleteExam(id) {
+    this.exams = this.exams.filter(e => e.id !== id);
+    return true;
+  }
+
+  // Marks
+  addMarks(marks) {
+    this.marks.push(marks);
+    return marks;
+  }
+
+  getMarks(filters = {}) {
+    let results = [...this.marks];
+    
+    if (filters.examId) {
+      results = results.filter(m => m.examId === filters.examId);
+    }
+    if (filters.studentId) {
+      results = results.filter(m => m.studentId === filters.studentId);
+    }
+    if (filters.classId) {
+      results = results.filter(m => m.classId === filters.classId);
+    }
+    
+    return results;
+  }
+
+  getMarksById(id) {
+    return this.marks.find(m => m.id === id);
+  }
+
+  updateMarks(id, updates) {
+    const marks = this.marks.find(m => m.id === id);
+    if (marks) {
+      Object.assign(marks, updates);
+    }
+    return marks;
+  }
+
+  deleteMarks(id) {
+    this.marks = this.marks.filter(m => m.id !== id);
+    return true;
+  }
+
   // Clear all data
   clear() {
     this.schools = [];
@@ -280,8 +435,13 @@ class MemoryStore {
     this.subjects = [];
     this.students = [];
     this.attendance = [];
+    this.examTemplates = [];
+    this.examPeriods = [];
+    this.exams = [];
+    this.marks = [];
   }
 }
+
 
 // Export a singleton instance
 export default new MemoryStore();

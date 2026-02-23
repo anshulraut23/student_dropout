@@ -47,10 +47,18 @@
   - Statistics and analytics
   - 35+ automated tests
 
+### In Progress
+
+- **[Exam Management System](EXAM_MANAGEMENT.md)** - Standardized exam and marks management
+  - Admin-controlled exam templates
+  - Automated exam generation
+  - Standardized marking scheme
+  - Performance tracking for dropout prediction
+  - Status: Planning Phase
+
 ### Implementation Plans (30%)
 
 - **[Backend Implementation Plan](BACKEND_IMPLEMENTATION_PLAN.md)** - Roadmap for remaining features
-  - Performance/Exam management (10%)
   - Behavioral records (8%)
   - Intervention system (7%)
   - Alert and notification system (5%)
@@ -97,6 +105,7 @@ docs/
 ├── SUBJECT_MANAGEMENT.md              # Subject docs
 ├── STUDENT_MANAGEMENT.md              # Student docs
 ├── ATTENDANCE_SYSTEM.md               # Attendance docs
+├── EXAM_MANAGEMENT.md                 # Exam & marks system (NEW)
 └── BACKEND_IMPLEMENTATION_PLAN.md     # Future features
 ```
 
@@ -113,8 +122,10 @@ docs/
 - Attendance System - 100%
 - Data Storage (SQLite) - 100%
 
+### 🚧 In Progress
+- Exam Management System - 0% (Planning complete, ready for implementation)
+
 ### 🚧 Planned (30%)
-- Performance/Exam Management - 0%
 - Behavioral Records - 0%
 - Intervention System - 0%
 - Alert & Notification System - 0%

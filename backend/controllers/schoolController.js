@@ -1,9 +1,9 @@
 import dataStore from '../storage/dataStore.js';
 
 // Get all schools
-export const getAllSchools = (req, res) => {
+export const getAllSchools = async (req, res) => {
   try {
-    const schools = dataStore.getSchools();
+    const schools = await dataStore.getSchools();
     
     // Sort alphabetically by name
     const sortedSchools = schools
@@ -29,10 +29,10 @@ export const getAllSchools = (req, res) => {
 };
 
 // Get school by ID
-export const getSchoolById = (req, res) => {
+export const getSchoolById = async (req, res) => {
   try {
     const { schoolId } = req.params;
-    const school = dataStore.getSchoolById(schoolId);
+    const school = await dataStore.getSchoolById(schoolId);
 
     if (!school) {
       return res.status(404).json({ 

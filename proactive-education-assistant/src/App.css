@@ -1,42 +1,198 @@
-/* #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+/* ═══════════════════════════════════════════════════════════
+   HORIZON THEME - CSS VARIABLES & GLOBAL STYLES
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Color Palette */
+  --sky: #1a6fb5;
+  --sky-light: #2d8fd4;
+  --sky-deep: #0e4a80;
+  --accent: #f0a500;
+  --slate: #3c4a5a;
+  --gray: #6b7a8d;
+  --light: #f5f8fb;
+  --white: #ffffff;
+  --text: #1e2c3a;
+  
+  /* Typography */
+  --font-heading: 'DM Serif Display', serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #5f67f7aa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+/* Global Typography */
+body {
+  font-family: var(--font-body);
+  color: var(--text);
+  line-height: 1.6;
 }
 
-@keyframes logo-spin {
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  line-height: 1.2;
+}
+
+/* Animations */
+@keyframes fadeUp {
   from {
-    transform: rotate(0deg);
+    transform: translateY(40px);
+    opacity: 0;
   }
   to {
-    transform: rotate(360deg);
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
-.card {
-  padding: 2em;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
-.read-the-docs {
-  color: #888;
-} */
+/* Scroll Reveal Animation */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Utility Classes */
+.horizon-card {
+  border: 1px solid rgba(26, 111, 181, 0.12);
+  border-radius: 16px;
+  padding: 2rem;
+  background: var(--white);
+  transition: all 0.3s ease;
+}
+
+.horizon-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(26, 111, 181, 0.12);
+  border-color: rgba(26, 111, 181, 0.25);
+}
+
+.horizon-btn-primary {
+  background: var(--sky);
+  color: var(--white);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.horizon-btn-primary:hover {
+  background: var(--sky-deep);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(26, 111, 181, 0.3);
+}
+
+.horizon-btn-secondary {
+  background: var(--accent);
+  color: var(--text);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.horizon-btn-secondary:hover {
+  background: #d89400;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(240, 165, 0, 0.4);
+}
+
+.horizon-btn-outline {
+  background: transparent;
+  color: var(--sky);
+  border: 1.5px solid var(--sky);
+  border-radius: 8px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.horizon-btn-outline:hover {
+  background: var(--sky);
+  color: var(--white);
+}
+
+.horizon-input {
+  border: 1.5px solid rgba(26, 111, 181, 0.15);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--white);
+  transition: all 0.2s ease;
+}
+
+.horizon-input:focus {
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.1);
+  outline: none;
+}
+
+.horizon-badge {
+  background: rgba(240, 165, 0, 0.2);
+  border: 1px solid rgba(240, 165, 0, 0.5);
+  color: var(--accent);
+  border-radius: 30px;
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-weight: 600;
+  padding: 0.4rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.horizon-section-label {
+  color: var(--sky);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 900px) {
+  .horizon-two-col {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .horizon-three-col {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .horizon-card {
+    padding: 1.5rem;
+  }
+}

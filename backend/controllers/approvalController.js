@@ -1,7 +1,7 @@
 import dataStore from '../storage/dataStore.js';
 
 // Get pending teacher requests for a school
-export const getPendingRequests = (req, res) => {
+export const getPendingRequests = async (req, res) => {
   try {
     const { schoolId } = req.user;
 
@@ -13,17 +13,17 @@ export const getPendingRequests = (req, res) => {
       });
     }
 
-    const requests = dataStore.getRequestsBySchool(schoolId);
+    const requests = await dataStore.getRequestsBySchool(schoolId);
     
     // Enrich requests with user data
-    const enrichedRequests = requests.map(request => {
-      const user = dataStore.getUserById(request.teacherId);
+    const enrichedRequests = await Promise.all(requests.map(async request => {
+      const user = await dataStore.getUserById(request.teacherId);
       return {
         ...request,
         teacherName: user ? user.fullName : 'Unknown',
         teacherEmail: user ? user.email : 'Unknown'
       };
-    });
+    }));
 
     res.json({
       success: true,
@@ -39,7 +39,7 @@ export const getPendingRequests = (req, res) => {
 };
 
 // Approve teacher
-export const approveTeacher = (req, res) => {
+export const approveTeacher = async (req, res) => {
   try {
     const { teacherId } = req.params;
     const { classIds = [] } = req.body;
@@ -53,7 +53,7 @@ export const approveTeacher = (req, res) => {
     }
 
     // Update user status
-    const user = dataStore.updateUser(teacherId, {
+    const user = await dataStore.updateUser(teacherId, {
       status: 'approved',
       assignedClasses: classIds
     });
@@ -67,20 +67,20 @@ export const approveTeacher = (req, res) => {
 
     // If classIds provided, update those classes to have this teacher as incharge
     if (classIds.length > 0) {
-      classIds.forEach(classId => {
-        const classData = dataStore.getClassById(classId);
+      for (const classId of classIds) {
+        const classData = await dataStore.getClassById(classId);
         if (classData && classData.schoolId === req.user.schoolId) {
           // Update class to have this teacher as incharge
-          dataStore.updateClass(classId, {
+          await dataStore.updateClass(classId, {
             teacherId: teacherId,
             updatedAt: new Date().toISOString()
           });
         }
-      });
+      }
     }
 
     // Update request
-    dataStore.updateRequest(teacherId, {
+    await dataStore.updateRequest(teacherId, {
       status: 'approved',
       processedAt: new Date().toISOString()
     });
@@ -106,7 +106,7 @@ export const approveTeacher = (req, res) => {
 };
 
 // Reject teacher
-export const rejectTeacher = (req, res) => {
+export const rejectTeacher = async (req, res) => {
   try {
     const { teacherId } = req.params;
 
@@ -119,7 +119,7 @@ export const rejectTeacher = (req, res) => {
     }
 
     // Update user status
-    const user = dataStore.updateUser(teacherId, {
+    const user = await dataStore.updateUser(teacherId, {
       status: 'rejected'
     });
 
@@ -131,7 +131,7 @@ export const rejectTeacher = (req, res) => {
     }
 
     // Update request
-    dataStore.updateRequest(teacherId, {
+    await dataStore.updateRequest(teacherId, {
       status: 'rejected',
       processedAt: new Date().toISOString()
     });

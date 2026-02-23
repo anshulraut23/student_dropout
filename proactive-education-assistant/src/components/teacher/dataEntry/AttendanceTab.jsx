@@ -48,11 +48,11 @@ export default function AttendanceTab() {
         checkExistingAttendance();
       }
       // For subject-wise attendance, only check when subject is selected
-      else if ((attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedSubject) {
+      else if ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedSubject) {
         checkExistingAttendance();
       }
       // If subject-wise but no subject selected, clear the banner
-      else if ((attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
+      else if ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
         setIsAttendanceMarked(false);
         setExistingAttendance([]);
         setIsEditMode(false);
@@ -70,7 +70,7 @@ export default function AttendanceTab() {
       }
       
       // For subject-wise attendance, don't check until subject is selected
-      if ((attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
+      if ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
         setIsAttendanceMarked(false);
         setExistingAttendance([]);
         return;
@@ -81,7 +81,7 @@ export default function AttendanceTab() {
       };
       
       // Only add subjectId if in subject-wise mode and subject is selected
-      if ((attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedSubject) {
+      if ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedSubject) {
         filters.subjectId = selectedSubject;
       }
 
@@ -199,8 +199,8 @@ export default function AttendanceTab() {
       // Set teacher role
       setTeacherRole(classData.role || 'incharge');
 
-      // If subject-wise mode, load subjects (check both formats)
-      if (classData.attendanceMode === 'subject-wise' || classData.attendanceMode === 'subject_wise') {
+      // If subject-wise mode, load subjects (check all formats: 'subject', 'subject-wise', 'subject_wise')
+      if (classData.attendanceMode === 'subject' || classData.attendanceMode === 'subject-wise' || classData.attendanceMode === 'subject_wise') {
         // Load subjects for this class
         const subjectsResult = await apiService.getSubjectsByClass(selectedClass);
         
@@ -252,7 +252,7 @@ export default function AttendanceTab() {
     }
 
     // Check if subject is required but not selected
-    if ((attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
+    if ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
       setMessage({ type: "error", text: "Please select a subject" });
       setTimeout(() => setMessage({ type: "", text: "" }), 3000);
       return;
@@ -270,7 +270,7 @@ export default function AttendanceTab() {
 
       const bulkData = {
         classId: selectedClass,
-        subjectId: (attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? selectedSubject : null,
+        subjectId: (attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? selectedSubject : null,
         date: selectedDate,
         attendance: attendanceArray
       };
@@ -408,7 +408,7 @@ export default function AttendanceTab() {
     }
 
     // Check if subject is required but not selected
-    if ((attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
+    if ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
       setMessage({ type: "error", text: "Please select a subject" });
       return;
     }
@@ -431,7 +431,7 @@ export default function AttendanceTab() {
 
       const bulkData = {
         classId: selectedClass,
-        subjectId: (attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? selectedSubject : null,
+        subjectId: (attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? selectedSubject : null,
         date: selectedDate,
         attendance: attendanceArray
       };
@@ -550,7 +550,7 @@ export default function AttendanceTab() {
             </div>
 
             {/* Subject Selection - Only for subject-wise attendance */}
-            {(attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && availableSubjects.length > 0 && (
+            {(attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && availableSubjects.length > 0 && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Select Subject <span className="text-red-500">*</span>
@@ -572,7 +572,7 @@ export default function AttendanceTab() {
           </div>
 
           {/* Info message for subject-wise attendance */}
-          {(attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedClass && (
+          {(attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedClass && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700">
               <strong>Subject-wise Attendance:</strong> This class uses subject-wise attendance. 
               {teacherRole === 'subject_teacher' 
@@ -583,7 +583,7 @@ export default function AttendanceTab() {
 
           {/* Attendance Already Marked Banner */}
           {isAttendanceMarked && !isEditMode && selectedClass && students.length > 0 && (
-            attendanceMode === 'daily' || ((attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedSubject)
+            attendanceMode === 'daily' || ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedSubject)
           ) && (
             <div className="mb-4 p-4 bg-green-50 border-2 border-green-300 rounded-lg">
               <div className="flex items-center justify-between">
@@ -596,7 +596,7 @@ export default function AttendanceTab() {
                   <div>
                     <h3 className="text-sm font-semibold text-green-800">Attendance Already Marked</h3>
                     <p className="text-xs text-green-700 mt-1">
-                      Attendance for this {(attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? 'subject' : 'class'} on {new Date(selectedDate).toLocaleDateString()} has been recorded.
+                      Attendance for this {(attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? 'subject' : 'class'} on {new Date(selectedDate).toLocaleDateString()} has been recorded.
                       <br />
                       <span className="font-medium">
                         Present: {existingAttendance.filter(a => a.status === 'present').length} | 
@@ -617,7 +617,7 @@ export default function AttendanceTab() {
           )}
 
           {selectedClass && students.length > 0 && (
-            attendanceMode === 'daily' || ((attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedSubject)
+            attendanceMode === 'daily' || ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && selectedSubject)
           ) && (isEditMode || !isAttendanceMarked) && (
             <>
               {/* Quick Actions */}

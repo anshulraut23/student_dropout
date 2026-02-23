@@ -139,7 +139,7 @@ export const getStudentAttendanceSummary = (studentId, startDate, endDate, subje
       className: classData ? classData.name : null,
       subjectName: subject ? subject.name : null,
       markedBy: markedByUser ? markedByUser.fullName : null,
-      markedAt: record.markedAt,
+      markedAt: record.createdAt,
       notes: record.notes
     };
   });
@@ -236,7 +236,7 @@ export const generateAttendanceReport = (filters) => {
       subjectName: subject ? subject.name : 'N/A',
       status: record.status,
       markedBy: markedByUser ? markedByUser.fullName : 'Unknown',
-      markedAt: record.markedAt,
+      markedAt: record.createdAt,
       notes: record.notes || ''
     };
   });
@@ -265,9 +265,9 @@ export const determineRiskLevel = (percentage) => {
 /**
  * Get attendance for a specific date
  */
-export const getAttendanceForDate = (classId, date, subjectId = null) => {
-  const records = dataStore.getAttendanceByDate(date, classId, subjectId);
-  const students = dataStore.getStudentsByClass(classId);
+export const getAttendanceForDate = async (classId, date, subjectId = null) => {
+  const records = await dataStore.getAttendanceByDate(date, classId, subjectId);
+  const students = await dataStore.getStudentsByClass(classId);
   
   // Create a map of student attendance
   const attendanceMap = new Map();
@@ -285,7 +285,7 @@ export const getAttendanceForDate = (classId, date, subjectId = null) => {
       enrollmentNo: student.enrollmentNo,
       status: record ? record.status : null,
       notes: record ? record.notes : null,
-      markedAt: record ? record.markedAt : null,
+      markedAt: record ? record.createdAt : null,
       attendanceId: record ? record.id : null
     };
   });
