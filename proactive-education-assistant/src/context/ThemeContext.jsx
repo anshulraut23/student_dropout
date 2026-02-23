@@ -1,27 +1,38 @@
-import { createContext, useContext, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext();
 
+const STORAGE_KEY = 'themeMode';
+const DEFAULT_THEME = 'light';
+
 export function ThemeProvider({ children }) {
-  // Fixed to light theme only
-  const theme = 'light';
+  const [theme, setTheme] = useState(() => localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME);
 
   useEffect(() => {
     const root = document.documentElement;
     const body = document.body;
-    
-    // Remove dark theme classes
-    root.classList.remove('dark');
-    body.classList.remove('dark', 'dark-mode');
-    
-    // Ensure light theme
-    root.classList.add('light');
-    body.classList.add('light');
-  }, []);
+
+    root.classList.remove('light', 'dark');
+    body.classList.remove('light', 'dark', 'dark-mode');
+
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      body.classList.add('dark', 'dark-mode');
+    } else {
+      root.classList.add('light');
+      body.classList.add('light');
+    }
+
+    localStorage.setItem(STORAGE_KEY, theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((previousTheme) => (previousTheme === 'dark' ? 'light' : 'dark'));
+  };
 
   const value = {
     theme,
-    toggleTheme: () => {}, // No-op for compatibility
+    toggleTheme,
   };
 
   return (
