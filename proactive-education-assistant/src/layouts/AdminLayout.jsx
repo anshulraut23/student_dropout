@@ -67,12 +67,16 @@ function AdminLayout() {
 
           {/* User Info & Logout */}
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
+            <button
+              onClick={() => navigate('/admin/profile')}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors cursor-pointer"
+              title="View Profile"
+            >
               <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
                 <span className="text-white text-xs font-semibold">AD</span>
               </div>
               <span className="text-sm font-medium text-gray-700 hidden md:inline">Admin</span>
-            </div>
+            </button>
             
             <button
               onClick={handleLogout}

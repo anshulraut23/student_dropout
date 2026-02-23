@@ -144,33 +144,29 @@ export default function ScoresTab() {
     setMessage({ type: "", text: "" });
 
     try {
-      const performanceRecords = Object.entries(scores)
+      // Use the marks API instead of performance API
+      const marksRecords = Object.entries(scores)
         .filter(([_, score]) => score.obtainedMarks !== "")
-        .map(([studentId, score]) => {
-          const obtainedMarks = parseFloat(score.obtainedMarks);
-          const percentage = parseFloat(calculatePercentage(obtainedMarks));
-          
-          return {
-            studentId,
-            classId: selectedExam.classId,
-            subjectId: selectedExam.subjectId,
-            examId: selectedExam.id,
-            examType: selectedExam.examType,
-            examDate: selectedExam.examDate,
-            maxMarks: selectedExam.totalMarks,
-            obtainedMarks,
-            percentage,
-            grade: calculateGrade(obtainedMarks),
-            remarks: score.remarks || ""
-          };
-        });
+        .map(([studentId, score]) => ({
+          studentId,
+          marksObtained: parseFloat(score.obtainedMarks),
+          status: 'present',
+          remarks: score.remarks || ""
+        }));
 
-      const result = await apiService.createPerformanceBulk(performanceRecords);
+      console.log('Submitting marks:', { examId: selectedExam.id, marks: marksRecords });
+
+      const result = await apiService.enterBulkMarks({
+        examId: selectedExam.id,
+        marks: marksRecords
+      });
+      
+      console.log('Marks submission result:', result);
       
       if (result.success) {
         setMessage({ 
           type: "success", 
-          text: `Successfully saved scores for ${performanceRecords.length} student(s)!` 
+          text: `Successfully saved scores for ${result.entered} student(s)!${result.failed > 0 ? ` (${result.failed} failed)` : ''}` 
         });
         
         setTimeout(() => {
@@ -192,10 +188,15 @@ export default function ScoresTab() {
       if (error.message.includes('404') || error.message.includes('Endpoint not found')) {
         setMessage({ 
           type: "error", 
-          text: "Backend API not available. Please ensure the server is running." 
+          text: "Backend API not available. Please ensure the server is running on port 5000." 
+        });
+      } else if (error.message.includes('Cannot connect to backend')) {
+        setMessage({ 
+          type: "error", 
+          text: "Cannot connect to backend server. Please check if it's running." 
         });
       } else {
-        setMessage({ type: "error", text: "Failed to save scores. Please try again." });
+        setMessage({ type: "error", text: "Failed to save scores: " + error.message });
       }
     } finally {
       setLoading(false);

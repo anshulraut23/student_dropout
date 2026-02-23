@@ -11,27 +11,27 @@ export default function BehaviourTab() {
   const [formData, setFormData] = useState({
     studentId: "",
     classId: "",
-    tags: [],
+    behaviorType: "positive",
+    category: "",
     severity: "medium",
-    notes: "",
+    description: "",
+    actionTaken: "",
+    followUpRequired: false,
+    followUpDate: "",
     date: new Date().toISOString().split('T')[0]
   });
 
-  const behaviourTags = [
-    "Low participation",
-    "Frequent absence",
-    "Disruptive",
-    "Silent withdrawal",
-    "Good improvement",
-    "Excellent behaviour",
-    "Needs attention",
-    "Aggressive",
-    "Helpful",
+  const behaviourCategories = [
+    "Attendance",
+    "Participation",
+    "Discipline",
+    "Academic Performance",
+    "Social Behavior",
+    "Emotional Well-being",
     "Leadership",
-    "Cooperative",
-    "Distracted",
-    "Motivated",
-    "Struggling"
+    "Cooperation",
+    "Motivation",
+    "Other"
   ];
 
   useEffect(() => {
@@ -71,13 +71,9 @@ export default function BehaviourTab() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleTagToggle = (tag) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.includes(tag) 
-        ? prev.tags.filter(t => t !== tag) 
-        : [...prev.tags, tag]
-    }));
+  const handleCheckboxChange = (e) => {
+    const { name, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: checked }));
   };
 
   const handleSubmit = async (e) => {
@@ -88,8 +84,8 @@ export default function BehaviourTab() {
       return;
     }
 
-    if (formData.tags.length === 0 && !formData.notes) {
-      setMessage({ type: "error", text: "Please add at least one tag or note" });
+    if (!formData.category || !formData.description) {
+      setMessage({ type: "error", text: "Please select category and add description" });
       return;
     }
 
@@ -99,11 +95,14 @@ export default function BehaviourTab() {
     try {
       const behaviourData = {
         studentId: formData.studentId,
-        classId: formData.classId,
-        tags: formData.tags,
+        date: formData.date,
+        behaviorType: formData.behaviorType,
+        category: formData.category,
         severity: formData.severity,
-        notes: formData.notes,
-        date: formData.date
+        description: formData.description,
+        actionTaken: formData.actionTaken || null,
+        followUpRequired: formData.followUpRequired,
+        followUpDate: formData.followUpDate || null
       };
 
       const result = await apiService.createBehaviourRecord(behaviourData);
@@ -115,9 +114,13 @@ export default function BehaviourTab() {
           setFormData({
             studentId: "",
             classId: formData.classId,
-            tags: [],
+            behaviorType: "positive",
+            category: "",
             severity: "medium",
-            notes: "",
+            description: "",
+            actionTaken: "",
+            followUpRequired: false,
+            followUpDate: "",
             date: new Date().toISOString().split('T')[0]
           });
           setMessage({ type: "", text: "" });
@@ -205,32 +208,54 @@ export default function BehaviourTab() {
           />
         </div>
 
-        {/* Behaviour Tags */}
+        {/* Behavior Type */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Behaviour Tags
+            Behavior Type <span className="text-red-500">*</span>
           </label>
-          <div className="flex flex-wrap gap-2">
-            {behaviourTags.map(tag => (
-              <button
-                key={tag}
-                type="button"
-                onClick={() => handleTagToggle(tag)}
-                className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors ${
-                  formData.tags.includes(tag)
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {tag}
-              </button>
-            ))}
+          <div className="flex gap-4">
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="behaviorType"
+                value="positive"
+                checked={formData.behaviorType === "positive"}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              <span className="text-sm">Positive</span>
+            </label>
+            <label className="flex items-center">
+              <input
+                type="radio"
+                name="behaviorType"
+                value="negative"
+                checked={formData.behaviorType === "negative"}
+                onChange={handleInputChange}
+                className="mr-2"
+              />
+              <span className="text-sm">Negative</span>
+            </label>
           </div>
-          {formData.tags.length > 0 && (
-            <p className="text-xs text-gray-500 mt-2">
-              Selected: {formData.tags.join(", ")}
-            </p>
-          )}
+        </div>
+
+        {/* Category */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Category <span className="text-red-500">*</span>
+          </label>
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Select category</option>
+            {behaviourCategories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
         </div>
 
         {/* Severity */}
@@ -250,20 +275,67 @@ export default function BehaviourTab() {
           </select>
         </div>
 
-        {/* Notes */}
+        {/* Description */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Notes
+            Description <span className="text-red-500">*</span>
           </label>
           <textarea
-            name="notes"
-            value={formData.notes}
+            name="description"
+            value={formData.description}
             onChange={handleInputChange}
             rows="4"
-            placeholder="Describe the observation in detail..."
+            placeholder="Describe the behavior observation in detail..."
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          />
+        </div>
+
+        {/* Action Taken */}
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Action Taken
+          </label>
+          <textarea
+            name="actionTaken"
+            value={formData.actionTaken}
+            onChange={handleInputChange}
+            rows="3"
+            placeholder="What action was taken regarding this behavior..."
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
+
+        {/* Follow-up Required */}
+        <div className="mb-6">
+          <label className="flex items-center">
+            <input
+              type="checkbox"
+              name="followUpRequired"
+              checked={formData.followUpRequired}
+              onChange={handleCheckboxChange}
+              className="mr-2"
+            />
+            <span className="text-sm font-medium text-gray-700">Follow-up Required</span>
+          </label>
+        </div>
+
+        {/* Follow-up Date */}
+        {formData.followUpRequired && (
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Follow-up Date
+            </label>
+            <input
+              type="date"
+              name="followUpDate"
+              value={formData.followUpDate}
+              onChange={handleInputChange}
+              min={new Date().toISOString().split('T')[0]}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+        )}
 
         {/* Submit */}
         <div className="flex justify-end">

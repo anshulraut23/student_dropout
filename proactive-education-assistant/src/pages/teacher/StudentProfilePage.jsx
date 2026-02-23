@@ -1,517 +1,184 @@
-// import { useParams, useNavigate } from "react-router-dom";
-// import { students } from "../../data/students";
-// import RiskBadge from "../../components/RiskBadge";
-// import { useTheme } from "../../context/ThemeContext";
-// import {
-//   FaArrowLeft,
-//   FaUser,
-//   FaCalendarCheck,
-//   FaChartLine,
-//   FaLightbulb,
-//   FaExclamationTriangle,
-//   FaHome,
-//   FaPhone,
-//   FaBook,
-//   FaClipboardList,
-//   FaBrain,
-//   FaComments,
-// } from "react-icons/fa";
-// import { useTranslation } from "react-i18next";
-// import { useEffect, useState } from "react";
-// import { translateText } from "../../utils/googleTranslate";
-
-// export default function StudentProfilePage() {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-//   const { t, i18n } = useTranslation();
-//   const { darkMode } = useTheme();
-
-//   // Find student from mock data
-//   const student = students.find((s) => s.id === parseInt(id));
-
-//   // If student not found
-//   if (!student) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 px-4">
-//         <div className="text-center">
-//           <FaUser className="mx-auto text-7xl text-gray-300 dark:text-gray-600 mb-4" />
-//           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">{t('teacher.student_not_found')}</h1>
-//           <p className="text-gray-600 dark:text-gray-400 mb-6 text-lg">{t('teacher.student_not_found_desc')}</p>
-//           <button
-//             onClick={() => navigate("/students")}
-//             className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-2xl hover:shadow-lg transition-all duration-300 font-semibold transform hover:scale-105 active:scale-95"
-//           >
-//             <FaArrowLeft />
-//             {t('teacher.back_to_students')}
-//           </button>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   // Mock data for this student
-//   const riskExplanation = getRiskExplanation(student);
-//   const [riskText, setRiskText] = useState(riskExplanation);
-
-//   useEffect(() => {
-//     let isMounted = true;
-//     const run = async () => {
-//       const lng = i18n.language || 'en';
-//       if (lng !== 'en') {
-//         const translated = await translateText(riskExplanation, lng, 'en');
-//         if (isMounted) setRiskText(translated);
-//       } else {
-//         if (isMounted) setRiskText(riskExplanation);
-//       }
-//     };
-//     run();
-//     return () => { isMounted = false; };
-//   }, [riskExplanation, i18n.language]);
-//   const attendanceTrend = getAttendanceTrend(student);
-//   const academicPerformance = getAcademicPerformance(student);
-//   const suggestedInterventions = getSuggestedInterventions(student);
-
-//   return (
-//     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 py-8 px-4 sm:px-6 lg:px-8">
-//       <div className="max-w-5xl mx-auto">
-//         {/* 1️⃣ Page Header */}
-//         <div className="mb-8">
-//           <button
-//             onClick={() => navigate("/students")}
-//             className="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-bold mb-4 transition-colors transform hover:translate-x-1"
-//           >
-//             <FaArrowLeft />
-//             {t('teacher.back_to_students')}
-//           </button>
-//           <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-teal-600 bg-clip-text text-transparent mb-2">
-//             🎓 {t('teacher.student_profile_title')}
-//           </h1>
-//           <p className="text-gray-600 dark:text-gray-400 font-medium">{t('teacher.student_profile_subtitle')}</p>
-//         </div>
-
-//         {/* 2️⃣ Student Basic Information Card */}
-//         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden mb-8">
-//           <div className="h-40 bg-gradient-to-r from-blue-500 via-blue-600 to-teal-500 relative">
-//             <div className="absolute inset-0 opacity-20 bg-pattern" style={{
-//               backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%)',
-//             }}></div>
-//           </div>
-
-//           <div className="relative px-6 pb-6">
-//             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 -mt-20 mb-6">
-//               <div className="flex items-end gap-4">
-//                 <div className="w-32 h-32 bg-gradient-to-br from-blue-500 to-teal-500 rounded-2xl shadow-2xl flex items-center justify-center text-white text-4xl font-bold border-4 border-white dark:border-gray-800 transform transition-all duration-300 hover:scale-105">
-//                   {student.name.charAt(0).toUpperCase()}
-//                 </div>
-//                 <div className="pb-2">
-//                   <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{student.name}</h2>
-//                   <div className="flex flex-wrap items-center gap-2 mt-2">
-//                     <span className="text-sm font-bold text-gray-700 dark:text-gray-300 bg-blue-50 dark:bg-blue-900/30 px-3 py-1.5 rounded-full">
-//                       🎓 {student.class}
-//                     </span>
-//                     <div className="text-sm font-bold text-gray-700 dark:text-gray-300 bg-green-50 dark:bg-green-900/30 px-3 py-1.5 rounded-full">
-//                       📊 {student.attendance}% {t('teacher.attendance_label')}
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-//               <div className="flex items-center gap-3">
-//                 <RiskBadge level={student.riskLevel} />
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* 3️⃣ Risk Explanation Section (MOST IMPORTANT) */}
-//         <div
-//           className={`rounded-2xl shadow-xl p-8 mb-8 border-l-4 ${
-//             student.riskLevel === "high"
-//               ? "bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-red-500"
-//               : student.riskLevel === "medium"
-//               ? "bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-500"
-//               : "bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-500"
-//           }`}
-//         >
-//           <div className="flex items-start gap-4 mb-4">
-//             <div className={`text-3xl mt-1 ${
-//               student.riskLevel === "high"
-//                 ? "text-red-600"
-//                 : student.riskLevel === "medium"
-//                 ? "text-yellow-600"
-//                 : "text-green-600"
-//             }`}>
-//               ⚠️
-//             </div>
-//             <div className="flex-1">
-//               <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
-//                 {t('teacher.risk_analysis_title')}
-//               </h3>
-//               <p className="text-gray-800 dark:text-gray-200 leading-relaxed text-lg">{riskText}</p>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* 4️⃣ Attendance Trend Section */}
-//         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
-//           <div className="flex items-center gap-2 mb-6">
-//             <FaCalendarCheck className="text-blue-600 text-2xl" />
-//             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-//               {t('teacher.attendance_trend_title')}
-//             </h3>
-//           </div>
-//           <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
-//             {attendanceTrend.map((day, index) => (
-//               <div key={index} className="text-center">
-//                 <div
-//                   className={`w-full h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-md transform transition-all duration-300 hover:scale-110 cursor-default ${
-//                     day.present ? "bg-gradient-to-br from-green-500 to-emerald-600" : "bg-gradient-to-br from-red-500 to-orange-600"
-//                   }`}
-//                 >
-//                   {day.present ? t('teacher.present_short') : t('teacher.absent_short')}
-//                 </div>
-//                 <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 mt-2">{day.label}</p>
-//               </div>
-//             ))}
-//           </div>
-//           <div className="mt-6 flex items-center gap-6 text-sm">
-//             <div className="flex items-center gap-3">
-//               <div className="w-5 h-5 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg"></div>
-//               <span className="font-semibold text-gray-700 dark:text-gray-300">{t('teacher.present')}</span>
-//             </div>
-//             <div className="flex items-center gap-3">
-//               <div className="w-5 h-5 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg"></div>
-//               <span className="font-semibold text-gray-700 dark:text-gray-300">{t('teacher.absent')}</span>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* 5️⃣ Academic Performance Trend */}
-//         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
-//           <div className="flex items-center gap-2 mb-6">
-//             <FaChartLine className="text-teal-600 text-2xl" />
-//             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-//               {t('teacher.academic_overview_title')}
-//             </h3>
-//           </div>
-//           <div className="space-y-6">
-//             {academicPerformance.map((subject, index) => (
-//               <div key={index}>
-//                 <div className="flex items-center justify-between mb-3">
-//                   <span className="text-sm font-bold text-gray-700 dark:text-gray-300">{subject.name}</span>
-//                   <span className="text-lg font-bold text-gray-900 dark:text-white bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-full">
-//                     {subject.score}%
-//                   </span>
-//                 </div>
-//                 <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden shadow-md">
-//                   <div
-//                     className={`h-3 rounded-full transition-all duration-500 ${
-//                       subject.score >= 75
-//                         ? "bg-gradient-to-r from-green-500 to-emerald-600"
-//                         : subject.score >= 50
-//                         ? "bg-gradient-to-r from-yellow-500 to-amber-600"
-//                         : "bg-gradient-to-r from-red-500 to-orange-600"
-//                     }`}
-//                     style={{ width: `${subject.score}%` }}
-//                   ></div>
-//                 </div>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* 6️⃣ Suggested Interventions Section */}
-//         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-8">
-//           <div className="flex items-center gap-2 mb-6">
-//             <FaLightbulb className="text-yellow-600 text-2xl" />
-//             <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
-//               {t('teacher.suggested_interventions_title')}
-//             </h3>
-//           </div>
-//           <div className="space-y-4">
-//             {suggestedInterventions.map((intervention, index) => (
-//               <div
-//                 key={index}
-//                 className="flex items-start gap-4 p-5 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border-2 border-blue-200 dark:border-blue-700 hover:shadow-lg transition-all duration-300 transform hover:translate-x-1"
-//               >
-//                 <div className="text-2xl text-blue-600 dark:text-blue-400 flex-shrink-0 mt-1">
-//                   <intervention.icon />
-//                 </div>
-//                 <div className="flex-1">
-//                   <h4 className="font-bold text-gray-900 dark:text-white mb-1 text-lg">
-//                     {intervention.title}
-//                   </h4>
-//                   <p className="text-sm text-gray-700 dark:text-gray-300">{intervention.description}</p>
-//                 </div>
-//                 <span
-//                   className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap flex-shrink-0 ${
-//                     intervention.priority === "High"
-//                       ? "bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-200"
-//                       : intervention.priority === "Medium"
-//                       ? "bg-yellow-100 dark:bg-yellow-900/40 text-yellow-700 dark:text-yellow-200"
-//                       : "bg-green-100 dark:bg-green-900/40 text-green-700 dark:text-green-200"
-//                   }`}
-//                 >
-//                   {t(`teacher.priority_${intervention.priority.toLowerCase()}`)}
-//                 </span>
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-
-//         {/* 7️⃣ Action Buttons */}
-//         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
-//           <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">{t('teacher.quick_actions')}</h3>
-//           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-//             <button
-//               onClick={() => alert(t('teacher.coming_soon_add_attendance'))}
-//               className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-bold transform hover:scale-105 active:scale-95"
-//             >
-//               <FaCalendarCheck />
-//               {t('teacher.add_attendance')}
-//             </button>
-//             <button
-//               onClick={() => alert(t('teacher.coming_soon_add_score'))}
-//               className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-blue-600 to-teal-600 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-bold transform hover:scale-105 active:scale-95"
-//             >
-//               <FaBook />
-//               {t('teacher.add_academic_score')}
-//             </button>
-//             <button
-//               onClick={() => alert(t('teacher.coming_soon_add_behaviour'))}
-//               className="flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-2xl hover:shadow-xl transition-all duration-300 font-bold transform hover:scale-105 active:scale-95"
-//             >
-//               <FaComments />
-//               {t('teacher.add_behaviour')}
-//             </button>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }
-
-// // Helper functions for mock data
-// function getRiskExplanation(student) {
-//   if (student.riskLevel === "high") {
-//     return `This student is marked high-risk due to a consistent drop in attendance (${student.attendance}%) and declining academic performance over the last month. Recent observations indicate reduced classroom engagement and several missed assignments. Immediate intervention is recommended to prevent potential dropout.`;
-//   } else if (student.riskLevel === "medium") {
-//     return `This student shows moderate risk indicators. While attendance (${student.attendance}%) is acceptable, there are early warning signs of disengagement, including occasional absences and fluctuating academic performance. Proactive monitoring and support can help prevent escalation to high risk.`;
-//   } else {
-//     return `This student is currently low-risk with strong attendance (${student.attendance}%) and consistent academic performance. They demonstrate good classroom engagement and participation. Continue regular monitoring to maintain positive trajectory.`;
-//   }
-// }
-
-// function getAttendanceTrend(student) {
-//   // Mock attendance data - in real app, this would come from backend
-//   const attendance = student.attendance;
-//   const presentCount = Math.round((attendance / 100) * 8);
-  
-//   return Array.from({ length: 8 }, (_, i) => ({
-//     present: i < presentCount,
-//     label: `D${i + 1}`,
-//   }));
-// }
-
-// function getAcademicPerformance(student) {
-//   // Mock academic scores based on risk level
-//   const baseScore = student.riskLevel === "high" ? 45 : student.riskLevel === "medium" ? 65 : 85;
-  
-//   return [
-//     { name: "Mathematics", score: baseScore + Math.floor(Math.random() * 15) },
-//     { name: "Science", score: baseScore + Math.floor(Math.random() * 15) },
-//     { name: "English", score: baseScore + Math.floor(Math.random() * 15) },
-//     { name: "Social Studies", score: baseScore + Math.floor(Math.random() * 15) },
-//   ];
-// }
-
-// function getSuggestedInterventions(student) {
-//   const baseInterventions = [
-//     {
-//       icon: FaHome,
-//       title: "Conduct Home Visit",
-//       description: "Meet with family to understand home environment and discuss concerns.",
-//       priority: student.riskLevel === "high" ? "High" : "Medium",
-//     },
-//     {
-//       icon: FaPhone,
-//       title: "Engage with Parents",
-//       description: "Schedule a parent-teacher meeting to align on student support strategies.",
-//       priority: student.riskLevel === "high" ? "High" : "Medium",
-//     },
-//   ];
-
-//   if (student.riskLevel === "high") {
-//     baseInterventions.push({
-//       icon: FaBook,
-//       title: "Provide Learning Support",
-//       description: "Arrange extra tutoring sessions or peer mentoring for struggling subjects.",
-//       priority: "High",
-//     });
-//   }
-
-//   baseInterventions.push({
-//     icon: FaBrain,
-//     title: "Monitor Attendance Closely",
-//     description: "Daily check-ins and follow-up on absences within 24 hours.",
-//     priority: student.riskLevel === "high" ? "High" : "Low",
-//   });
-
-//   return baseInterventions;
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { useParams, useNavigate } from "react-router-dom";
-// import { students } from "../../data/students";
-// import RiskBadge from "../../components/RiskBadge";
-// import { FaArrowLeft } from "react-icons/fa";
-
-// export default function StudentProfilePage() {
-//   const { id } = useParams();
-//   const navigate = useNavigate();
-
-//   const student = students.find((s) => s.id === parseInt(id));
-
-//   if (!student) {
-//     return (
-//       <div className="min-h-screen flex items-center justify-center bg-slate-100">
-//         <div className="text-center">
-//           <h2 className="text-lg font-semibold text-slate-700 mb-2">
-//             Student not found
-//           </h2>
-//           <button
-//             onClick={() => navigate("/students")}
-//             className="text-blue-600 hover:underline text-sm"
-//           >
-//             Back to students
-//           </button>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="px-6 py-6 bg-slate-100 min-h-screen">
-//       <div className="max-w-5xl mx-auto space-y-6">
-
-//         {/* Back */}
-//         <button
-//           onClick={() => navigate("/students")}
-//           className="inline-flex items-center gap-2 text-sm text-blue-600 hover:underline"
-//         >
-//           <FaArrowLeft />
-//           Back to students
-//         </button>
-
-//         {/* Header */}
-//         <div className="bg-white border border-slate-200 rounded-md p-6">
-//           <div className="flex items-center justify-between">
-//             <div>
-//               <h1 className="text-2xl font-semibold text-slate-900">
-//                 {student.name}
-//               </h1>
-//               <p className="text-sm text-slate-600 mt-1">
-//                 {student.class} • Attendance {student.attendance}%
-//               </p>
-//             </div>
-//             <RiskBadge level={student.riskLevel} />
-//           </div>
-//         </div>
-
-//         {/* Risk Explanation */}
-//         <div className="bg-white border border-slate-200 rounded-md p-6">
-//           <h2 className="text-lg font-semibold text-slate-900 mb-2">
-//             Risk Analysis
-//           </h2>
-//           <p className="text-sm text-slate-700 leading-relaxed">
-//             This student is currently classified as <strong>{student.riskLevel}</strong> risk
-//             based on attendance trends and academic indicators. Continuous monitoring
-//             and timely intervention are recommended.
-//           </p>
-//         </div>
-
-//         {/* Academic Snapshot */}
-//         <div className="bg-white border border-slate-200 rounded-md p-6">
-//           <h2 className="text-lg font-semibold text-slate-900 mb-4">
-//             Academic Overview
-//           </h2>
-//           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
-//             <div>
-//               <p className="text-slate-500">Attendance</p>
-//               <p className="font-semibold text-slate-900">
-//                 {student.attendance}%
-//               </p>
-//             </div>
-//             <div>
-//               <p className="text-slate-500">Class</p>
-//               <p className="font-semibold text-slate-900">
-//                 {student.class}
-//               </p>
-//             </div>
-//             <div>
-//               <p className="text-slate-500">Risk Level</p>
-//               <RiskBadge level={student.riskLevel} />
-//             </div>
-//           </div>
-//         </div>
-
-//       </div>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
 import { useParams, useNavigate } from "react-router-dom";
-import { useState } from "react";
-import { students } from "../../data/students";
-import RiskBadge from "../../components/RiskBadge";
+import { useState, useEffect } from "react";
+import apiService from "../../services/apiService";
 import {
   FaArrowLeft,
   FaDownload,
   FaUser,
-  FaChartLine,
-  FaClipboardList,
+  FaCalendarCheck,
+  FaChartBar,
+  FaUserCheck,
+  FaHandsHelping,
   FaPlus,
 } from "react-icons/fa";
 
 export default function StudentProfilePage() {
   const { id } = useParams();
   const navigate = useNavigate();
-
-  const student = students.find((s) => s.id === parseInt(id));
+  const [student, setStudent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
+  
+  // Data for different tabs
+  const [attendanceData, setAttendanceData] = useState([]);
+  const [scoresData, setScoresData] = useState([]);
+  const [behaviorData, setBehaviorData] = useState([]);
+  const [interventionsData, setInterventionsData] = useState([]);
+  const [loadingData, setLoadingData] = useState(false);
 
-  if (!student) {
+  useEffect(() => {
+    loadStudentData();
+  }, [id]);
+
+  useEffect(() => {
+    if (student && activeTab !== "overview" && activeTab !== "personal") {
+      loadTabData();
+    }
+  }, [activeTab, student]);
+
+  const loadStudentData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await apiService.getStudentById(id);
+      if (response.success) {
+        setStudent(response.student);
+      } else {
+        setError(response.error || 'Failed to load student');
+      }
+    } catch (err) {
+      console.error('Error loading student:', err);
+      setError(err.message || 'Failed to load student');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadTabData = async () => {
+    if (!student) return;
+    
+    setLoadingData(true);
+    try {
+      switch (activeTab) {
+        case "attendance":
+          await loadAttendanceHistory();
+          break;
+        case "scores":
+          await loadScoresHistory();
+          break;
+        case "behavior":
+          await loadBehaviorHistory();
+          break;
+        case "interventions":
+          await loadInterventionsHistory();
+          break;
+      }
+    } catch (error) {
+      console.error(`Error loading ${activeTab} data:`, error);
+    } finally {
+      setLoadingData(false);
+    }
+  };
+
+  const loadAttendanceHistory = async () => {
+    try {
+      const response = await apiService.getStudentAttendance(id);
+      if (response.success) {
+        setAttendanceData(response.attendance || []);
+      }
+    } catch (error) {
+      console.error('Error loading attendance:', error);
+      setAttendanceData([]);
+    }
+  };
+
+  const loadScoresHistory = async () => {
+    try {
+      const response = await apiService.getMarksByStudent(id);
+      if (response.success) {
+        setScoresData(response.marks || []);
+      }
+    } catch (error) {
+      console.error('Error loading scores:', error);
+      setScoresData([]);
+    }
+  };
+
+  const loadBehaviorHistory = async () => {
+    try {
+      const response = await apiService.getBehavioursByStudent(id);
+      if (response.success) {
+        setBehaviorData(response.behaviors || []);
+      }
+    } catch (error) {
+      console.error('Error loading behavior:', error);
+      setBehaviorData([]);
+    }
+  };
+
+  const loadInterventionsHistory = async () => {
+    try {
+      const response = await apiService.getInterventionsByStudent(id);
+      if (response.success) {
+        setInterventionsData(response.interventions || []);
+      }
+    } catch (error) {
+      console.error('Error loading interventions:', error);
+      setInterventionsData([]);
+    }
+  };
+
+  const calculateAttendanceStats = () => {
+    if (attendanceData.length === 0) return { total: 0, present: 0, absent: 0, percentage: 0 };
+    
+    const present = attendanceData.filter(a => a.status === 'present').length;
+    const absent = attendanceData.filter(a => a.status === 'absent').length;
+    const percentage = ((present / attendanceData.length) * 100).toFixed(1);
+    
+    return { total: attendanceData.length, present, absent, percentage };
+  };
+
+  const calculateScoreStats = () => {
+    if (scoresData.length === 0) return { total: 0, avgPercentage: 0, passed: 0, failed: 0 };
+    
+    const validScores = scoresData.filter(s => s.status === 'present' && s.percentage != null);
+    if (validScores.length === 0) return { total: 0, avgPercentage: 0, passed: 0, failed: 0 };
+    
+    const avgPercentage = (validScores.reduce((sum, s) => sum + s.percentage, 0) / validScores.length).toFixed(1);
+    const passed = validScores.filter(s => s.percentage >= 40).length; // Assuming 40% is passing
+    const failed = validScores.filter(s => s.percentage < 40).length;
+    
+    return { total: validScores.length, avgPercentage, passed, failed };
+  };
+
+  if (loading) {
     return (
       <div className="p-10 text-center text-slate-500">
-        Student not found
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+        Loading student...
       </div>
     );
   }
+
+  if (error || !student) {
+    return (
+      <div className="p-10 text-center">
+        <div className="text-red-500 mb-4">
+          {error || 'Student not found'}
+        </div>
+        <button
+          onClick={() => navigate('/students')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          Back to Students
+        </button>
+      </div>
+    );
+  }
+
+  const attendanceStats = calculateAttendanceStats();
+  const scoreStats = calculateScoreStats();
 
   return (
     <div className="px-6 py-6 bg-slate-100 min-h-screen">
@@ -531,18 +198,29 @@ export default function StudentProfilePage() {
 
             <div className="flex gap-4 items-center">
               <div className="h-16 w-16 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold">
-                {student.name.split(" ").map(n => n[0]).join("").slice(0, 2)}
+                {(student.firstName?.charAt(0) || '?')}{(student.lastName?.charAt(0) || '')}
               </div>
 
               <div>
                 <h1 className="text-2xl font-semibold text-slate-900">
-                  {student.name}
+                  {student.firstName} {student.lastName}
                 </h1>
                 <p className="text-sm text-slate-500">
-                  {student.class} • Roll No: {student.id}
+                  {student.className || 'N/A'} • Enrollment: {student.enrollmentNo || student.id}
                 </p>
-                <div className="mt-2">
-                  <RiskBadge level={student.riskLevel} />
+                <div className="mt-2 flex gap-2">
+                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-semibold">
+                    {student.status || 'Active'}
+                  </span>
+                  {attendanceStats.percentage > 0 && (
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                      attendanceStats.percentage >= 75 ? 'bg-green-100 text-green-800' :
+                      attendanceStats.percentage >= 60 ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {attendanceStats.percentage}% Attendance
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -556,20 +234,31 @@ export default function StudentProfilePage() {
 
         {/* TABS */}
         <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-          <div className="flex border-b border-slate-200 text-sm">
-            {["overview", "personal", "academics", "interventions"].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`px-5 py-3 font-medium capitalize transition ${
-                  activeTab === tab
-                    ? "border-b-2 border-blue-600 text-blue-600"
-                    : "text-slate-500 hover:text-slate-800"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+          <div className="flex border-b border-slate-200 text-sm overflow-x-auto">
+            {[
+              { key: "overview", label: "Overview", icon: FaUser },
+              { key: "personal", label: "Personal", icon: FaUser },
+              { key: "attendance", label: "Attendance", icon: FaCalendarCheck },
+              { key: "scores", label: "Scores", icon: FaChartBar },
+              { key: "behavior", label: "Behavior", icon: FaUserCheck },
+              { key: "interventions", label: "Interventions", icon: FaHandsHelping }
+            ].map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-5 py-3 font-medium transition flex items-center gap-2 whitespace-nowrap ${
+                    activeTab === tab.key
+                      ? "border-b-2 border-blue-600 text-blue-600"
+                      : "text-slate-500 hover:text-slate-800"
+                  }`}
+                >
+                  <Icon className="text-sm" />
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
           <div className="p-6">
@@ -581,53 +270,71 @@ export default function StudentProfilePage() {
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
 
                   <StatCard
-                    title="Attendance"
-                    value={`${student.attendance}%`}
-                    color={
-                      student.attendance < 70
-                        ? "text-red-600"
-                        : student.attendance < 85
-                        ? "text-yellow-600"
-                        : "text-green-600"
-                    }
-                  />
-
-                  <StatCard
-                    title="Average Score"
-                    value={`${student.avgScore || 0}`}
+                    title="Status"
+                    value={student.status || 'Active'}
                     color="text-blue-600"
                   />
 
                   <StatCard
-                    title="Risk Level"
-                    value={student.riskLevel.toUpperCase()}
-                    color="text-red-600"
+                    title="Class"
+                    value={student.className || 'N/A'}
+                    color="text-green-600"
                   />
 
                   <StatCard
-                    title="Interventions"
-                    value="2"
+                    title="Attendance"
+                    value={`${attendanceStats.percentage}%`}
+                    color={attendanceStats.percentage >= 75 ? "text-green-600" : "text-red-600"}
+                  />
+
+                  <StatCard
+                    title="Avg Score"
+                    value={scoreStats.avgPercentage > 0 ? `${scoreStats.avgPercentage}%` : 'N/A'}
                     color="text-purple-600"
                   />
 
                 </div>
 
-                {/* Simple Attendance Bar */}
+                {/* Student Information */}
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-700 mb-2">
-                    Attendance Overview
+                  <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                    Student Information
                   </h3>
-                  <div className="h-4 bg-slate-200 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${
-                        student.attendance < 70
-                          ? "bg-red-500"
-                          : student.attendance < 85
-                          ? "bg-yellow-500"
-                          : "bg-green-500"
-                      }`}
-                      style={{ width: `${student.attendance}%` }}
-                    />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <InfoBox label="Date of Birth" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'N/A'} />
+                    <InfoBox label="Gender" value={student.gender || 'N/A'} />
+                    <InfoBox label="Parent Name" value={student.parentName || 'N/A'} />
+                    <InfoBox label="Parent Contact" value={student.parentContact || 'N/A'} />
+                    <InfoBox label="Email" value={student.email || 'N/A'} />
+                    <InfoBox label="Address" value={student.address || 'N/A'} />
+                  </div>
+                </div>
+
+                {/* Quick Stats */}
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-700 mb-3">
+                    Quick Statistics
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <p className="text-xs text-blue-600 font-medium">Attendance Records</p>
+                      <p className="text-2xl font-bold text-blue-900 mt-1">{attendanceStats.total}</p>
+                      <p className="text-xs text-blue-600 mt-1">
+                        {attendanceStats.present} Present • {attendanceStats.absent} Absent
+                      </p>
+                    </div>
+                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                      <p className="text-xs text-purple-600 font-medium">Exam Scores</p>
+                      <p className="text-2xl font-bold text-purple-900 mt-1">{scoreStats.total}</p>
+                      <p className="text-xs text-purple-600 mt-1">
+                        {scoreStats.passed} Passed • {scoreStats.failed} Failed
+                      </p>
+                    </div>
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <p className="text-xs text-green-600 font-medium">Behavior Records</p>
+                      <p className="text-2xl font-bold text-green-900 mt-1">{behaviorData.length}</p>
+                      <p className="text-xs text-green-600 mt-1">Total observations</p>
+                    </div>
                   </div>
                 </div>
 
@@ -638,48 +345,265 @@ export default function StudentProfilePage() {
             {activeTab === "personal" && (
               <div className="grid sm:grid-cols-2 gap-4 text-sm">
 
-                <InfoBox label="Full Name" value={student.name} />
-                <InfoBox label="Class" value={student.class} />
-                <InfoBox label="Attendance" value={`${student.attendance}%`} />
-                <InfoBox label="Risk Level" value={student.riskLevel} />
-                <InfoBox label="Phone" value="+91 XXXXX XXXXX" />
-                <InfoBox label="Address" value="Village Area" />
+                <InfoBox label="Full Name" value={`${student.firstName} ${student.lastName}`} />
+                <InfoBox label="Class" value={student.className || 'N/A'} />
+                <InfoBox label="Enrollment Number" value={student.enrollmentNo || 'N/A'} />
+                <InfoBox label="Date of Birth" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'N/A'} />
+                <InfoBox label="Gender" value={student.gender || 'N/A'} />
+                <InfoBox label="Status" value={student.status || 'Active'} />
+                <InfoBox label="Parent Name" value={student.parentName || 'N/A'} />
+                <InfoBox label="Parent Contact" value={student.parentContact || 'N/A'} />
+                <InfoBox label="Email" value={student.email || 'N/A'} />
+                <InfoBox label="Address" value={student.address || 'N/A'} />
 
               </div>
             )}
 
-            {/* ACADEMICS TAB */}
-            {activeTab === "academics" && (
+            {/* ATTENDANCE TAB */}
+            {activeTab === "attendance" && (
               <div className="space-y-4">
-
-                <h3 className="text-sm font-semibold text-slate-700">
-                  Academic Summary
-                </h3>
-
-                <div className="bg-slate-50 border border-slate-200 rounded-md p-4">
-                  <p className="text-sm text-slate-600">
-                    Average Score:{" "}
-                    <span className="font-semibold text-slate-900">
-                      {student.avgScore || 0}
-                    </span>
-                  </p>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-semibold text-slate-700">
+                    Attendance History
+                  </h3>
+                  <div className="text-sm text-slate-600">
+                    Total: {attendanceStats.total} | Present: {attendanceStats.present} | Absent: {attendanceStats.absent}
+                  </div>
                 </div>
 
+                {loadingData ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  </div>
+                ) : attendanceData.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    No attendance records found
+                  </div>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase">Date</th>
+                          <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase">Subject</th>
+                          <th className="text-center px-4 py-3 text-xs font-medium text-slate-500 uppercase">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {attendanceData.slice(0, 50).map((record, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50">
+                            <td className="px-4 py-3">{new Date(record.date).toLocaleDateString()}</td>
+                            <td className="px-4 py-3">{record.subjectName || 'Daily'}</td>
+                            <td className="px-4 py-3 text-center">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                record.status === 'present' ? 'bg-green-100 text-green-700' :
+                                record.status === 'absent' ? 'bg-red-100 text-red-700' :
+                                record.status === 'late' ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-gray-100 text-gray-700'
+                              }`}>
+                                {record.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SCORES TAB */}
+            {activeTab === "scores" && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-semibold text-slate-700">
+                    Exam Scores
+                  </h3>
+                  <div className="text-sm text-slate-600">
+                    Average: {scoreStats.avgPercentage}%
+                  </div>
+                </div>
+
+                {loadingData ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  </div>
+                ) : scoresData.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    No exam scores found
+                  </div>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg overflow-hidden">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase">Exam</th>
+                          <th className="text-left px-4 py-3 text-xs font-medium text-slate-500 uppercase">Subject</th>
+                          <th className="text-center px-4 py-3 text-xs font-medium text-slate-500 uppercase">Marks</th>
+                          <th className="text-center px-4 py-3 text-xs font-medium text-slate-500 uppercase">Percentage</th>
+                          <th className="text-center px-4 py-3 text-xs font-medium text-slate-500 uppercase">Grade</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {scoresData.map((record, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50">
+                            <td className="px-4 py-3">{record.examName || 'N/A'}</td>
+                            <td className="px-4 py-3">{record.subjectName || 'N/A'}</td>
+                            <td className="px-4 py-3 text-center">
+                              {record.status === 'present' ? `${record.marksObtained}/${record.totalMarks}` : '-'}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {record.status === 'present' ? (
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  record.percentage >= 75 ? 'bg-green-100 text-green-700' :
+                                  record.percentage >= 60 ? 'bg-blue-100 text-blue-700' :
+                                  record.percentage >= 40 ? 'bg-yellow-100 text-yellow-700' :
+                                  'bg-red-100 text-red-700'
+                                }`}>
+                                  {record.percentage}%
+                                </span>
+                              ) : '-'}
+                            </td>
+                            <td className="px-4 py-3 text-center">{record.grade || '-'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* BEHAVIOR TAB */}
+            {activeTab === "behavior" && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-semibold text-slate-700">
+                    Behavior Records
+                  </h3>
+                  <button
+                    onClick={() => navigate('/data-entry')}
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs flex items-center gap-1 hover:bg-blue-700"
+                  >
+                    <FaPlus className="text-xs" /> Add Record
+                  </button>
+                </div>
+
+                {loadingData ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  </div>
+                ) : behaviorData.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    No behavior records found
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {behaviorData.map((record, idx) => (
+                      <div key={idx} className="border border-slate-200 rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <div className="flex gap-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              record.behaviorType === 'positive' ? 'bg-green-100 text-green-700' :
+                              'bg-red-100 text-red-700'
+                            }`}>
+                              {record.behaviorType}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              record.severity === 'high' ? 'bg-red-100 text-red-700' :
+                              record.severity === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-green-100 text-green-700'
+                            }`}>
+                              {record.severity}
+                            </span>
+                          </div>
+                          <span className="text-xs text-slate-500">
+                            {new Date(record.date).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-slate-900 mb-1">{record.category}</p>
+                        <p className="text-sm text-slate-600">{record.description}</p>
+                        {record.actionTaken && (
+                          <p className="text-xs text-slate-500 mt-2">
+                            <strong>Action:</strong> {record.actionTaken}
+                          </p>
+                        )}
+                        <p className="text-xs text-slate-400 mt-2">
+                          By: {record.teacherName || 'Unknown'}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
             {/* INTERVENTIONS TAB */}
             {activeTab === "interventions" && (
               <div className="space-y-4">
-
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm flex items-center gap-2">
-                  <FaPlus /> Add Intervention
-                </button>
-
-                <div className="bg-slate-50 border border-slate-200 rounded-md p-4 text-sm text-slate-600">
-                  No interventions logged yet.
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-semibold text-slate-700">
+                    Intervention Plans
+                  </h3>
+                  <button
+                    onClick={() => navigate('/data-entry')}
+                    className="px-3 py-1.5 bg-blue-600 text-white rounded-md text-xs flex items-center gap-1 hover:bg-blue-700"
+                  >
+                    <FaPlus className="text-xs" /> Add Intervention
+                  </button>
                 </div>
 
+                {loadingData ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  </div>
+                ) : interventionsData.length === 0 ? (
+                  <div className="text-center py-8 text-slate-500">
+                    No intervention plans found
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {interventionsData.map((record, idx) => (
+                      <div key={idx} className="border border-slate-200 rounded-lg p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="text-sm font-semibold text-slate-900">{record.title}</h4>
+                          <div className="flex gap-2">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              record.priority === 'urgent' ? 'bg-red-100 text-red-700' :
+                              record.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+                              record.priority === 'medium' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-green-100 text-green-700'
+                            }`}>
+                              {record.priority}
+                            </span>
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              record.status === 'completed' ? 'bg-green-100 text-green-700' :
+                              record.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {record.status}
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-slate-500 mb-2">{record.interventionType}</p>
+                        <p className="text-sm text-slate-600 mb-2">{record.description}</p>
+                        {record.actionPlan && (
+                          <div className="bg-slate-50 rounded p-2 mb-2">
+                            <p className="text-xs font-medium text-slate-700">Action Plan:</p>
+                            <p className="text-xs text-slate-600">{record.actionPlan}</p>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-xs text-slate-500">
+                          <span>Start: {new Date(record.startDate).toLocaleDateString()}</span>
+                          {record.targetDate && (
+                            <span>Target: {new Date(record.targetDate).toLocaleDateString()}</span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 

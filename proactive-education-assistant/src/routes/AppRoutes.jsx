@@ -14,6 +14,7 @@ import ProfilePage from "../pages/teacher/ProfilePage";
 import DataEntryPage from "../pages/teacher/DataEntryPage";
 import AttendanceHistoryPage from "../pages/teacher/AttendanceHistoryPage";
 import MarksEntryPage from "../pages/teacher/MarksEntryPage";
+import ScoreHistoryPage from "../pages/teacher/ScoreHistoryPage";
 import GamificationPage from "../pages/teacher/GamificationPage";
 import AddStudentPage from "../pages/teacher/AddStudentPage";
 import MyClassesPage from "../pages/teacher/MyClassesPage";
@@ -30,6 +31,7 @@ import ClassManagement from "../pages/admin/ClassManagement";
 import SubjectManagement from "../pages/admin/SubjectManagement";
 import ExamTemplateManagement from "../pages/admin/ExamTemplateManagement";
 import Analytics from "../pages/admin/Analytics";
+import AdminProfile from "../pages/admin/AdminProfile";
 
 export default function AppRoutes() {
   const readAuthState = () => {
@@ -115,6 +117,7 @@ export default function AppRoutes() {
           <Route path="subjects" element={<SubjectManagement />} />
           <Route path="exam-templates" element={<ExamTemplateManagement />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="profile" element={<AdminProfile />} />
         </Route>
       ) : (
         <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
@@ -133,6 +136,7 @@ export default function AppRoutes() {
             <Route path="/teacher/marks/entry/:examId" element={<MarksEntryPage />} />
             <Route path="/data-entry" element={<DataEntryPage />} />
             <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
+            <Route path="/score-history" element={<ScoreHistoryPage />} />
             <Route path="/gamification" element={<GamificationPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
@@ -149,6 +153,7 @@ export default function AppRoutes() {
           <Route path="/teacher/marks/entry/:examId" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/data-entry" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/attendance-history" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/score-history" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/gamification" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/profile" element={<Navigate to="/teacher/login" replace />} />
         </>

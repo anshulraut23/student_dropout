@@ -46,18 +46,30 @@ class ApiService {
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.error('Non-JSON response:', text);
-        throw new Error('Server returned non-JSON response');
+        
+        // Check if it's a connection error
+        if (text.includes('Cannot GET') || text.includes('Cannot POST')) {
+          throw new Error('Backend server endpoint not found. Make sure the backend server is running on port 5000.');
+        }
+        
+        throw new Error('Backend server error. Please check if the server is running and try again.');
       }
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Request failed');
+        throw new Error(data.error || `Request failed with status ${response.status}`);
       }
 
       return data;
     } catch (error) {
       console.error('API request error:', error);
+      
+      // Provide more helpful error messages
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        throw new Error('Cannot connect to backend server. Please make sure the backend is running on http://localhost:5000');
+      }
+      
       throw error;
     }
   }
@@ -585,9 +597,56 @@ class ApiService {
     });
   }
 
+  // Behavior endpoints
+  async createBehaviorRecord(behaviorData) {
+    return this.request('/behavior', {
+      method: 'POST',
+      body: JSON.stringify(behaviorData),
+      auth: true,
+    });
+  }
+
+  async getBehaviorRecords(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/behavior${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getBehaviorById(behaviorId) {
+    return this.request(`/behavior/${behaviorId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getBehaviorsByStudent(studentId, filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/behavior/student/${studentId}${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async updateBehaviorRecord(behaviorId, updates) {
+    return this.request(`/behavior/${behaviorId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+      auth: true,
+    });
+  }
+
+  async deleteBehaviorRecord(behaviorId) {
+    return this.request(`/behavior/${behaviorId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
   // Behaviour endpoints
   async createBehaviourRecord(behaviourData) {
-    return this.request('/behaviour', {
+    return this.request('/behavior', {
       method: 'POST',
       body: JSON.stringify(behaviourData),
       auth: true,
@@ -596,7 +655,91 @@ class ApiService {
 
   async getBehaviourRecords(filters = {}) {
     const query = new URLSearchParams(filters).toString();
-    return this.request(`/behaviour${query ? '?' + query : ''}`, {
+    return this.request(`/behavior${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getBehavioursByStudent(studentId) {
+    return this.request(`/behavior/student/${studentId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async updateBehaviourRecord(behaviorId, updates) {
+    return this.request(`/behavior/${behaviorId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+      auth: true,
+    });
+  }
+
+  async deleteBehaviourRecord(behaviorId) {
+    return this.request(`/behavior/${behaviorId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
+  // Intervention endpoints
+  async createIntervention(interventionData) {
+    return this.request('/interventions', {
+      method: 'POST',
+      body: JSON.stringify(interventionData),
+      auth: true,
+    });
+  }
+
+  async getInterventions(filters = {}) {
+    const query = new URLSearchParams(filters).toString();
+    return this.request(`/interventions${query ? '?' + query : ''}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getInterventionsByStudent(studentId) {
+    return this.request(`/interventions/student/${studentId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async updateIntervention(interventionId, updates) {
+    return this.request(`/interventions/${interventionId}`, {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+      auth: true,
+    });
+  }
+
+  async deleteIntervention(interventionId) {
+    return this.request(`/interventions/${interventionId}`, {
+      method: 'DELETE',
+      auth: true,
+    });
+  }
+
+  // Profile endpoints
+  async getProfile() {
+    return this.request('/profile', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async updateProfile(updates) {
+    return this.request('/profile', {
+      method: 'PUT',
+      body: JSON.stringify(updates),
+      auth: true,
+    });
+  }
+
+  async getProfileById(userId) {
+    return this.request(`/profile/${userId}`, {
       method: 'GET',
       auth: true,
     });
