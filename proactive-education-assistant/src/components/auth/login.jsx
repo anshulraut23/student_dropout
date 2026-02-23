@@ -8,8 +8,6 @@ const ROLE_ADMIN = "admin";
 const ROLE_TEACHER = "teacher";
 
 function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
-  if (!isOpen) return null;
-
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -17,6 +15,8 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
   const [rememberMe, setRememberMe] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  if (!isOpen) return null;
 
   const getDashboardRoute = (userRole) =>
     userRole === ROLE_ADMIN ? "/admin/dashboard" : "/teacher/dashboard";

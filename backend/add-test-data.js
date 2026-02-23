@@ -3,7 +3,7 @@
 // Uses existing school
 
 import dataStore from './storage/dataStore.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 console.log('\n🌱 Adding Test Data to Database...\n');
 

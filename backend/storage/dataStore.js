@@ -1,9 +1,8 @@
 // Data Store - Supports multiple storage backends
-// Now using SQLite for persistent storage
+// Using in-memory storage for compatibility during development
 
-import sqliteStore from './sqliteStore.js';
-// import memoryStore from './memoryStore.js'; // Uncomment to switch back to in-memory storage
+// import sqliteStore from './sqliteStore.js';
+import memoryStore from './memoryStore.js';
 
-// Export SQLite store for persistent data storage
-// Data will persist across server restarts until the database file is deleted
-export default sqliteStore;
+// Export in-memory store (non-persistent)
+export default memoryStore;

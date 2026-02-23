@@ -2,7 +2,7 @@
 // Creates: 1 school, 1 admin, 4 teachers, 4 classes (2 daily, 2 subject-wise), subjects, 20 students (5 per class)
 
 import dataStore from './storage/dataStore.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

@@ -1,7 +1,9 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dataStore from '../storage/dataStore.js';
 import { generateId, validateEmail, validatePassword } from '../utils/helpers.js';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'dev-local-jwt-secret';
 
 // Admin Registration
 export const registerAdmin = async (req, res) => {
@@ -78,7 +80,7 @@ export const registerAdmin = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role, schoolId: user.schoolId },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
 
@@ -263,7 +265,7 @@ export const login = async (req, res) => {
     // Generate JWT token
     const token = jwt.sign(
       { userId: user.id, email: user.email, role: user.role, schoolId: user.schoolId },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: '7d' }
     );
 

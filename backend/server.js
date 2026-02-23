@@ -9,12 +9,7 @@ import classRoutes from './routes/classRoutes.js';
 import subjectRoutes from './routes/subjectRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
 import attendanceRoutes from './routes/attendanceRoutes.js';
-import examRoutes from './routes/examRoutes.js';
-import marksRoutes from './routes/marksRoutes.js';
-import examTemplateRoutes from './routes/examTemplateRoutes.js';
-import examPeriodRoutes from './routes/examPeriodRoutes.js';
-import profileRoutes from './routes/profileRoutes.js';
-import behaviorRoutes from './routes/behaviorRoutes.js';
+import { seedDefaultDataIfEmpty } from './utils/bootstrapSeed.js';
 
 dotenv.config();
 
@@ -134,6 +129,13 @@ app.use((req, res) => {
     path: req.path
   });
 });
+
+const seedResult = await seedDefaultDataIfEmpty();
+if (seedResult.seeded) {
+  console.log('🌱 Seeded default in-memory users for local development');
+  console.log(`   Admin: ${seedResult.credentials.admin} / ${seedResult.credentials.password}`);
+  console.log(`   Teacher: ${seedResult.credentials.teachers[0]} / ${seedResult.credentials.password}`);
+}
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

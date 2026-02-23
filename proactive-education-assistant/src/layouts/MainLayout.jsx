@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
   FaChartLine, 
@@ -16,11 +16,17 @@ import {
 } from "react-icons/fa";
 import Header from "../components/layouts/Header";
 import DashboardFooter from "../components/layouts/DashboardFooter";
+import loadingGif from "../assets/loading.gif";
+import { useTheme } from "../context/ThemeContext";
 
 function MainLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isNavLoading, setIsNavLoading] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { t } = useTranslation();
+  const { theme } = useTheme();
+  const navigationTimerRef = useRef(null);
 
   const navItems = [
     { path: "/dashboard", label: t("nav.dashboard", "Dashboard"), icon: FaChartLine },
@@ -35,6 +41,28 @@ function MainLayout() {
 
   const closeSidebar = () => setSidebarOpen(false);
 
+  const handleSidebarNavigation = (path) => {
+    closeSidebar();
+    setIsNavLoading(true);
+
+    if (navigationTimerRef.current) {
+      clearTimeout(navigationTimerRef.current);
+    }
+
+    navigationTimerRef.current = setTimeout(() => {
+      setIsNavLoading(false);
+      navigate(path);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (navigationTimerRef.current) {
+        clearTimeout(navigationTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="min-h-screen flex bg-gray-50">
       
@@ -48,17 +76,17 @@ function MainLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 w-64 h-screen
+        className={`fixed top-0 left-0 z-50 w-64 h-screen border border-gray-300
         transition-transform duration-300 ease-in-out lg:translate-x-0
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}
-        style={{ backgroundColor: '#1d2530' }}
+        style={{ backgroundColor: '#f8fafc' }}
       >
         {/* Mobile Close Button */}
-        <div className="lg:hidden flex items-center justify-between p-4 border-b" style={{ borderColor: '#2a3744' }}>
-          <h2 className="text-lg font-semibold text-white">Menu</h2>
+        <div className="lg:hidden flex items-center justify-between p-4 border-b" style={{ borderColor: '#d1d5db' }}>
+          <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
           <button
             onClick={closeSidebar}
-            className="p-2 text-gray-300 hover:text-white hover:bg-gray-700/50 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <FaTimes className="text-xl" />
           </button>
@@ -70,27 +98,29 @@ function MainLayout() {
               const Icon = item.icon;
               const active = location.pathname.startsWith(item.path);
               return (
-                <Link
+                <button
                   key={item.path}
-                  to={item.path}
-                  onClick={closeSidebar}
+                  type="button"
+                  onClick={() => handleSidebarNavigation(item.path)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
                     ${
                       active
-                        ? "bg-blue-600 text-white shadow-lg"
-                        : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
-                    }`}
+                        ? theme === "dark"
+                          ? "bg-white text-black shadow-lg"
+                          : "bg-gray-400 text-white shadow-lg"
+                        : "text-gray-900 hover:bg-gray-200 hover:text-gray-900"
+                    } w-full text-left`}
                 >
                   <Icon className="text-lg flex-shrink-0" />
                   <span>{item.label}</span>
-                </Link>
+                </button>
               );
             })}
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-3 border-t" style={{ borderColor: '#2a3744' }}>
-            <p className="text-xs text-gray-400 text-center">
+          <div className="px-4 py-3 border-t" style={{ borderColor: '#d1d5db' }}>
+            <p className="text-xs text-gray-500 text-center">
               Proactive Education Assistant
             </p>
           </div>
@@ -129,6 +159,12 @@ function MainLayout() {
 
         <DashboardFooter />
       </div>
+
+      {isNavLoading && (
+        <div className="fixed inset-0 lg:left-64 z-40 bg-white flex items-center justify-center">
+          <img src={loadingGif} alt="Loading" className="w-96 h-96 object-contain" />
+        </div>
+      )}
     </div>
   );
 }
