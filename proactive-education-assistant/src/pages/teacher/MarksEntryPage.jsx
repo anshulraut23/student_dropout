@@ -22,32 +22,78 @@ export default function MarksEntryPage() {
     try {
       setLoading(true);
       
+      console.log('Loading exam and marks for examId:', examId);
+      
       // Load exam details
-      const examResponse = await apiService.getExamById(examId);
-      setExam(examResponse.exam);
+      let examData;
+      try {
+        const examResponse = await apiService.getExamById(examId);
+        console.log('Exam response:', examResponse);
+        
+        if (!examResponse || !examResponse.exam) {
+          throw new Error('Invalid exam response from server');
+        }
+        
+        examData = examResponse.exam;
+        setExam(examData);
+      } catch (examError) {
+        console.error('Error loading exam:', examError);
+        throw new Error(`Failed to load exam: ${examError.message}`);
+      }
 
       // Load students
-      const studentsResponse = await apiService.getStudents(examResponse.exam.classId);
-      setStudents(studentsResponse.students || []);
+      try {
+        const studentsResponse = await apiService.getStudents(examData.classId);
+        console.log('Students response:', studentsResponse);
+        setStudents(studentsResponse.students || []);
+      } catch (studentsError) {
+        console.error('Error loading students:', studentsError);
+        // Continue even if students fail to load
+        setStudents([]);
+      }
 
       // Load existing marks
-      const marksResponse = await apiService.getMarksByExam(examId);
-      const existing = {};
-      const current = {};
-      
-      (marksResponse.marks || []).forEach(mark => {
-        existing[mark.studentId] = mark;
-        current[mark.studentId] = {
-          marksObtained: mark.marksObtained,
-          status: mark.status,
-          remarks: mark.remarks || ''
-        };
-      });
+      try {
+        const marksResponse = await apiService.getMarksByExam(examId);
+        console.log('Marks response:', marksResponse);
+        
+        const existing = {};
+        const current = {};
+        
+        (marksResponse.marks || []).forEach(mark => {
+          existing[mark.studentId] = mark;
+          current[mark.studentId] = {
+            marksObtained: mark.marksObtained,
+            status: mark.status,
+            remarks: mark.remarks || ''
+          };
+        });
 
-      setExistingMarks(existing);
-      setMarksData(current);
+        setExistingMarks(existing);
+        setMarksData(current);
+      } catch (marksError) {
+        console.error('Error loading marks:', marksError);
+        // Continue even if marks fail to load
+        setExistingMarks({});
+        setMarksData({});
+      }
+      
     } catch (error) {
-      alert('Error loading exam data: ' + error.message);
+      console.error('Fatal error loading exam data:', error);
+      
+      let errorMessage = 'Error loading exam data: ' + error.message;
+      
+      if (error.message.includes('Cannot connect to backend')) {
+        errorMessage = 'Cannot connect to backend server.\n\nPlease check:\n1. Backend is running on port 5000\n2. You are logged in\n3. Your auth token is valid';
+      } else if (error.message.includes('Endpoint not found')) {
+        errorMessage = 'API endpoint not found.\n\nThe exam or marks endpoint may not be available.';
+      } else if (error.message.includes('Unauthorized') || error.message.includes('401')) {
+        errorMessage = 'Authentication failed.\n\nPlease logout and login again.';
+      } else if (error.message.includes('Forbidden') || error.message.includes('403')) {
+        errorMessage = 'Access denied.\n\nYou may not have permission to view this exam.';
+      }
+      
+      alert(errorMessage);
       navigate('/dashboard');
     } finally {
       setLoading(false);
@@ -119,10 +165,14 @@ export default function MarksEntryPage() {
     try {
       setSaving(true);
       
+      console.log('Submitting marks:', { examId, marks: marksArray });
+      
       const response = await apiService.enterBulkMarks({
         examId,
         marks: marksArray
       });
+
+      console.log('Response:', response);
 
       if (response.success) {
         alert(`Marks saved successfully!\nEntered: ${response.entered}\nFailed: ${response.failed}`);
@@ -132,7 +182,16 @@ export default function MarksEntryPage() {
         loadExamAndMarks(); // Reload to show updated data
       }
     } catch (error) {
-      alert('Error saving marks: ' + error.message);
+      console.error('Submit error:', error);
+      
+      // Provide more helpful error messages
+      if (error.message.includes('Cannot connect to backend')) {
+        alert('Cannot connect to backend server.\n\nPlease make sure:\n1. Backend server is running (npm start in backend folder)\n2. Server is running on http://localhost:5000\n3. Check the backend terminal for errors');
+      } else if (error.message.includes('Endpoint not found')) {
+        alert('API endpoint not found.\n\nPlease make sure:\n1. Backend server is running\n2. All routes are properly registered\n3. Check backend/server.js for /api/marks/bulk route');
+      } else {
+        alert('Error saving marks: ' + error.message + '\n\nCheck the console for more details.');
+      }
     } finally {
       setSaving(false);
     }

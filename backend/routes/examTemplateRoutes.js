@@ -19,7 +19,14 @@ router.get('/:templateId', examTemplateController.getTemplateById);
 router.post('/', examTemplateController.createTemplate);
 
 // Update template
-router.put('/:templateId', examTemplateController.updateTemplate);
+router.put('/:templateId', (req, res, next) => {
+  console.log('📝 Template update route hit:', {
+    templateId: req.params.templateId,
+    bodyKeys: Object.keys(req.body),
+    userId: req.user?.userId
+  });
+  next();
+}, examTemplateController.updateTemplate);
 
 // Delete template
 router.delete('/:templateId', examTemplateController.deleteTemplate);

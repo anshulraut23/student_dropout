@@ -385,7 +385,8 @@ class SQLiteStore {
     
     const stmt = db.prepare(`
       UPDATE users 
-      SET email = ?, password = ?, fullName = ?, role = ?, schoolId = ?, status = ?, assignedClasses = ?
+      SET email = ?, password = ?, fullName = ?, role = ?, schoolId = ?, status = ?, assignedClasses = ?,
+          phone = ?, designation = ?, address = ?, city = ?, state = ?, pincode = ?, profilePicture = ?, updatedAt = ?
       WHERE id = ?
     `);
     stmt.run(
@@ -396,6 +397,14 @@ class SQLiteStore {
       updatedUser.schoolId,
       updatedUser.status,
       JSON.stringify(updatedUser.assignedClasses || []),
+      updatedUser.phone || null,
+      updatedUser.designation || null,
+      updatedUser.address || null,
+      updatedUser.city || null,
+      updatedUser.state || null,
+      updatedUser.pincode || null,
+      updatedUser.profilePicture || null,
+      updatedUser.updatedAt || new Date().toISOString(),
       userId
     );
     
@@ -1096,8 +1105,15 @@ class SQLiteStore {
   }
 
   updateExamTemplate(templateId, updates) {
+    console.log('💾 DataStore updateExamTemplate:', { templateId, updates });
+    
     const template = this.getExamTemplateById(templateId);
-    if (!template) return null;
+    if (!template) {
+      console.log('❌ Template not found in dataStore:', templateId);
+      return null;
+    }
+
+    console.log('📋 Template before update:', template);
 
     const updatedTemplate = { 
       ...template, 
@@ -1105,26 +1121,34 @@ class SQLiteStore {
       updatedAt: new Date().toISOString() 
     };
 
+    console.log('📝 Template after merge:', updatedTemplate);
+
     const stmt = db.prepare(`
       UPDATE exam_templates SET
         name = ?, type = ?, description = ?, totalMarks = ?, passingMarks = ?,
-        weightage = ?, isActive = ?, updatedAt = ?
+        weightage = ?, orderSequence = ?, isActive = ?, updatedAt = ?
       WHERE id = ?
     `);
 
-    stmt.run(
+    const result = stmt.run(
       updatedTemplate.name,
       updatedTemplate.type,
       updatedTemplate.description,
       updatedTemplate.totalMarks,
       updatedTemplate.passingMarks,
       updatedTemplate.weightage,
+      updatedTemplate.orderSequence,
       updatedTemplate.isActive ? 1 : 0,
       updatedTemplate.updatedAt,
       templateId
     );
 
-    return this.getExamTemplateById(templateId);
+    console.log('💾 SQL UPDATE result:', { changes: result.changes, lastInsertRowid: result.lastInsertRowid });
+
+    const finalTemplate = this.getExamTemplateById(templateId);
+    console.log('✅ Template after SQL update:', finalTemplate);
+
+    return finalTemplate;
   }
 
   deleteExamTemplate(templateId) {
@@ -1269,6 +1293,131 @@ class SQLiteStore {
       WHERE periodId = ? AND classId = ? AND subjectId = ?
     `);
     return stmt.get(periodId, classId, subjectId);
+  }
+
+  // ==================== BEHAVIOR METHODS ====================
+
+  addBehavior(behavior) {
+    const stmt = db.prepare(`
+      INSERT INTO behavior (
+        id, studentId, teacherId, date, behaviorType, severity, category,
+        description, actionTaken, followUpRequired, followUpDate, createdAt, updatedAt
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    stmt.run(
+      behavior.id,
+      behavior.studentId,
+      behavior.teacherId,
+      behavior.date,
+      behavior.behaviorType,
+      behavior.severity,
+      behavior.category,
+      behavior.description,
+      behavior.actionTaken || null,
+      behavior.followUpRequired ? 1 : 0,
+      behavior.followUpDate || null,
+      behavior.createdAt,
+      behavior.updatedAt
+    );
+    
+    return behavior;
+  }
+
+  getBehaviors(filters = {}) {
+    let query = 'SELECT * FROM behavior WHERE 1=1';
+    const params = [];
+
+    if (filters.studentId) {
+      query += ' AND studentId = ?';
+      params.push(filters.studentId);
+    }
+
+    if (filters.teacherId) {
+      query += ' AND teacherId = ?';
+      params.push(filters.teacherId);
+    }
+
+    if (filters.behaviorType) {
+      query += ' AND behaviorType = ?';
+      params.push(filters.behaviorType);
+    }
+
+    if (filters.severity) {
+      query += ' AND severity = ?';
+      params.push(filters.severity);
+    }
+
+    if (filters.startDate) {
+      query += ' AND date >= ?';
+      params.push(filters.startDate);
+    }
+
+    if (filters.endDate) {
+      query += ' AND date <= ?';
+      params.push(filters.endDate);
+    }
+
+    query += ' ORDER BY date DESC, createdAt DESC';
+
+    const stmt = db.prepare(query);
+    return stmt.all(...params).map(b => ({
+      ...b,
+      followUpRequired: b.followUpRequired === 1
+    }));
+  }
+
+  getBehaviorById(behaviorId) {
+    const stmt = db.prepare('SELECT * FROM behavior WHERE id = ?');
+    const behavior = stmt.get(behaviorId);
+    if (behavior) {
+      behavior.followUpRequired = behavior.followUpRequired === 1;
+    }
+    return behavior;
+  }
+
+  getBehaviorsByStudent(studentId, filters = {}) {
+    return this.getBehaviors({ ...filters, studentId });
+  }
+
+  updateBehavior(behaviorId, updates) {
+    const behavior = this.getBehaviorById(behaviorId);
+    if (!behavior) return null;
+
+    const updatedBehavior = { 
+      ...behavior, 
+      ...updates, 
+      updatedAt: new Date().toISOString() 
+    };
+
+    const stmt = db.prepare(`
+      UPDATE behavior SET
+        date = ?, behaviorType = ?, severity = ?, category = ?,
+        description = ?, actionTaken = ?, followUpRequired = ?, 
+        followUpDate = ?, updatedAt = ?
+      WHERE id = ?
+    `);
+
+    stmt.run(
+      updatedBehavior.date,
+      updatedBehavior.behaviorType,
+      updatedBehavior.severity,
+      updatedBehavior.category,
+      updatedBehavior.description,
+      updatedBehavior.actionTaken,
+      updatedBehavior.followUpRequired ? 1 : 0,
+      updatedBehavior.followUpDate,
+      updatedBehavior.updatedAt,
+      behaviorId
+    );
+
+    return this.getBehaviorById(behaviorId);
+  }
+
+  deleteBehavior(behaviorId) {
+    const stmt = db.prepare('DELETE FROM behavior WHERE id = ?');
+    const result = stmt.run(behaviorId);
+    return result.changes > 0;
   }
 }
 
