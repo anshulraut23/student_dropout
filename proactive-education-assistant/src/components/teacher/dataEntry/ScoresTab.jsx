@@ -200,23 +200,29 @@ export default function ScoresTab() {
     setMessage({ type: "", text: "" });
 
     try {
-      const marksArray = Object.entries(scores)
+      // Use the marks API instead of performance API
+      const marksRecords = Object.entries(scores)
         .filter(([_, score]) => score.obtainedMarks !== "")
         .map(([studentId, score]) => ({
           studentId,
           marksObtained: parseFloat(score.obtainedMarks),
+          status: 'present',
           remarks: score.remarks || ""
         }));
 
+      console.log('Submitting marks:', { examId: selectedExam.id, marks: marksRecords });
+
       const result = await apiService.enterBulkMarks({
         examId: selectedExam.id,
-        marks: marksArray
+        marks: marksRecords
       });
+      
+      console.log('Marks submission result:', result);
       
       if (result.success) {
         setMessage({ 
           type: "success", 
-          text: `✅ ${isEditMode ? 'Updated' : 'Saved'} marks successfully! ${result.entered} student${result.entered !== 1 ? 's' : ''} processed.` 
+          text: `✅ ${isEditMode ? 'Updated' : 'Saved'} marks successfully! ${result.entered} student${result.entered !== 1 ? 's' : ''} processed.${result.failed > 0 ? ` (${result.failed} failed)` : ''}` 
         });
         
         // Refresh to show as "already entered"
@@ -230,7 +236,19 @@ export default function ScoresTab() {
       }
     } catch (error) {
       console.error('Score submission error:', error);
-      setMessage({ type: "error", text: error.message || "Failed to save marks. Please try again." });
+      if (error.message.includes('404') || error.message.includes('Endpoint not found')) {
+        setMessage({ 
+          type: "error", 
+          text: "Backend API not available. Please ensure the server is running on port 5000." 
+        });
+      } else if (error.message.includes('Cannot connect to backend')) {
+        setMessage({ 
+          type: "error", 
+          text: "Cannot connect to backend server. Please check if it's running." 
+        });
+      } else {
+        setMessage({ type: "error", text: "Failed to save marks: " + error.message });
+      }
     } finally {
       setLoading(false);
     }

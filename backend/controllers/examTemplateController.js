@@ -153,8 +153,17 @@ export const updateTemplate = async (req, res) => {
     const updates = req.body;
     const { schoolId, userId, role } = req.user;
 
+    console.log('🔄 Update template controller:', {
+      templateId,
+      updates,
+      schoolId,
+      userId,
+      role
+    });
+
     // Only admins can update templates
     if (role !== 'admin') {
+      console.log('❌ Access denied: not admin');
       return res.status(403).json({
         success: false,
         error: 'Only admins can update exam templates'
@@ -162,9 +171,11 @@ export const updateTemplate = async (req, res) => {
     }
 
     const existingTemplate = await examTemplateService.getTemplateById(templateId);
+    console.log('📋 Existing template:', existingTemplate);
 
     // Verify template belongs to user's school
     if (existingTemplate.schoolId !== schoolId) {
+      console.log('❌ Access denied: wrong school');
       return res.status(403).json({
         success: false,
         error: 'Access denied'
@@ -172,6 +183,7 @@ export const updateTemplate = async (req, res) => {
     }
 
     const updatedTemplate = await examTemplateService.updateTemplate(templateId, updates, userId);
+    console.log('✅ Template updated:', updatedTemplate);
 
     res.json({
       success: true,
@@ -179,7 +191,7 @@ export const updateTemplate = async (req, res) => {
       template: updatedTemplate
     });
   } catch (error) {
-    console.error('Update template error:', error);
+    console.error('❌ Update template error:', error);
     res.status(400).json({
       success: false,
       error: error.message || 'Failed to update template'

@@ -124,10 +124,15 @@ export async function getTemplateById(templateId) {
  * Update exam template
  */
 export async function updateTemplate(templateId, updates, userId) {
+  console.log('🔧 Service updateTemplate called:', { templateId, updates, userId });
+  
   const existingTemplate = await dataStore.getExamTemplateById(templateId);
   if (!existingTemplate) {
+    console.log('❌ Template not found:', templateId);
     throw new Error('Template not found');
   }
+
+  console.log('📋 Existing template before update:', existingTemplate);
 
   // Validation
   if (updates.passingMarks && updates.totalMarks) {
@@ -152,12 +157,21 @@ export async function updateTemplate(templateId, updates, userId) {
     throw new Error('Total marks must be greater than 0');
   }
 
+  if (updates.orderSequence !== undefined && updates.orderSequence < 1) {
+    throw new Error('Order sequence must be at least 1');
+  }
+
   // Convert numeric fields
   if (updates.totalMarks) updates.totalMarks = parseInt(updates.totalMarks);
   if (updates.passingMarks) updates.passingMarks = parseInt(updates.passingMarks);
   if (updates.weightage !== undefined) updates.weightage = parseFloat(updates.weightage);
+  if (updates.orderSequence) updates.orderSequence = parseInt(updates.orderSequence);
+
+  console.log('📝 Updates after conversion:', updates);
 
   const updatedTemplate = await dataStore.updateExamTemplate(templateId, updates);
+  console.log('✅ Template updated in dataStore:', updatedTemplate);
+  
   return updatedTemplate;
 }
 
