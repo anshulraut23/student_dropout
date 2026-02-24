@@ -199,7 +199,8 @@ import {
   FaTimes,
   FaHistory,
   FaChartBar,
-  FaComments
+  FaComments,
+  FaHandsHelping
 } from "react-icons/fa";
 import Header from "../components/layouts/Header";
 import DashboardFooter from "../components/layouts/DashboardFooter";
