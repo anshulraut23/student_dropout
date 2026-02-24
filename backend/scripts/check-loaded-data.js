@@ -1,6 +1,6 @@
 // Check what data was loaded into Supabase
 import dotenv from 'dotenv';
-import dataStore from './storage/dataStore.js';
+import dataStore from '../storage/dataStore.js';
 
 dotenv.config();
 

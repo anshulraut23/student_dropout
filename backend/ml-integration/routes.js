@@ -1,7 +1,8 @@
-const express = require('express');
+import express from 'express';
+import riskController from './riskController.js';
+import { authenticateToken } from '../middleware/auth.js';
+
 const router = express.Router();
-const riskController = require('./riskController');
-const { authenticateToken } = require('../middleware/auth');
 
 /**
  * ML Risk Prediction Routes (Isolated)
@@ -9,7 +10,7 @@ const { authenticateToken } = require('../middleware/auth');
  */
 
 // Get risk prediction for a single student
-router.get('/risk/:studentId', authenticateToken, (req, res) => {
+router.get('/risk/student/:studentId', authenticateToken, (req, res) => {
   riskController.getStudentRisk(req, res);
 });
 
@@ -18,9 +19,15 @@ router.get('/risk/class/:classId', authenticateToken, (req, res) => {
   riskController.getClassRisk(req, res);
 });
 
-// Get risk dashboard statistics
-router.get('/risk/dashboard', authenticateToken, (req, res) => {
+// Get school-wide risk statistics
+router.get('/risk/statistics', authenticateToken, (req, res) => {
   riskController.getRiskDashboard(req, res);
 });
 
-module.exports = router;
+// Retrain ML model with latest data
+router.post('/retrain', authenticateToken, (req, res) => {
+  riskController.retrainModel(req, res);
+});
+
+export default router;
+

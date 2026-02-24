@@ -59,14 +59,16 @@ class MLPredictor:
         Returns:
             Dict with risk_score, risk_level, and feature_importance
         """
+        import pandas as pd
+        
         # Extract features in correct order
         feature_values = []
         for col in self.feature_columns:
             value = features.get(col, 0)
             feature_values.append(value)
         
-        # Convert to numpy array
-        X = np.array([feature_values])
+        # Convert to pandas DataFrame with proper column names to avoid sklearn warning
+        X = pd.DataFrame([feature_values], columns=self.feature_columns)
         
         # Get prediction probability
         proba = self.model.predict_proba(X)[0]
