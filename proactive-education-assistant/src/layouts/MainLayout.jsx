@@ -205,6 +205,12 @@ import {
 import Header from "../components/layouts/Header";
 import DashboardFooter from "../components/layouts/DashboardFooter";
 import loadingGif from "../assets/loading.gif";
+import { useNetworkStatus } from "../hooks/useNetworkStatus";
+import syncManager from "../services/syncManager";
+import NetworkStatus from "../components/NetworkStatus";
+import SyncButton from "../components/SyncButton";
+import SyncProgress from "../components/SyncProgress";
+import QueueCounter from "../components/QueueCounter";
 
 /* ── Teacher Sidebar Styles (matching Admin theme) ──────────────────── */
 const TEACHER_SIDEBAR_STYLES = `
@@ -483,6 +489,15 @@ function MainLayout() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const navigationTimerRef = useRef(null);
+  const { isOnline, wasOffline } = useNetworkStatus();
+
+  // Auto-sync when coming back online
+  useEffect(() => {
+    if (isOnline && wasOffline) {
+      console.log('🔄 Network restored - triggering auto-sync');
+      syncManager.sync();
+    }
+  }, [isOnline, wasOffline]);
 
   const navItems = [
     { path: "/dashboard", label: t("nav.dashboard", "Dashboard"), icon: FaChartLine },
@@ -620,41 +635,49 @@ function MainLayout() {
         <div className="teacher-main-content flex-1 flex flex-col">
           {/* Mobile Header with Menu Button */}
           <div 
-            className="lg:hidden fixed top-0 right-0 z-30 h-16 flex items-center px-4 shadow-sm"
+            className="lg:hidden fixed top-0 right-0 z-30 h-16 flex items-center justify-between px-4 shadow-sm"
             style={{
               backgroundColor: "#ffffff",
               borderBottom: "1px solid rgba(26, 111, 181, 0.08)",
               left: '0'
             }}
           >
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 rounded-lg transition-all"
-              style={{
-                color: "#6b7a8d",
-                backgroundColor: "rgba(26, 111, 181, 0.06)",
-                border: "1px solid rgba(26, 111, 181, 0.12)"
-              }}
-              aria-label="Open sidebar"
-            >
-              <FaBars className="text-lg" />
-            </button>
-            
-            <div className="ml-3 flex items-center gap-2">
-              <div 
-                className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                style={{ 
-                  background: "linear-gradient(135deg, #1a6fb5 0%, #2d8fd4 100%)"
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(true)}
+                className="p-2 rounded-lg transition-all"
+                style={{
+                  color: "#6b7a8d",
+                  backgroundColor: "rgba(26, 111, 181, 0.06)",
+                  border: "1px solid rgba(26, 111, 181, 0.12)"
                 }}
+                aria-label="Open sidebar"
               >
-                <span style={{ color: "white", fontWeight: "700", fontSize: "0.8rem" }}>PE</span>
+                <FaBars className="text-lg" />
+              </button>
+              
+              <div className="flex items-center gap-2">
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ 
+                    background: "linear-gradient(135deg, #1a6fb5 0%, #2d8fd4 100%)"
+                  }}
+                >
+                  <span style={{ color: "white", fontWeight: "700", fontSize: "0.8rem" }}>PE</span>
+                </div>
+                <h2 
+                  className="text-sm font-semibold"
+                  style={{ color: "#1e2c3a" }}
+                >
+                  Proactive Education
+                </h2>
               </div>
-              <h2 
-                className="text-sm font-semibold"
-                style={{ color: "#1e2c3a" }}
-              >
-                Proactive Education
-              </h2>
+            </div>
+
+            {/* Network Status & Queue Counter */}
+            <div className="flex items-center gap-2">
+              <QueueCounter />
+              <NetworkStatus />
             </div>
           </div>
 
@@ -664,6 +687,12 @@ function MainLayout() {
               onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
               isSidebarOpen={sidebarOpen}
             />
+            {/* Desktop Sync Controls */}
+            <div className="fixed top-4 right-4 z-30 flex items-center gap-3">
+              <QueueCounter />
+              <NetworkStatus />
+              <SyncButton />
+            </div>
           </div>
 
           {/* Main Content */}
@@ -673,6 +702,9 @@ function MainLayout() {
 
           <DashboardFooter />
         </div>
+
+        {/* Sync Progress Toast */}
+        <SyncProgress />
 
         {/* Loading Overlay */}
         {isNavLoading && (

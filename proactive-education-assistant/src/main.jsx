@@ -21,6 +21,22 @@ import "./App.css"; // Import Horizon theme
 import "./i18n"; // ✅ IMPORTANT
 import { ThemeProvider } from "./context/ThemeContext";
 
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // The service worker will be automatically registered by vite-plugin-pwa
+    // This is just to handle the registration events
+    navigator.serviceWorker.ready.then((registration) => {
+      console.log('✅ Service Worker registered and ready');
+      
+      // Check for updates periodically
+      setInterval(() => {
+        registration.update();
+      }, 60000); // Check every minute
+    });
+  });
+}
+
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <ThemeProvider>

@@ -1,5 +1,7 @@
 // API Service - Handles all backend API calls
 
+import offlineQueue from './offlineQueue';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 class ApiService {
@@ -28,13 +30,38 @@ class ApiService {
     return headers;
   }
 
-  // Generic request handler
+  // Generic request handler with offline support
   async request(endpoint, options = {}) {
+    const { method = 'GET', data, auth = false, offlineSupport = false } = options;
+
+    // Check if offline and operation supports offline
+    if (!navigator.onLine && offlineSupport && method !== 'GET') {
+      console.log('📴 Offline mode: Queuing request', endpoint);
+      
+      // Queue the request
+      const queueItem = await offlineQueue.add(endpoint, {
+        method,
+        data,
+        endpoint
+      });
+      
+      // Return success response
+      return {
+        success: true,
+        offline: true,
+        queueId: queueItem.id,
+        message: 'Saved locally. Will sync when online.'
+      };
+    }
+
+    // Normal online request
     try {
-      const headers = this.getHeaders(options.auth);
+      const headers = this.getHeaders(auth);
       
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         ...options,
+        method,
+        body: data ? JSON.stringify(data) : undefined,
         headers: {
           ...headers,
           ...(options.headers || {})
@@ -57,19 +84,19 @@ class ApiService {
         throw new Error('Backend server error. Please check if the server is running and try again.');
       }
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (!response.ok) {
         console.error('❌ API Error Response:', {
           endpoint,
           status: response.status,
           statusText: response.statusText,
-          data
+          data: responseData
         });
-        throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
+        throw new Error(responseData.error || responseData.message || `Request failed with status ${response.status}`);
       }
 
-      return data;
+      return responseData;
     } catch (error) {
       console.error('API request error:', error);
       
@@ -434,16 +461,18 @@ class ApiService {
   async enterSingleMarks(marksData) {
     return this.request('/marks', {
       method: 'POST',
-      body: JSON.stringify(marksData),
+      data: marksData,
       auth: true,
+      offlineSupport: true // Enable offline support
     });
   }
 
   async enterBulkMarks(bulkData) {
     return this.request('/marks/bulk', {
       method: 'POST',
-      body: JSON.stringify(bulkData),
+      data: bulkData,
       auth: true,
+      offlineSupport: true // Enable offline support
     });
   }
 
@@ -492,8 +521,9 @@ class ApiService {
   async markAttendance(attendanceData) {
     return this.request('/attendance/mark', {
       method: 'POST',
-      body: JSON.stringify(attendanceData),
+      data: attendanceData,
       auth: true,
+      offlineSupport: true // Enable offline support
     });
   }
 
@@ -503,8 +533,9 @@ class ApiService {
   async markBulkAttendance(bulkData) {
     return this.request('/attendance/mark-bulk', {
       method: 'POST',
-      body: JSON.stringify(bulkData),
+      data: bulkData,
       auth: true,
+      offlineSupport: true // Enable offline support
     });
   }
 
@@ -619,8 +650,9 @@ class ApiService {
   async createBehaviorRecord(behaviorData) {
     return this.request('/behavior', {
       method: 'POST',
-      body: JSON.stringify(behaviorData),
+      data: behaviorData,
       auth: true,
+      offlineSupport: true // Enable offline support
     });
   }
 
@@ -666,8 +698,9 @@ class ApiService {
   async createBehaviourRecord(behaviourData) {
     return this.request('/behavior', {
       method: 'POST',
-      body: JSON.stringify(behaviourData),
+      data: behaviourData,
       auth: true,
+      offlineSupport: true // Enable offline support
     });
   }
 
@@ -705,8 +738,9 @@ class ApiService {
   async createIntervention(interventionData) {
     return this.request('/interventions', {
       method: 'POST',
-      body: JSON.stringify(interventionData),
+      data: interventionData,
       auth: true,
+      offlineSupport: true // Enable offline support
     });
   }
 

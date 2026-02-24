@@ -1,41 +1,51 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 
+// Eager load critical pages (landing, login)
 import LandingPage from "../pages/LandingPage";
-import PricingTable from "../pages/payement/PricingTable";
-import PaymentUI from "../pages/payement/PaymentUI";
-import AboutPage from "../pages/AboutPage";
-import ForgotPassword from "../pages/auth/ForgotPassword";
-
-import DashboardPage from "../pages/teacher/DashboardPage";
-import StudentListPage from "../pages/teacher/StudentListPage";
-import StudentProfilePage from "../pages/teacher/StudentProfilePage";
-import ProfilePage from "../pages/teacher/ProfilePage";
-import DataEntryPage from "../pages/teacher/DataEntryPage";
-import AttendanceHistoryPage from "../pages/teacher/AttendanceHistoryPage";
-import InterventionsHistoryPage from "../pages/teacher/InterventionsHistoryPage";
-import MarksEntryPage from "../pages/teacher/MarksEntryPage";
-import ScoreHistoryPage from "../pages/teacher/ScoreHistoryPage";
-import GamificationPage from "../pages/teacher/GamificationPage";
-import LeaderboardPage from "../pages/teacher/LeaderboardPage";
-import AddStudentPage from "../pages/teacher/AddStudentPage";
-import MyClassesPage from "../pages/teacher/MyClassesPage";
 import LoginPage from "../pages/teacher/LoginPage";
-import FacultyConnect from "../pages/teacher/FacultyConnect";
-import FacultyChat from "../pages/teacher/FacultyChat";
-
 import MainLayout from "../layouts/MainLayout";
 
-// Admin
-import { AdminProvider } from "../context/AdminContext";
-import AdminLayout from "../layouts/AdminLayout";
-import AdminDashboard from "../pages/admin/AdminDashboard";
-import TeacherManagement from "../pages/admin/TeacherManagement";
-import ClassManagement from "../pages/admin/ClassManagement";
-import SubjectManagement from "../pages/admin/SubjectManagement";
-import ExamTemplateManagement from "../pages/admin/ExamTemplateManagement";
-import Analytics from "../pages/admin/Analytics";
-import AdminProfile from "../pages/admin/AdminProfile";
+// Lazy load all other pages
+const PricingTable = lazy(() => import("../pages/payement/PricingTable"));
+const PaymentUI = lazy(() => import("../pages/payement/PaymentUI"));
+const AboutPage = lazy(() => import("../pages/AboutPage"));
+const ForgotPassword = lazy(() => import("../pages/auth/ForgotPassword"));
+
+// Teacher pages - lazy loaded
+const DashboardPage = lazy(() => import("../pages/teacher/DashboardPage"));
+const StudentListPage = lazy(() => import("../pages/teacher/StudentListPage"));
+const StudentProfilePage = lazy(() => import("../pages/teacher/StudentProfilePage"));
+const ProfilePage = lazy(() => import("../pages/teacher/ProfilePage"));
+const DataEntryPage = lazy(() => import("../pages/teacher/DataEntryPage"));
+const AttendanceHistoryPage = lazy(() => import("../pages/teacher/AttendanceHistoryPage"));
+const InterventionsHistoryPage = lazy(() => import("../pages/teacher/InterventionsHistoryPage"));
+const MarksEntryPage = lazy(() => import("../pages/teacher/MarksEntryPage"));
+const ScoreHistoryPage = lazy(() => import("../pages/teacher/ScoreHistoryPage"));
+const GamificationPage = lazy(() => import("../pages/teacher/GamificationPage"));
+const LeaderboardPage = lazy(() => import("../pages/teacher/LeaderboardPage"));
+const AddStudentPage = lazy(() => import("../pages/teacher/AddStudentPage"));
+const MyClassesPage = lazy(() => import("../pages/teacher/MyClassesPage"));
+const FacultyConnect = lazy(() => import("../pages/teacher/FacultyConnect"));
+const FacultyChat = lazy(() => import("../pages/teacher/FacultyChat"));
+
+// Admin - lazy loaded
+const AdminProvider = lazy(() => import("../context/AdminContext").then(m => ({ default: m.AdminProvider })));
+const AdminLayout = lazy(() => import("../layouts/AdminLayout"));
+const AdminDashboard = lazy(() => import("../pages/admin/AdminDashboard"));
+const TeacherManagement = lazy(() => import("../pages/admin/TeacherManagement"));
+const ClassManagement = lazy(() => import("../pages/admin/ClassManagement"));
+const SubjectManagement = lazy(() => import("../pages/admin/SubjectManagement"));
+const ExamTemplateManagement = lazy(() => import("../pages/admin/ExamTemplateManagement"));
+const Analytics = lazy(() => import("../pages/admin/Analytics"));
+const AdminProfile = lazy(() => import("../pages/admin/AdminProfile"));
+
+// Loading fallback component
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+);
 
 export default function AppRoutes() {
   const readAuthState = () => {
@@ -77,13 +87,14 @@ export default function AppRoutes() {
   }, []);
 
   return (
-    <Routes>
-      {/* Public Pages */}
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/pricing" element={<PricingTable />} />
-      <Route path="/payment" element={<PaymentUI />} />
-      <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/about" element={<AboutPage />} />
+    <Suspense fallback={<LoadingSpinner />}>
+      <Routes>
+        {/* Public Pages */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/pricing" element={<PricingTable />} />
+        <Route path="/payment" element={<PaymentUI />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/about" element={<AboutPage />} />
       
       {/* Login Routes - Always Accessible */}
       <Route 
@@ -174,5 +185,6 @@ export default function AppRoutes() {
       {/* Catch all - redirect to home */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 }
