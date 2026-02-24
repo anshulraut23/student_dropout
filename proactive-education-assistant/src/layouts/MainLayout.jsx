@@ -208,8 +208,6 @@ import loadingGif from "../assets/loading.gif";
 
 /* ── Teacher Sidebar Styles (matching Admin theme) ──────────────────── */
 const TEACHER_SIDEBAR_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
-
   .teacher-sidebar {
     background: linear-gradient(180deg, #0e4a80 0%, #0a3660 45%, #071f3a 100%);
     position: fixed;
@@ -496,6 +494,7 @@ function MainLayout() {
     { path: "/interventions-history", label: "Interventions History", icon: FaHandsHelping },
     { path: "/score-history", label: "Score History", icon: FaChartBar },
     { path: "/gamification", label: "Progress", icon: FaTrophy },
+    { path: "/leaderboard", label: "Leaderboard", icon: FaTrophy },
     { path: "/faculty-connect", label: "Faculty Chat", icon: FaComments },
   ];
 
