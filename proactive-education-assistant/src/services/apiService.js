@@ -754,6 +754,67 @@ class ApiService {
       auth: true,
     });
   }
+
+  // Faculty endpoints
+  async getSchoolTeachers() {
+    return this.request('/faculty/teachers', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async sendFacultyInvite(recipientId) {
+    return this.request('/faculty/invites/send', {
+      method: 'POST',
+      body: JSON.stringify({ recipientId }),
+      auth: true,
+    });
+  }
+
+  async getMyFacultyInvites() {
+    return this.request('/faculty/invites', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async acceptFacultyInvite(inviteId) {
+    return this.request('/faculty/invites/accept', {
+      method: 'POST',
+      body: JSON.stringify({ inviteId }),
+      auth: true,
+    });
+  }
+
+  async rejectFacultyInvite(inviteId) {
+    return this.request('/faculty/invites/reject', {
+      method: 'POST',
+      body: JSON.stringify({ inviteId }),
+      auth: true,
+    });
+  }
+
+  async getAcceptedConnections() {
+    return this.request('/faculty/connections', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async sendMessage(recipientId, text, attachmentName = null, attachmentType = null, attachmentData = null) {
+    return this.request('/faculty/messages/send', {
+      method: 'POST',
+      body: JSON.stringify({ recipientId, text, attachmentName, attachmentType, attachmentData }),
+      auth: true,
+    });
+  }
+
+  async getConversation(facultyId, limit = 50) {
+    return this.request(`/faculty/messages/conversation/${facultyId}?limit=${limit}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
 }
 
 export default new ApiService();
