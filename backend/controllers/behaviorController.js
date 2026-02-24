@@ -5,7 +5,7 @@ import { generateId } from '../utils/helpers.js';
  * Get all behavior records with filters
  * GET /api/behavior
  */
-export const getBehaviors = (req, res) => {
+export const getBehaviors = async (req, res) => {
   try {
     const { userId, schoolId, role } = req.user;
     const { studentId, teacherId, behaviorType, severity, startDate, endDate } = req.query;
@@ -27,26 +27,34 @@ export const getBehaviors = (req, res) => {
     if (startDate) filters.startDate = startDate;
     if (endDate) filters.endDate = endDate;
 
-    const behaviors = dataStore.getBehaviors(filters);
+    const behaviors = await dataStore.getBehaviors(filters);
 
     // Filter by school
-    const schoolBehaviors = behaviors.filter(b => {
-      const student = dataStore.getStudentById(b.studentId);
-      return student && student.schoolId === schoolId;
-    });
+    const schoolBehaviors = [];
+    for (const behavior of behaviors) {
+      const student = await dataStore.getStudentById(behavior.studentId);
+      if (student && student.classId) {
+        const classData = await dataStore.getClassById(student.classId);
+        if (classData && classData.schoolId === schoolId) {
+          schoolBehaviors.push(behavior);
+        }
+      }
+    }
 
     // Enrich with student and teacher details
-    const enrichedBehaviors = schoolBehaviors.map(behavior => {
-      const student = dataStore.getStudentById(behavior.studentId);
-      const teacher = dataStore.getUserById(behavior.teacherId);
-      
-      return {
-        ...behavior,
-        studentName: student ? `${student.firstName} ${student.lastName}` : 'Unknown',
-        teacherName: teacher ? teacher.fullName : 'Unknown',
-        className: student?.className || 'Unknown'
-      };
-    });
+    const enrichedBehaviors = await Promise.all(
+      schoolBehaviors.map(async (behavior) => {
+        const student = await dataStore.getStudentById(behavior.studentId);
+        const teacher = await dataStore.getUserById(behavior.teacherId);
+        
+        return {
+          ...behavior,
+          studentName: student ? student.name : 'Unknown',
+          teacherName: teacher ? teacher.fullName : 'Unknown',
+          className: student?.className || 'Unknown'
+        };
+      })
+    );
 
     res.json({
       success: true,
@@ -66,12 +74,12 @@ export const getBehaviors = (req, res) => {
  * Get behavior record by ID
  * GET /api/behavior/:behaviorId
  */
-export const getBehaviorById = (req, res) => {
+export const getBehaviorById = async (req, res) => {
   try {
     const { behaviorId } = req.params;
     const { schoolId } = req.user;
 
-    const behavior = dataStore.getBehaviorById(behaviorId);
+    const behavior = await dataStore.getBehaviorById(behaviorId);
 
     if (!behavior) {
       return res.status(404).json({
@@ -81,22 +89,33 @@ export const getBehaviorById = (req, res) => {
     }
 
     // Verify student belongs to user's school
-    const student = dataStore.getStudentById(behavior.studentId);
-    if (!student || student.schoolId !== schoolId) {
-      return res.status(403).json({
+    const student = await dataStore.getStudentById(behavior.studentId);
+    if (!student) {
+      return res.status(404).json({
         success: false,
-        error: 'Access denied'
+        error: 'Student not found'
       });
     }
 
+    // Check school via class
+    if (student.classId) {
+      const classData = await dataStore.getClassById(student.classId);
+      if (!classData || classData.schoolId !== schoolId) {
+        return res.status(403).json({
+          success: false,
+          error: 'Access denied'
+        });
+      }
+    }
+
     // Enrich with details
-    const teacher = dataStore.getUserById(behavior.teacherId);
+    const teacher = await dataStore.getUserById(behavior.teacherId);
     
     res.json({
       success: true,
       behavior: {
         ...behavior,
-        studentName: `${student.firstName} ${student.lastName}`,
+        studentName: student.name,
         teacherName: teacher ? teacher.fullName : 'Unknown',
         className: student.className
       }
@@ -114,7 +133,7 @@ export const getBehaviorById = (req, res) => {
  * Create new behavior record
  * POST /api/behavior
  */
-export const createBehavior = (req, res) => {
+export const createBehavior = async (req, res) => {
   try {
     const { userId, schoolId, role } = req.user;
     const behaviorData = req.body;
@@ -137,7 +156,7 @@ export const createBehavior = (req, res) => {
     }
 
     // Verify student exists and belongs to school
-    const student = dataStore.getStudentById(behaviorData.studentId);
+    const student = await dataStore.getStudentById(behaviorData.studentId);
     if (!student) {
       return res.status(404).json({
         success: false,
@@ -145,11 +164,23 @@ export const createBehavior = (req, res) => {
       });
     }
 
-    if (student.schoolId !== schoolId) {
-      return res.status(403).json({
-        success: false,
-        error: 'Student does not belong to your school'
-      });
+    // Check if student belongs to teacher's school by checking the class
+    if (student.classId) {
+      const classData = await dataStore.getClassById(student.classId);
+      if (!classData || classData.schoolId !== schoolId) {
+        return res.status(403).json({
+          success: false,
+          error: 'Student does not belong to your school'
+        });
+      }
+    } else {
+      // If no classId, check schoolId directly (if it exists on student)
+      if (student.schoolId && student.schoolId !== schoolId) {
+        return res.status(403).json({
+          success: false,
+          error: 'Student does not belong to your school'
+        });
+      }
     }
 
     const behavior = {
@@ -168,7 +199,7 @@ export const createBehavior = (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    const createdBehavior = dataStore.addBehavior(behavior);
+    const createdBehavior = await dataStore.addBehavior(behavior);
 
     res.status(201).json({
       success: true,
@@ -188,13 +219,13 @@ export const createBehavior = (req, res) => {
  * Update behavior record
  * PUT /api/behavior/:behaviorId
  */
-export const updateBehavior = (req, res) => {
+export const updateBehavior = async (req, res) => {
   try {
     const { behaviorId } = req.params;
     const updates = req.body;
     const { userId, schoolId, role } = req.user;
 
-    const behavior = dataStore.getBehaviorById(behaviorId);
+    const behavior = await dataStore.getBehaviorById(behaviorId);
 
     if (!behavior) {
       return res.status(404).json({
@@ -204,12 +235,23 @@ export const updateBehavior = (req, res) => {
     }
 
     // Verify student belongs to user's school
-    const student = dataStore.getStudentById(behavior.studentId);
-    if (!student || student.schoolId !== schoolId) {
-      return res.status(403).json({
+    const student = await dataStore.getStudentById(behavior.studentId);
+    if (!student) {
+      return res.status(404).json({
         success: false,
-        error: 'Access denied'
+        error: 'Student not found'
       });
+    }
+
+    // Check school via class
+    if (student.classId) {
+      const classData = await dataStore.getClassById(student.classId);
+      if (!classData || classData.schoolId !== schoolId) {
+        return res.status(403).json({
+          success: false,
+          error: 'Access denied'
+        });
+      }
     }
 
     // Teachers can only update their own records, admins can update any
@@ -222,8 +264,9 @@ export const updateBehavior = (req, res) => {
 
     // Prevent updating immutable fields
     const { id, studentId, teacherId, createdAt, ...allowedUpdates } = updates;
+    allowedUpdates.updatedAt = new Date().toISOString();
 
-    const updatedBehavior = dataStore.updateBehavior(behaviorId, allowedUpdates);
+    const updatedBehavior = await dataStore.updateBehavior(behaviorId, allowedUpdates);
 
     res.json({
       success: true,
@@ -243,12 +286,12 @@ export const updateBehavior = (req, res) => {
  * Delete behavior record
  * DELETE /api/behavior/:behaviorId
  */
-export const deleteBehavior = (req, res) => {
+export const deleteBehavior = async (req, res) => {
   try {
     const { behaviorId } = req.params;
     const { userId, schoolId, role } = req.user;
 
-    const behavior = dataStore.getBehaviorById(behaviorId);
+    const behavior = await dataStore.getBehaviorById(behaviorId);
 
     if (!behavior) {
       return res.status(404).json({
@@ -258,12 +301,23 @@ export const deleteBehavior = (req, res) => {
     }
 
     // Verify student belongs to user's school
-    const student = dataStore.getStudentById(behavior.studentId);
-    if (!student || student.schoolId !== schoolId) {
-      return res.status(403).json({
+    const student = await dataStore.getStudentById(behavior.studentId);
+    if (!student) {
+      return res.status(404).json({
         success: false,
-        error: 'Access denied'
+        error: 'Student not found'
       });
+    }
+
+    // Check school via class
+    if (student.classId) {
+      const classData = await dataStore.getClassById(student.classId);
+      if (!classData || classData.schoolId !== schoolId) {
+        return res.status(403).json({
+          success: false,
+          error: 'Access denied'
+        });
+      }
     }
 
     // Teachers can only delete their own records, admins can delete any
@@ -274,7 +328,7 @@ export const deleteBehavior = (req, res) => {
       });
     }
 
-    const deleted = dataStore.deleteBehavior(behaviorId);
+    const deleted = await dataStore.deleteBehavior(behaviorId);
 
     if (!deleted) {
       return res.status(500).json({
@@ -300,13 +354,13 @@ export const deleteBehavior = (req, res) => {
  * Get behavior records for a specific student
  * GET /api/behavior/student/:studentId
  */
-export const getBehaviorsByStudent = (req, res) => {
+export const getBehaviorsByStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
     const { schoolId } = req.user;
     const { startDate, endDate, behaviorType, severity } = req.query;
 
-    const student = dataStore.getStudentById(studentId);
+    const student = await dataStore.getStudentById(studentId);
 
     if (!student) {
       return res.status(404).json({
@@ -315,11 +369,15 @@ export const getBehaviorsByStudent = (req, res) => {
       });
     }
 
-    if (student.schoolId !== schoolId) {
-      return res.status(403).json({
-        success: false,
-        error: 'Access denied'
-      });
+    // Check school via class
+    if (student.classId) {
+      const classData = await dataStore.getClassById(student.classId);
+      if (!classData || classData.schoolId !== schoolId) {
+        return res.status(403).json({
+          success: false,
+          error: 'Access denied'
+        });
+      }
     }
 
     const filters = { studentId };
@@ -328,21 +386,23 @@ export const getBehaviorsByStudent = (req, res) => {
     if (behaviorType) filters.behaviorType = behaviorType;
     if (severity) filters.severity = severity;
 
-    const behaviors = dataStore.getBehaviors(filters);
+    const behaviors = await dataStore.getBehaviors(filters);
 
     // Enrich with teacher details
-    const enrichedBehaviors = behaviors.map(behavior => {
-      const teacher = dataStore.getUserById(behavior.teacherId);
-      return {
-        ...behavior,
-        teacherName: teacher ? teacher.fullName : 'Unknown'
-      };
-    });
+    const enrichedBehaviors = await Promise.all(
+      behaviors.map(async (behavior) => {
+        const teacher = await dataStore.getUserById(behavior.teacherId);
+        return {
+          ...behavior,
+          teacherName: teacher ? teacher.fullName : 'Unknown'
+        };
+      })
+    );
 
     res.json({
       success: true,
       studentId,
-      studentName: `${student.firstName} ${student.lastName}`,
+      studentName: student.name,
       totalBehaviors: enrichedBehaviors.length,
       behaviors: enrichedBehaviors
     });

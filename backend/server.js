@@ -15,6 +15,7 @@ import examTemplateRoutes from './routes/examTemplateRoutes.js';
 import examPeriodRoutes from './routes/examPeriodRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import behaviorRoutes from './routes/behaviorRoutes.js';
+import interventionRoutes from './routes/interventionRoutes.js';
 
 dotenv.config();
 
@@ -41,6 +42,7 @@ app.use('/api/exam-templates', examTemplateRoutes);
 app.use('/api/exam-periods', examPeriodRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/behavior', behaviorRoutes);
+app.use('/api/interventions', interventionRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

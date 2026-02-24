@@ -1099,6 +1099,332 @@ class PostgresStore {
       createdAt: row.created_at
     }));
   }
+
+  // ==================== BEHAVIOR METHODS ====================
+
+  async addBehavior(behavior) {
+    const query = `
+      INSERT INTO behavior (id, student_id, teacher_id, date, behavior_type, category, severity, description, action_taken, follow_up_required, follow_up_date, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      RETURNING *
+    `;
+    const values = [
+      behavior.id,
+      behavior.studentId,
+      behavior.teacherId,
+      behavior.date,
+      behavior.behaviorType,
+      behavior.category,
+      behavior.severity,
+      behavior.description,
+      behavior.actionTaken || null,
+      behavior.followUpRequired || false,
+      behavior.followUpDate || null,
+      behavior.createdAt,
+      behavior.updatedAt
+    ];
+    const result = await this.query(query, values);
+    const row = result.rows[0];
+    return {
+      ...row,
+      studentId: row.student_id,
+      teacherId: row.teacher_id,
+      behaviorType: row.behavior_type,
+      actionTaken: row.action_taken,
+      followUpRequired: row.follow_up_required,
+      followUpDate: row.follow_up_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  async getBehaviors(filters = {}) {
+    let query = 'SELECT * FROM behavior WHERE 1=1';
+    const values = [];
+    let paramIndex = 1;
+
+    if (filters.studentId) {
+      query += ` AND student_id = $${paramIndex}`;
+      values.push(filters.studentId);
+      paramIndex++;
+    }
+    if (filters.teacherId) {
+      query += ` AND teacher_id = $${paramIndex}`;
+      values.push(filters.teacherId);
+      paramIndex++;
+    }
+    if (filters.behaviorType) {
+      query += ` AND behavior_type = $${paramIndex}`;
+      values.push(filters.behaviorType);
+      paramIndex++;
+    }
+    if (filters.severity) {
+      query += ` AND severity = $${paramIndex}`;
+      values.push(filters.severity);
+      paramIndex++;
+    }
+    if (filters.startDate) {
+      query += ` AND date >= $${paramIndex}`;
+      values.push(filters.startDate);
+      paramIndex++;
+    }
+    if (filters.endDate) {
+      query += ` AND date <= $${paramIndex}`;
+      values.push(filters.endDate);
+      paramIndex++;
+    }
+
+    query += ' ORDER BY date DESC';
+
+    const result = await this.query(query, values);
+    return result.rows.map(row => ({
+      ...row,
+      studentId: row.student_id,
+      teacherId: row.teacher_id,
+      behaviorType: row.behavior_type,
+      actionTaken: row.action_taken,
+      followUpRequired: row.follow_up_required,
+      followUpDate: row.follow_up_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+  }
+
+  async getBehaviorById(id) {
+    const result = await this.query('SELECT * FROM behavior WHERE id = $1', [id]);
+    if (!result.rows[0]) return null;
+    const row = result.rows[0];
+    return {
+      ...row,
+      studentId: row.student_id,
+      teacherId: row.teacher_id,
+      behaviorType: row.behavior_type,
+      actionTaken: row.action_taken,
+      followUpRequired: row.follow_up_required,
+      followUpDate: row.follow_up_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  async updateBehavior(id, updates) {
+    const fields = [];
+    const values = [id];
+    let paramIndex = 2;
+
+    const fieldMap = {
+      date: 'date',
+      behaviorType: 'behavior_type',
+      category: 'category',
+      severity: 'severity',
+      description: 'description',
+      actionTaken: 'action_taken',
+      followUpRequired: 'follow_up_required',
+      followUpDate: 'follow_up_date',
+      updatedAt: 'updated_at'
+    };
+
+    for (const [key, dbField] of Object.entries(fieldMap)) {
+      if (updates[key] !== undefined) {
+        fields.push(`${dbField} = $${paramIndex}`);
+        values.push(updates[key]);
+        paramIndex++;
+      }
+    }
+
+    if (fields.length === 0) return null;
+
+    const query = `UPDATE behavior SET ${fields.join(', ')} WHERE id = $1 RETURNING *`;
+    const result = await this.query(query, values);
+    if (!result.rows[0]) return null;
+    const row = result.rows[0];
+    return {
+      ...row,
+      studentId: row.student_id,
+      teacherId: row.teacher_id,
+      behaviorType: row.behavior_type,
+      actionTaken: row.action_taken,
+      followUpRequired: row.follow_up_required,
+      followUpDate: row.follow_up_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  async deleteBehavior(id) {
+    await this.query('DELETE FROM behavior WHERE id = $1', [id]);
+    return true;
+  }
+
+  // ==================== INTERVENTION METHODS ====================
+
+  async addIntervention(intervention) {
+    const query = `
+      INSERT INTO interventions (id, student_id, initiated_by, intervention_type, priority, title, description, action_plan, expected_outcome, start_date, target_date, end_date, status, outcome, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      RETURNING *
+    `;
+    const values = [
+      intervention.id,
+      intervention.studentId,
+      intervention.initiatedBy,
+      intervention.interventionType,
+      intervention.priority || 'medium',
+      intervention.title,
+      intervention.description,
+      intervention.actionPlan || null,
+      intervention.expectedOutcome || null,
+      intervention.startDate || null,
+      intervention.targetDate || null,
+      intervention.endDate || null,
+      intervention.status || 'planned',
+      intervention.outcome || null,
+      intervention.createdAt,
+      intervention.updatedAt
+    ];
+    const result = await this.query(query, values);
+    const row = result.rows[0];
+    return {
+      ...row,
+      studentId: row.student_id,
+      initiatedBy: row.initiated_by,
+      interventionType: row.intervention_type,
+      actionPlan: row.action_plan,
+      expectedOutcome: row.expected_outcome,
+      startDate: row.start_date,
+      targetDate: row.target_date,
+      endDate: row.end_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  async getInterventions(filters = {}) {
+    let query = 'SELECT * FROM interventions WHERE 1=1';
+    const values = [];
+    let paramIndex = 1;
+
+    if (filters.studentId) {
+      query += ` AND student_id = $${paramIndex}`;
+      values.push(filters.studentId);
+      paramIndex++;
+    }
+    if (filters.initiatedBy) {
+      query += ` AND initiated_by = $${paramIndex}`;
+      values.push(filters.initiatedBy);
+      paramIndex++;
+    }
+    if (filters.status) {
+      query += ` AND status = $${paramIndex}`;
+      values.push(filters.status);
+      paramIndex++;
+    }
+    if (filters.priority) {
+      query += ` AND priority = $${paramIndex}`;
+      values.push(filters.priority);
+      paramIndex++;
+    }
+    if (filters.startDate) {
+      query += ` AND start_date >= $${paramIndex}`;
+      values.push(filters.startDate);
+      paramIndex++;
+    }
+    if (filters.endDate) {
+      query += ` AND (end_date <= $${paramIndex} OR end_date IS NULL)`;
+      values.push(filters.endDate);
+      paramIndex++;
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    const result = await this.query(query, values);
+    return result.rows.map(row => ({
+      ...row,
+      studentId: row.student_id,
+      initiatedBy: row.initiated_by,
+      interventionType: row.intervention_type,
+      actionPlan: row.action_plan,
+      expectedOutcome: row.expected_outcome,
+      startDate: row.start_date,
+      targetDate: row.target_date,
+      endDate: row.end_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+  }
+
+  async getInterventionById(id) {
+    const result = await this.query('SELECT * FROM interventions WHERE id = $1', [id]);
+    if (!result.rows[0]) return null;
+    const row = result.rows[0];
+    return {
+      ...row,
+      studentId: row.student_id,
+      initiatedBy: row.initiated_by,
+      interventionType: row.intervention_type,
+      actionPlan: row.action_plan,
+      expectedOutcome: row.expected_outcome,
+      startDate: row.start_date,
+      targetDate: row.target_date,
+      endDate: row.end_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  async updateIntervention(id, updates) {
+    const fields = [];
+    const values = [id];
+    let paramIndex = 2;
+
+    const fieldMap = {
+      interventionType: 'intervention_type',
+      priority: 'priority',
+      title: 'title',
+      description: 'description',
+      actionPlan: 'action_plan',
+      expectedOutcome: 'expected_outcome',
+      startDate: 'start_date',
+      targetDate: 'target_date',
+      endDate: 'end_date',
+      status: 'status',
+      outcome: 'outcome',
+      updatedAt: 'updated_at'
+    };
+
+    for (const [key, dbField] of Object.entries(fieldMap)) {
+      if (updates[key] !== undefined) {
+        fields.push(`${dbField} = $${paramIndex}`);
+        values.push(updates[key]);
+        paramIndex++;
+      }
+    }
+
+    if (fields.length === 0) return null;
+
+    const query = `UPDATE interventions SET ${fields.join(', ')} WHERE id = $1 RETURNING *`;
+    const result = await this.query(query, values);
+    if (!result.rows[0]) return null;
+    const row = result.rows[0];
+    return {
+      ...row,
+      studentId: row.student_id,
+      initiatedBy: row.initiated_by,
+      interventionType: row.intervention_type,
+      actionPlan: row.action_plan,
+      expectedOutcome: row.expected_outcome,
+      startDate: row.start_date,
+      targetDate: row.target_date,
+      endDate: row.end_date,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  async deleteIntervention(id) {
+    await this.query('DELETE FROM interventions WHERE id = $1', [id]);
+    return true;
+  }
 }
 
 export default new PostgresStore();

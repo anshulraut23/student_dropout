@@ -1,0 +1,16 @@
+:root {
+  /* Colors */
+  --sky: #1a6fb5;
+  --sky-light: #2d8fd4;
+  --sky-deep: #0e4a80;
+  --accent: #f0a500;
+  --text: #1e2c3a;
+  --text-secondary: #6b7a8d;
+  --border: rgba(26, 111, 181, 0.12);
+  --white: #ffffff;
+  --light-bg: #f5f8fb;
+
+  /* Fonts */
+  --font-display: 'DM Serif Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+}

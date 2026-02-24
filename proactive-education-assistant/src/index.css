@@ -2,7 +2,7 @@
 
 /* ========== PROFESSIONAL LIGHT THEME ========== */
 /* Clean, modern design with subtle colors and professional spacing */
-
+/* 
 :root {
   --color-primary: #2563eb;
   --color-primary-hover: #1d4ed8;
@@ -15,6 +15,29 @@
   --color-success: #10b981;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
+} */
+
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Horizon Colors */
+  --color-primary: #1a6fb5;
+  --color-primary-hover: #0e4a80;
+  --color-secondary: #2d8fd4;
+  --color-background: #ffffff;
+  --color-surface: #f5f8fb;
+  --color-border: rgba(26, 111, 181, 0.12);
+  --color-text-primary: #1e2c3a;
+  --color-text-secondary: #6b7a8d;
+  --color-accent: #f0a500;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+  
+  /* Fonts */
+  --font-display: 'DM Serif Display', serif;
+  --font-body: 'DM Sans', sans-serif;
 }
 
 html,
@@ -86,7 +109,7 @@ button {
   border-radius: 0.5rem;
 }
 
-.btn-primary,
+/* .btn-primary,
 .bg-blue-600,
 .bg-blue-700 {
   background-color: var(--color-primary);
@@ -100,6 +123,22 @@ button {
 .bg-blue-700:hover {
   background-color: var(--color-primary-hover);
   box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+   */
+
+
+.btn-primary,
+.bg-blue-600,
+.bg-blue-700 {
+  background-color: #f0a500;  /* Gold button */
+  color: white;
+}
+
+.btn-primary:hover,
+.bg-blue-600:hover,
+.bg-blue-700:hover {
+  background-color: #d68a00;
+  box-shadow: 0 4px 6px -1px rgba(240, 165, 0, 0.2);
 }
 
 /* ========== TABLES ========== */
