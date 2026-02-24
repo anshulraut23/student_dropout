@@ -1,12 +1,82 @@
 import { useState, useEffect } from 'react';
 import { FaUser, FaSchool, FaEdit, FaSave, FaTimes, FaSpinner } from 'react-icons/fa';
 import apiService from '../../services/apiService';
+import { injectHorizonStyles } from '../../styles/horizonTheme';
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ADMIN PROFILE HERO SECTION STYLES
+   ══════════════════════════════════════════════════════════════════════════ */
+const HERO_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  .ap-hero {
+    position: relative;
+    background: linear-gradient(135deg, #1a5a96 0%, #1a6fb5 100%);
+    padding: 2rem 3rem;
+    color: white;
+    border-radius: 20px;
+    margin: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(26, 111, 181, 0.15);
+  }
+
+  .ap-hero-content {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+  }
+
+  .ap-hero-tag {
+    display: inline-block;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .ap-hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 0.5rem 0;
+    color: white;
+  }
+
+  .ap-hero-subtitle {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: white;
+    margin: 0;
+  }
+
+  .ap-hero-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 0.75rem;
+  }
+`;
 
 export default function AdminProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+  
+  // Inject both Horizon theme and Hero styles on mount
+  useEffect(() => {
+    injectHorizonStyles();
+    // Inject Hero styles
+    const styleTag = document.createElement('style');
+    styleTag.textContent = HERO_STYLES;
+    document.head.appendChild(styleTag);
+    return () => styleTag.remove();
+  }, []);
   
   const [profileData, setProfileData] = useState({
     // Admin Personal Info
@@ -131,40 +201,37 @@ export default function AdminProfile() {
 
   if (loading) {
     return (
-      <div className="p-6 pt-20 md:pt-6 min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <FaSpinner className="animate-spin text-4xl text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-500">Loading profile...</p>
-        </div>
+      <div className="hd-page hd-flex-center" style={{ minHeight: '100vh' }}>
+        <div className="hd-spinner"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 md:p-6 pt-20 md:pt-6 min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto">
-        
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Admin Profile</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage your personal and school information</p>
-          </div>
-          
+    <div className="hd-page">
+      {/* Hero Section */}
+      <div className="ap-hero">
+        <div className="ap-hero-content">
+          <span className="ap-hero-tag">Admin Settings</span>
+          <h1 className="ap-hero-title">My Profile</h1>
+          <p className="ap-hero-subtitle">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        </div>
+        <div className="ap-hero-actions">
           {!isEditing ? (
             <button
               onClick={handleEdit}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="hd-btn-primary"
             >
               <FaEdit />
               Edit Profile
             </button>
           ) : (
-            <div className="flex gap-2">
+            <>
               <button
                 onClick={handleCancel}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="hd-btn-secondary"
+                style={{ opacity: saving ? 0.5 : 1 }}
               >
                 <FaTimes />
                 Cancel
@@ -172,37 +239,43 @@ export default function AdminProfile() {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                className="hd-btn-primary"
+                style={{ opacity: saving ? 0.5 : 1 }}
               >
-                {saving ? <FaSpinner className="animate-spin" /> : <FaSave />}
+                {saving ? <FaSpinner style={{ animation: 'hd-spin 0.8s linear infinite' }} /> : <FaSave />}
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
-            </div>
+            </>
           )}
         </div>
+      </div>
 
+      <div className="hd-container">
         {/* Message */}
         {message.text && (
-          <div className={`mb-6 p-4 rounded-lg ${
-            message.type === 'success' 
-              ? 'bg-green-50 text-green-700 border border-green-200' 
-              : 'bg-red-50 text-red-700 border border-red-200'
-          }`}>
+          <div className={`hd-card hd-fade mb-6 hd-badge-danger`} style={{
+            padding: '1rem',
+            marginBottom: '1.5rem',
+            borderRadius: '8px',
+            background: message.type === 'success' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+            border: message.type === 'success' ? '1px solid rgba(16,185,129,0.3)' : '1px solid rgba(239,68,68,0.3)',
+            color: message.type === 'success' ? '#10b981' : '#ef4444'
+          }}>
             {message.text}
           </div>
         )}
 
         {/* Personal Information Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-200">
-            <FaUser className="text-blue-600 text-xl" />
-            <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
+        <div className="hd-card hd-section mb-6">
+          <div className="hd-flex hd-gap-2 mb-4 pb-4" style={{ borderBottom: '1px solid rgba(26,111,181,0.1)' }}>
+            <FaUser style={{ color: '#1a6fb5', fontSize: '1.25rem' }} />
+            <h2 className="hd-section-title" style={{ fontSize: '1.1rem', marginBottom: 0 }}>Personal Information</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="hd-grid-2">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name <span className="text-red-500">*</span>
+              <label className="hd-label">
+                Full Name <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
                 type="text"
@@ -210,14 +283,14 @@ export default function AdminProfile() {
                 value={profileData.fullName}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                className="hd-input"
                 placeholder="Enter your full name"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email <span className="text-red-500">*</span>
+              <label className="hd-label">
+                Email <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
                 type="email"
@@ -225,14 +298,15 @@ export default function AdminProfile() {
                 value={profileData.email}
                 onChange={handleInputChange}
                 disabled={true}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="hd-input"
+                style={{ background: '#f5f8fb', color: '#6b7a8d', cursor: 'not-allowed' }}
                 placeholder="your.email@example.com"
               />
-              <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+              <p className="hd-text-xs hd-text-muted mt-1">Email cannot be changed</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="hd-label">
                 Phone Number
               </label>
               <input
@@ -241,13 +315,13 @@ export default function AdminProfile() {
                 value={profileData.phone}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                className="hd-input"
                 placeholder="+91 9876543210"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="hd-label">
                 Designation
               </label>
               <input
@@ -256,7 +330,7 @@ export default function AdminProfile() {
                 value={profileData.designation}
                 onChange={handleInputChange}
                 disabled={!isEditing}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-50 disabled:text-gray-500"
+                className="hd-input"
                 placeholder="e.g., Principal, Vice Principal"
               />
             </div>
@@ -264,15 +338,15 @@ export default function AdminProfile() {
         </div>
 
         {/* School Information Section */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex items-center gap-2 mb-4 pb-4 border-b border-gray-200">
-            <FaSchool className="text-blue-600 text-xl" />
-            <h2 className="text-lg font-semibold text-gray-900">School Information</h2>
+        <div className="hd-card hd-section">
+          <div className="hd-flex hd-gap-2 mb-4 pb-4" style={{ borderBottom: '1px solid rgba(26,111,181,0.1)' }}>
+            <FaSchool style={{ color: '#1a6fb5', fontSize: '1.25rem' }} />
+            <h2 className="hd-section-title" style={{ fontSize: '1.1rem', marginBottom: 0 }}>School Information</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+          <div className="hd-grid-2">
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="hd-label">
                 School Name
               </label>
               <input
@@ -280,13 +354,14 @@ export default function AdminProfile() {
                 name="schoolName"
                 value={profileData.schoolName}
                 disabled={true}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="hd-input"
+                style={{ background: '#f5f8fb', color: '#6b7a8d', cursor: 'not-allowed' }}
               />
-              <p className="text-xs text-gray-500 mt-1">School information is managed by system administrators</p>
+              <p className="hd-text-xs hd-text-muted mt-1">School information is managed by system administrators</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="hd-label">
                 School Type
               </label>
               <input
@@ -294,12 +369,13 @@ export default function AdminProfile() {
                 name="schoolType"
                 value={profileData.schoolType}
                 disabled={true}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="hd-input"
+                style={{ background: '#f5f8fb', color: '#6b7a8d', cursor: 'not-allowed' }}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="hd-label">
                 City
               </label>
               <input
@@ -307,12 +383,13 @@ export default function AdminProfile() {
                 name="city"
                 value={profileData.city}
                 disabled={true}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="hd-input"
+                style={{ background: '#f5f8fb', color: '#6b7a8d', cursor: 'not-allowed' }}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="hd-label">
                 State
               </label>
               <input
@@ -320,12 +397,13 @@ export default function AdminProfile() {
                 name="state"
                 value={profileData.state}
                 disabled={true}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="hd-input"
+                style={{ background: '#f5f8fb', color: '#6b7a8d', cursor: 'not-allowed' }}
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="hd-label">
                 Pincode
               </label>
               <input
@@ -333,12 +411,13 @@ export default function AdminProfile() {
                 name="pincode"
                 value={profileData.pincode}
                 disabled={true}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                className="hd-input"
+                style={{ background: '#f5f8fb', color: '#6b7a8d', cursor: 'not-allowed' }}
               />
             </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label className="hd-label">
                 Address
               </label>
               <textarea
@@ -346,7 +425,8 @@ export default function AdminProfile() {
                 value={profileData.address}
                 disabled={true}
                 rows="2"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed resize-none"
+                className="hd-input"
+                style={{ background: '#f5f8fb', color: '#6b7a8d', cursor: 'not-allowed', resize: 'none' }}
               />
             </div>
           </div>

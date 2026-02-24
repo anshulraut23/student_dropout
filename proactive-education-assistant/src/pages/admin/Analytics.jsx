@@ -2,10 +2,70 @@ import { useState, useEffect } from 'react';
 import { adminService } from '../../services/adminService';
 import RiskSummaryCards from '../../components/admin/analytics/RiskSummaryCards';
 import TrendPlaceholder from '../../components/admin/analytics/TrendPlaceholder';
+import { FaChartLine } from 'react-icons/fa';
+import { injectHorizonStyles } from '../../styles/horizonTheme';
+
+/* ══════════════════════════════════════════════════════════════════════════
+   ANALYTICS HERO SECTION STYLES
+   ══════════════════════════════════════════════════════════════════════════ */
+const HERO_STYLES = `
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+
+  .ana-hero {
+    position: relative;
+    background: linear-gradient(135deg, #1a5a96 0%, #1a6fb5 100%);
+    padding: 2rem 3rem;
+    color: white;
+    border-radius: 20px;
+    margin: 2rem;
+    box-shadow: 0 4px 12px rgba(26, 111, 181, 0.15);
+  }
+
+  .ana-hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .ana-hero-tag {
+    display: inline-block;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .ana-hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 0.5rem 0;
+    color: white;
+  }
+
+  .ana-hero-subtitle {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: white;
+    margin: 0;
+  }
+`;
 
 function Analytics() {
   const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Inject both Horizon theme and Hero styles on mount
+  useEffect(() => {
+    injectHorizonStyles();
+    // Inject Hero styles
+    const styleTag = document.createElement('style');
+    styleTag.textContent = HERO_STYLES;
+    document.head.appendChild(styleTag);
+    return () => styleTag.remove();
+  }, []);
   const impactSnapshots = [
     {
       label: "Attendance",
@@ -63,75 +123,78 @@ function Analytics() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600"></div>
+      <div className="hd-page hd-flex-center" style={{ minHeight: '100vh' }}>
+        <div className="hd-spinner"></div>
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg p-5 text-white shadow-md">
-          <h1 className="text-xl sm:text-2xl font-semibold mb-1">Analytics Dashboard</h1>
-          <p className="text-blue-100 text-sm">Real-time insights and performance metrics</p>
+    <div className="hd-page">
+      {/* Hero Section */}
+      <div className="ana-hero">
+        <div className="ana-hero-content">
+          <span className="ana-hero-tag">Analytics Dashboard</span>
+          <h1 className="ana-hero-title">Real-Time Analytics</h1>
+          <p className="ana-hero-subtitle">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
         </div>
+      </div>
 
+      <div className="hd-container">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="hd-grid-3 mb-8">
           {[
             {
               label: 'Students Monitored',
               value: analytics?.totalStudents || 0,
               icon: '👥',
-              bgColor: 'bg-blue-50',
-              borderColor: 'border-blue-500'
+              color: '#1a6fb5'
             },
             {
               label: 'Active Classes',
               value: analytics?.activeClasses || 0,
               icon: '📚',
-              bgColor: 'bg-violet-50',
-              borderColor: 'border-violet-500'
+              color: '#8b5cf6'
             },
             {
               label: 'Improvement Rate',
               value: `${analytics?.improvementRate || 0}%`,
               icon: '📈',
-              bgColor: 'bg-emerald-50',
-              borderColor: 'border-emerald-500'
+              color: '#10b981'
             }
           ].map((stat, index) => (
             <div
               key={index}
-              className={`${stat.bgColor} border-l-4 ${stat.borderColor} rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow`}
+              className="hd-stat-card hd-fade"
+              style={{ '--blob-color': stat.color }}
             >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-gray-600 text-xs font-medium mb-1">{stat.label}</p>
-                  <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+              <div style={{ position: 'relative', zIndex: 2 }}>
+                <div className="hd-flex-between mb-3">
+                  <p className="hd-text-xs hd-text-muted hd-font-semibold">{stat.label}</p>
+                  <div className="hd-icon-box" style={{ background: `${stat.color}15` }}>
+                    <span style={{ fontSize: '1.25rem' }}>{stat.icon}</span>
+                  </div>
                 </div>
-                <div className="text-3xl opacity-60 flex-shrink-0">{stat.icon}</div>
+                <p className="hd-stat-num" style={{ color: stat.color }}>{stat.value}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* Risk Distribution Section */}
-        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+        <div className="hd-card">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Risk Distribution</h2>
-            <p className="text-gray-500 text-sm">Student risk assessment breakdown across all classes</p>
+            <h2 className="hd-section-title" style={{ fontSize: '1.1rem', marginBottom: 0 }}>Risk Distribution</h2>
+            <p className="hd-text-muted hd-text-sm">Student risk assessment breakdown across all classes</p>
           </div>
           <RiskSummaryCards riskDistribution={analytics?.riskDistribution} />
         </div>
 
         {/* Attendance Trend Section */}
-        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+        <div className="hd-card">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Attendance Trend</h2>
-            <p className="text-gray-500 text-sm">Weekly attendance pattern analysis</p>
+            <h2 className="hd-section-title" style={{ fontSize: '1.1rem', marginBottom: 0 }}>Attendance Trend</h2>
+            <p className="hd-text-muted hd-text-sm">Weekly attendance pattern analysis</p>
           </div>
           <TrendPlaceholder
             title="7-Day Attendance Trend"
@@ -141,33 +204,36 @@ function Analytics() {
         </div>
 
         {/* Intervention Impact (Before / After) */}
-        <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-200">
+        <div className="hd-card">
           <div className="mb-5">
-            <h2 className="text-lg font-semibold text-gray-900 mb-1">Intervention Impact</h2>
-            <p className="text-gray-500 text-sm">Before/after comparison for key outcomes</p>
+            <h2 className="hd-section-title" style={{ fontSize: '1.1rem', marginBottom: 0 }}>Intervention Impact</h2>
+            <p className="hd-text-muted hd-text-sm">Before/after comparison for key outcomes</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+          <div className="hd-grid-3 mb-5">
             {impactSnapshots.map((item) => {
               const delta = item.after - item.before;
               const positive = item.invert ? delta < 0 : delta > 0;
               return (
-                <div key={item.label} className="border border-gray-200 rounded-lg p-4">
-                  <p className="text-sm font-semibold text-gray-800 mb-3">{item.label}</p>
-                  <div className="flex items-center justify-between text-xs text-gray-500">
+                <div key={item.label} className="hd-card" style={{ padding: '1rem' }}>
+                  <p className="hd-text-sm hd-font-semibold mb-3">{item.label}</p>
+                  <div className="hd-flex-between hd-text-xs hd-text-muted mb-1">
                     <span>Before</span>
                     <span>After</span>
                   </div>
-                  <div className="flex items-center justify-between mt-1">
-                    <span className="text-lg font-bold text-gray-900">{item.before}{item.unit}</span>
-                    <span className="text-lg font-bold text-gray-900">{item.after}{item.unit}</span>
+                  <div className="hd-flex-between">
+                    <span className="hd-stat-num" style={{ fontSize: '1.5rem' }}>{item.before}{item.unit}</span>
+                    <span className="hd-stat-num" style={{ fontSize: '1.5rem' }}>{item.after}{item.unit}</span>
                   </div>
-                  <div className="mt-3 h-2 rounded-full bg-gray-100 overflow-hidden">
+                  <div className="mt-3 h-2 rounded-full" style={{ background: 'rgba(26,111,181,0.1)', overflow: 'hidden' }}>
                     <div
-                      className={`h-2 ${positive ? "bg-emerald-500" : "bg-rose-500"}`}
-                      style={{ width: `${Math.min(Math.abs(delta) * 4, 100)}%` }}
+                      style={{
+                        height: '8px',
+                        background: positive ? '#10b981' : '#ef4444',
+                        width: `${Math.min(Math.abs(delta) * 4, 100)}%`
+                      }}
                     ></div>
                   </div>
-                  <p className={`mt-2 text-xs font-semibold ${positive ? "text-emerald-600" : "text-rose-600"}`}>
+                  <p className="hd-text-xs hd-font-semibold mt-2" style={{ color: positive ? '#10b981' : '#ef4444' }}>
                     {positive ? "+" : ""}{delta}{item.unit} change
                   </p>
                 </div>
@@ -175,18 +241,23 @@ function Analytics() {
             })}
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-800 mb-3">Impact by intervention type</p>
-            <div className="space-y-2">
+            <p className="hd-text-sm hd-font-semibold mb-3">Impact by intervention type</p>
+            <div className="hd-flex-col hd-gap-2">
               {interventionImpact.map((item) => (
-                <div key={item.type} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border border-gray-200 rounded-lg p-3">
+                <div key={item.type} className="hd-alert-row">
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">{item.type}</p>
-                    <p className="text-xs text-gray-500">Students covered: {item.students}</p>
+                    <p className="hd-text-sm hd-font-semibold">{item.type}</p>
+                    <p className="hd-text-xs hd-text-muted">Students covered: {item.students}</p>
                   </div>
-                  <div className="text-sm font-semibold text-blue-600">{item.uplift}</div>
-                  <span className={`text-xs font-semibold px-2 py-1 rounded-full ${item.trend === "Up" ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600"}`}>
-                    Trend {item.trend}
-                  </span>
+                  <div className="hd-flex-between hd-gap-2">
+                    <span className="hd-text-sm hd-font-semibold" style={{ color: '#1a6fb5' }}>{item.uplift}</span>
+                    <span className="hd-badge" style={{
+                      background: item.trend === "Up" ? 'rgba(16,185,129,0.15)' : 'rgba(240,165,0,0.15)',
+                      color: item.trend === "Up" ? '#10b981' : '#d97706'
+                    }}>
+                      Trend {item.trend}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -194,27 +265,29 @@ function Analytics() {
         </div>
 
         {/* Key Metrics Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="hd-grid-4">
           {[
-            { label: 'High Risk Students', value: analytics?.riskDistribution?.high || 0, color: 'text-rose-600' },
-            { label: 'Medium Risk', value: analytics?.riskDistribution?.medium || 0, color: 'text-amber-600' },
-            { label: 'Low Risk', value: analytics?.riskDistribution?.low || 0, color: 'text-emerald-600' },
-            { label: 'System Health', value: '98%', color: 'text-blue-600' }
+            { label: 'High Risk Students', value: analytics?.riskDistribution?.high || 0, color: '#ef4444' },
+            { label: 'Medium Risk', value: analytics?.riskDistribution?.medium || 0, color: '#f59e0b' },
+            { label: 'Low Risk', value: analytics?.riskDistribution?.low || 0, color: '#10b981' },
+            { label: 'System Health', value: '98%', color: '#1a6fb5' }
           ].map((metric, index) => (
-            <div key={index} className="bg-white rounded-lg p-4 shadow-sm border border-gray-200 hover:border-gray-300 transition-colors">
-              <p className="text-gray-500 text-xs font-medium mb-2">{metric.label}</p>
-              <p className={`text-2xl font-semibold ${metric.color}`}>{metric.value}</p>
+            <div key={index} className="hd-stat-card hd-fade">
+              <div style={{ position: 'relative', zIndex: 2 }}>
+                <p className="hd-text-xs hd-text-muted hd-font-semibold mb-2">{metric.label}</p>
+                <p className="hd-stat-num" style={{ color: metric.color }}>{metric.value}</p>
+              </div>
             </div>
           ))}
         </div>
 
         {/* Info Note */}
-        <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 shadow-sm">
-          <div className="flex items-start gap-3">
-            <div className="text-xl flex-shrink-0">ℹ️</div>
-            <div className="flex-1 min-w-0">
-              <p className="text-blue-900 font-semibold mb-1 text-sm">About This Dashboard</p>
-              <p className="text-blue-800 text-xs leading-relaxed">
+        <div className="hd-card" style={{ background: 'rgba(26,111,181,0.05)', border: '1px solid rgba(26,111,181,0.2)' }}>
+          <div className="hd-flex hd-gap-2">
+            <div style={{ fontSize: '1.5rem', flexShrink: 0 }}>ℹ️</div>
+            <div className="hd-flex-col">
+              <p className="hd-text-sm hd-font-semibold mb-1" style={{ color: '#0e4a80' }}>About This Dashboard</p>
+              <p className="hd-text-xs" style={{ color: '#1a6fb5' }}>
                 These are high-level system insights providing a quick overview of system performance and student risk assessment. 
                 For detailed student analytics and individual progress tracking, navigate to the Student Overview page.
               </p>

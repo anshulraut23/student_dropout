@@ -2,61 +2,186 @@ import { useState, useEffect } from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import { approvalService } from '../../services/approvalService';
 import apiService from '../../services/apiService';
+import { injectHorizonStyles } from '../../styles/horizonTheme';
 import { 
   FaUserCheck, FaUserClock, FaUserTimes, FaUsers, FaChalkboard,
   FaSearch, FaFilter, FaDownload, FaTimes, FaCheck, FaUserPlus,
-  FaEye, FaSort, FaCheckCircle, FaTimesCircle, FaClock
+  FaEye, FaSort, FaCheckCircle, FaTimesCircle, FaClock, FaStar
 } from 'react-icons/fa';
 
 /* ══════════════════════════════════════════════════════════════════════════
-   HORIZON THEME STYLES
+   HORIZON THEME STYLES - COMPLETE REDESIGN
    ══════════════════════════════════════════════════════════════════════════ */
 const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
+  :root {
+    --sky-blue: #1a6fb5;
+    --sky-light: #2d8fd4;
+    --sky-deep: #0e4a80;
+    --accent-gold: #f0a500;
+    --slate: #3c4a5a;
+    --gray: #6b7a8d;
+    --light-bg: #f5f8fb;
+    --text-dark: #1e2c3a;
+    --white: #ffffff;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
   .tm-container {
     min-height: 100vh;
-    background: var(--light, #f5f8fb);
-    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--light-bg) 0%, #ffffff 100%);
+    padding: 0;
     font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Hero Section */
+  .tm-hero {
+    position: relative;
+    background: linear-gradient(135deg, #1a5a96 0%, #1a6fb5 100%);
+    padding: 2rem 3rem;
+    color: white;
+    border-radius: 20px;
+    margin: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(26, 111, 181, 0.15);
+  }
+
+  .tm-hero-content {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+  }
+
+  .tm-hero-tag {
+    display: inline-block;
+    color: white;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .tm-hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0 0 0.5rem 0;
+  }
+
+  .tm-hero-title .tm-accent-word {
+    color: white;
+  }
+
+  .tm-hero-subtitle {
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: white;
+    margin: 0;
+  }
+
+  .tm-hero-actions {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  /* Main Content */
+  .tm-main {
+    padding: 2.5rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .tm-section-header {
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease-out 0.1s both;
+  }
+
+  .tm-section-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--sky-blue);
+    margin-bottom: 0.5rem;
+    display: inline-block;
   }
 
   .tm-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 1.5rem;
+    animation: fadeUp 0.8s ease-out 0.2s both;
+  }
+
+  .tm-header-left h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    color: var(--text-dark);
+    line-height: 1.2;
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
   }
 
   .tm-title {
     font-family: 'DM Serif Display', serif;
     font-size: 1.75rem;
-    color: var(--text, #1e2c3a);
+    color: var(--text-dark);
     line-height: 1.2;
     margin: 0;
   }
 
   .tm-subtitle {
     font-size: 0.875rem;
-    color: var(--gray, #6b7a8d);
-    margin-top: 0.25rem;
+    color: var(--gray);
+    margin-top: 0.5rem;
+    font-weight: 300;
   }
 
   .tm-actions {
     display: flex;
     gap: 0.75rem;
     flex-wrap: wrap;
+    animation: slideInRight 0.8s ease-out 0.3s both;
   }
 
   .tm-btn {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.625rem 1rem;
+    padding: 0.65rem 1.25rem;
     border-radius: 8px;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -65,41 +190,57 @@ const STYLES = `
   }
 
   .tm-btn-primary {
-    background: var(--sky, #1a6fb5);
+    background: var(--sky-blue);
     color: white;
   }
+  
   .tm-btn-primary:hover {
-    background: var(--sky-deep, #0e4a80);
+    background: #0e4a80;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(26, 111, 181, 0.3);
   }
 
   .tm-btn-secondary {
     background: white;
-    color: var(--text, #1e2c3a);
-    border: 1px solid rgba(26, 111, 181, 0.2);
+    color: var(--text-dark);
+    border: 1px solid rgba(26, 111, 181, 0.15);
   }
+  
   .tm-btn-secondary:hover {
     background: rgba(26, 111, 181, 0.05);
-    border-color: var(--sky, #1a6fb5);
+    border-color: var(--sky-blue);
+  }
+
+  .tm-hero .tm-btn-secondary {
+    background: transparent;
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .tm-hero .tm-btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
+  }
+
+  .tm-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   /* Stats Cards */
   .tm-stats {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
   }
 
   .tm-stat-card {
     background: white;
-    padding: 1.25rem;
+    padding: 1.5rem;
     border-radius: 12px;
-    border: 1px solid rgba(26, 111, 181, 0.1);
-    transition: all 0.3s ease;
+    border: 1px solid rgba(26, 111, 181, 0.08);
+    transition: all 0.25s ease;
     position: relative;
-    overflow: hidden;
   }
 
   .tm-stat-card::before {
@@ -110,59 +251,62 @@ const STYLES = `
     bottom: 0;
     width: 4px;
     background: var(--accent-color);
+    border-radius: 12px 0 0 12px;
   }
 
   .tm-stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(26, 111, 181, 0.15);
+    box-shadow: 0 8px 20px rgba(26, 111, 181, 0.1);
   }
 
   .tm-stat-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
   }
 
   .tm-stat-label {
-    font-size: 0.8rem;
-    color: var(--gray, #6b7a8d);
-    font-weight: 500;
+    font-size: 0.75rem;
+    color: var(--gray);
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
   .tm-stat-icon {
-    width: 36px;
-    height: 36px;
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--icon-bg);
     color: var(--icon-color);
+    font-size: 1.1rem;
   }
 
   .tm-stat-value {
     font-family: 'DM Serif Display', serif;
-    font-size: 2rem;
-    color: var(--text, #1e2c3a);
-    font-weight: 600;
+    font-size: 2.2rem;
+    color: var(--text-dark);
+    font-weight: 700;
     line-height: 1;
   }
 
   /* Filter Bar */
   .tm-filter-bar {
     background: white;
-    padding: 1rem;
+    padding: 1.25rem;
     border-radius: 12px;
-    border: 1px solid rgba(26, 111, 181, 0.1);
+    border: 1px solid rgba(26, 111, 181, 0.08);
     margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(26, 111, 181, 0.02);
   }
 
   .tm-filter-row {
     display: flex;
-    gap: 1rem;
+    gap: 1.25rem;
     flex-wrap: wrap;
     align-items: center;
   }
@@ -175,26 +319,32 @@ const STYLES = `
 
   .tm-search-icon {
     position: absolute;
-    left: 1rem;
+    left: 0.875rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--gray, #6b7a8d);
+    color: var(--gray);
+    font-size: 0.85rem;
   }
 
   .tm-search-input {
     width: 100%;
-    padding: 0.75rem 1rem 0.75rem 2.75rem;
-    border: 1px solid rgba(26, 111, 181, 0.2);
+    padding: 0.75rem 0.875rem 0.75rem 2.5rem;
+    border: 1px solid rgba(26, 111, 181, 0.1);
     border-radius: 8px;
     font-size: 0.875rem;
     font-family: 'DM Sans', sans-serif;
     transition: all 0.2s ease;
+    background: white;
   }
 
   .tm-search-input:focus {
     outline: none;
-    border-color: var(--sky, #1a6fb5);
-    box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.1);
+    border-color: var(--sky-blue);
+    box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.08);
+  }
+
+  .tm-search-input::placeholder {
+    color: var(--gray);
   }
 
   .tm-filter-tabs {
@@ -206,31 +356,32 @@ const STYLES = `
   .tm-tab {
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 500;
+    font-size: 0.8rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
-    border: 1px solid transparent;
-    background: transparent;
-    color: var(--gray, #6b7a8d);
+    border: none;
+    background: rgba(26, 111, 181, 0.05);
+    color: var(--gray);
+    white-space: nowrap;
   }
 
   .tm-tab:hover {
-    background: rgba(26, 111, 181, 0.05);
+    background: rgba(26, 111, 181, 0.1);
   }
 
   .tm-tab.active {
-    background: var(--sky, #1a6fb5);
+    background: var(--sky-blue);
     color: white;
-    border-color: var(--sky, #1a6fb5);
   }
-
   /* Table */
   .tm-table-container {
     background: white;
     border-radius: 12px;
-    border: 1px solid rgba(26, 111, 181, 0.1);
+    border: 1px solid rgba(26, 111, 181, 0.08);
     overflow: hidden;
+    box-shadow: 0 2px 8px rgba(26, 111, 181, 0.02);
+    animation: fadeUp 0.6s ease-out;
   }
 
   .tm-table {
@@ -240,6 +391,7 @@ const STYLES = `
 
   .tm-table thead {
     background: linear-gradient(135deg, rgba(26, 111, 181, 0.05) 0%, rgba(26, 111, 181, 0.02) 100%);
+    border-bottom: 1px solid rgba(26, 111, 181, 0.1);
   }
 
   .tm-table th {
@@ -247,15 +399,15 @@ const STYLES = `
     text-align: left;
     font-size: 0.75rem;
     font-weight: 700;
-    color: var(--text, #1e2c3a);
+    color: var(--text-dark);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 2px solid rgba(26, 111, 181, 0.1);
+    font-family: 'DM Sans', sans-serif;
   }
 
   .tm-table td {
     padding: 1rem;
-    border-bottom: 1px solid rgba(26, 111, 181, 0.06);
+    border-bottom: 1px solid rgba(26, 111, 181, 0.05);
     font-size: 0.875rem;
   }
 
@@ -270,14 +422,15 @@ const STYLES = `
   .tm-avatar {
     width: 40px;
     height: 40px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--sky, #1a6fb5), #2d8fd4);
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--sky-blue) 0%, var(--sky-light) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-weight: 700;
-    font-size: 0.875rem;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 6px rgba(26, 111, 181, 0.15);
   }
 
   .tm-teacher-info {
@@ -288,60 +441,62 @@ const STYLES = `
 
   .tm-teacher-name {
     font-weight: 600;
-    color: var(--text, #1e2c3a);
+    color: var(--text-dark);
     margin-bottom: 0.125rem;
   }
 
   .tm-teacher-email {
     font-size: 0.75rem;
-    color: var(--gray, #6b7a8d);
+    color: var(--gray);
   }
 
   .tm-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    padding: 0.25rem 0.625rem;
-    border-radius: 30px;
-    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 6px;
+    font-size: 0.7rem;
     font-weight: 600;
     border: 1px solid;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 
   .tm-badge-pending {
     background: rgba(240, 165, 0, 0.1);
-    color: var(--accent, #f0a500);
-    border-color: rgba(240, 165, 0, 0.3);
+    color: var(--accent-gold);
+    border-color: rgba(240, 165, 0, 0.25);
   }
 
   .tm-badge-approved {
     background: rgba(16, 185, 129, 0.1);
     color: #10b981;
-    border-color: rgba(16, 185, 129, 0.3);
+    border-color: rgba(16, 185, 129, 0.25);
   }
 
   .tm-badge-rejected {
     background: rgba(239, 68, 68, 0.1);
     color: #ef4444;
-    border-color: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.25);
   }
 
   .tm-subject-tag {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
+    padding: 0.3rem 0.6rem;
     background: rgba(124, 58, 237, 0.1);
     color: #7c3aed;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
     font-weight: 500;
-    margin-right: 0.25rem;
-    margin-bottom: 0.25rem;
+    margin-right: 0.3rem;
+    margin-bottom: 0.3rem;
   }
 
   .tm-action-btn {
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.75rem;
     border-radius: 6px;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -349,12 +504,14 @@ const STYLES = `
     background: transparent;
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
+    gap: 0.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
 
   .tm-action-approve {
     color: #10b981;
-    border-color: rgba(16, 185, 129, 0.3);
+    border-color: rgba(16, 185, 129, 0.25);
   }
   .tm-action-approve:hover {
     background: rgba(16, 185, 129, 0.1);
@@ -362,21 +519,21 @@ const STYLES = `
   }
 
   .tm-action-assign {
-    color: var(--sky, #1a6fb5);
-    border-color: rgba(26, 111, 181, 0.3);
+    color: var(--sky-blue);
+    border-color: rgba(26, 111, 181, 0.25);
   }
   .tm-action-assign:hover {
     background: rgba(26, 111, 181, 0.1);
-    border-color: var(--sky, #1a6fb5);
+    border-color: var(--sky-blue);
   }
 
   .tm-action-view {
-    color: var(--gray, #6b7a8d);
-    border-color: rgba(107, 122, 141, 0.3);
+    color: var(--gray);
+    border-color: rgba(107, 122, 141, 0.25);
   }
   .tm-action-view:hover {
-    background: rgba(107, 122, 141, 0.1);
-    border-color: var(--gray, #6b7a8d);
+    background: rgba(107, 122, 141, 0.08);
+    border-color: var(--gray);
   }
 
   /* Modal */
@@ -394,17 +551,17 @@ const STYLES = `
 
   .tm-modal {
     background: white;
-    border-radius: 16px;
-    max-width: 600px;
+    border-radius: 12px;
+    max-width: 500px;
     width: 100%;
-    max-height: 90vh;
+    max-height: 85vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(26, 111, 181, 0.3);
+    box-shadow: 0 10px 40px rgba(26, 111, 181, 0.2);
   }
 
   .tm-modal-header {
     padding: 1.5rem;
-    border-bottom: 1px solid rgba(26, 111, 181, 0.1);
+    border-bottom: 1px solid rgba(26, 111, 181, 0.08);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -413,7 +570,9 @@ const STYLES = `
   .tm-modal-title {
     font-family: 'DM Serif Display', serif;
     font-size: 1.25rem;
-    color: var(--text, #1e2c3a);
+    color: var(--text-dark);
+    font-weight: 700;
+    margin: 0;
   }
 
   .tm-modal-close {
@@ -427,11 +586,12 @@ const STYLES = `
     transition: all 0.2s ease;
     border: none;
     background: transparent;
-    color: var(--gray, #6b7a8d);
+    color: var(--gray);
+    font-size: 1.1rem;
   }
   .tm-modal-close:hover {
     background: rgba(26, 111, 181, 0.1);
-    color: var(--sky, #1a6fb5);
+    color: var(--sky-blue);
   }
 
   .tm-modal-body {
@@ -439,113 +599,212 @@ const STYLES = `
   }
 
   .tm-modal-footer {
-    padding: 1.5rem;
-    border-top: 1px solid rgba(26, 111, 181, 0.1);
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid rgba(26, 111, 181, 0.08);
     display: flex;
     gap: 0.75rem;
     justify-content: flex-end;
-    background: rgba(26, 111, 181, 0.02);
   }
 
   .tm-info-card {
-    background: rgba(26, 111, 181, 0.05);
+    background: rgba(26, 111, 181, 0.04);
     padding: 1rem;
-    border-radius: 10px;
-    border: 1px solid rgba(26, 111, 181, 0.1);
-    margin-bottom: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(26, 111, 181, 0.08);
+    margin-bottom: 1.25rem;
   }
 
   .tm-info-row {
     display: flex;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     font-size: 0.875rem;
   }
 
   .tm-info-label {
     font-weight: 600;
-    color: var(--text, #1e2c3a);
-    min-width: 80px;
+    color: var(--text-dark);
+    min-width: 75px;
   }
 
   .tm-info-value {
-    color: var(--gray, #6b7a8d);
+    color: var(--gray);
   }
 
   .tm-class-option {
-    padding: 1rem;
-    border: 2px solid rgba(26, 111, 181, 0.15);
-    border-radius: 10px;
+    padding: 0.875rem;
+    border: 1px solid rgba(26, 111, 181, 0.1);
+    border-radius: 8px;
     margin-bottom: 0.75rem;
     cursor: pointer;
     transition: all 0.2s ease;
   }
 
   .tm-class-option:hover {
-    border-color: var(--sky, #1a6fb5);
+    border-color: var(--sky-blue);
     background: rgba(26, 111, 181, 0.02);
   }
 
   .tm-class-option.selected {
-    border-color: var(--sky, #1a6fb5);
+    border-color: var(--sky-blue);
     background: rgba(26, 111, 181, 0.08);
   }
 
   .tm-textarea {
     width: 100%;
     padding: 0.75rem;
-    border: 1px solid rgba(26, 111, 181, 0.2);
+    border: 1px solid rgba(26, 111, 181, 0.1);
     border-radius: 8px;
     font-family: 'DM Sans', sans-serif;
     font-size: 0.875rem;
+    transition: all 0.2s ease;
+    background: white;
     resize: vertical;
     min-height: 100px;
   }
 
   .tm-textarea:focus {
     outline: none;
-    border-color: var(--sky, #1a6fb5);
-    box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.1);
+    border-color: var(--sky-blue);
+    box-shadow: 0 0 0 3px rgba(26, 111, 181, 0.08);
   }
-
+  /* Empty State */
   .tm-empty {
     text-align: center;
-    padding: 3rem 1rem;
-    color: var(--gray, #6b7a8d);
+    padding: 3rem 1.5rem;
+    color: var(--gray);
   }
 
   .tm-empty-icon {
     font-size: 3rem;
-    color: rgba(26, 111, 181, 0.2);
+    color: rgba(26, 111, 181, 0.15);
     margin-bottom: 1rem;
   }
 
+  .tm-empty p {
+    font-size: 1rem;
+    color: var(--gray);
+    margin: 0;
+  }
+
+  /* Loading State */
   .tm-loading {
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 3rem;
+    min-height: 60vh;
   }
 
   .tm-spinner {
     width: 40px;
     height: 40px;
     border: 3px solid rgba(26, 111, 181, 0.1);
-    border-top-color: var(--sky, #1a6fb5);
+    border-top-color: var(--sky-blue);
     border-radius: 50%;
-    animation: tm-spin 0.8s linear infinite;
+    animation: spin 0.8s linear infinite;
   }
 
-  @keyframes tm-spin {
+  @keyframes spin {
     to { transform: rotate(360deg); }
   }
 
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .tm-hero-title {
+      font-size: 1.7rem;
+    }
+    .tm-stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
   @media (max-width: 768px) {
-    .tm-container { padding: 1rem; }
-    .tm-title { font-size: 1.5rem; }
-    .tm-stats { grid-template-columns: 1fr; }
-    .tm-table-container { overflow-x: auto; }
-    .tm-table { min-width: 800px; }
+    .tm-container {
+      padding: 0;
+    }
+
+    .tm-hero {
+      padding: 1.5rem;
+      margin: 1rem;
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .tm-hero-title {
+      font-size: 1.4rem;
+    }
+
+    .tm-hero-actions {
+      justify-content: center;
+      margin-top: 1.25rem;
+      width: 100%;
+    }
+
+    .tm-main {
+      padding: 1.25rem;
+    }
+
+    .tm-stats {
+      grid-template-columns: 1fr;
+      margin-bottom: 1.25rem;
+    }
+
+    .tm-filter-row {
+      flex-direction: column;
+    }
+
+    .tm-search-box {
+      min-width: 100%;
+    }
+
+    .tm-table th,
+    .tm-table td {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .tm-hero {
+      padding: 1rem;
+      margin: 0.5rem;
+    }
+
+    .tm-hero-title {
+      font-size: 1.2rem;
+    }
+
+    .tm-hero-subtitle {
+      font-size: 0.85rem;
+    }
+
+    .tm-hero-actions {
+      width: 100%;
+    }
+
+    .tm-hero-actions .tm-btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .tm-filter-tabs {
+      gap: 0.3rem;
+    }
+
+    .tm-tab {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.75rem;
+    }
+
+    .tm-modal-footer {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .tm-modal-footer .tm-btn {
+      width: 100%;
+    }
   }
 `;
 
@@ -565,6 +824,11 @@ function TeacherManagement() {
   const [selectedClassId, setSelectedClassId] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [processing, setProcessing] = useState(false);
+
+  // Inject Horizon theme on mount
+  useEffect(() => {
+    injectHorizonStyles();
+  }, []);
 
   // Fetch available classes when needed
   useEffect(() => {
@@ -785,201 +1049,201 @@ function TeacherManagement() {
       <style dangerouslySetInnerHTML={{ __html: STYLES }} />
       
       <div className="tm-container">
-        {/* Header */}
-        <div className="tm-header">
-          <div>
-            <h1 className="tm-title">Teacher Management</h1>
-            <p className="tm-subtitle">Manage teacher approvals and class assignments</p>
+        {/* Hero Section - Dashboard Style */}
+        <div className="tm-hero">
+          <div className="tm-hero-content">
+            <div className="tm-hero-tag">ADMIN PANEL</div>
+            <h1 className="tm-hero-title">Teacher Management</h1>
+            <p className="tm-hero-subtitle">Tuesday, February 24, 2026</p>
           </div>
-          <div className="tm-actions">
+          <div className="tm-hero-actions">
             <button className="tm-btn tm-btn-secondary" onClick={exportToCSV}>
-              <FaDownload /> Export
-            </button>
-            <button className="tm-btn tm-btn-primary" onClick={refreshTeachers}>
-              <FaUserCheck /> Refresh
+              📊 Export Data
             </button>
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="tm-stats">
-          <div className="tm-stat-card" style={{ '--accent-color': 'var(--sky)', '--icon-bg': 'rgba(26,111,181,0.1)', '--icon-color': 'var(--sky)' }}>
-            <div className="tm-stat-header">
-              <span className="tm-stat-label">Total Teachers</span>
-              <div className="tm-stat-icon"><FaUsers /></div>
+        {/* Main Content */}
+        <div className="tm-main">
+          {/* Stats */}
+          <div className="tm-stats">
+            <div className="tm-stat-card" style={{ '--accent-color': '#1a6fb5', '--icon-bg': 'rgba(26,111,181,0.1)', '--icon-color': '#1a6fb5' }}>
+              <div className="tm-stat-header">
+                <span className="tm-stat-label">Total Teachers</span>
+                <div className="tm-stat-icon"><FaUsers /></div>
+              </div>
+              <div className="tm-stat-value">{stats.total}</div>
             </div>
-            <div className="tm-stat-value">{stats.total}</div>
+
+            <div className="tm-stat-card" style={{ '--accent-color': '#f0a500', '--icon-bg': 'rgba(240,165,0,0.1)', '--icon-color': '#f0a500' }}>
+              <div className="tm-stat-header">
+                <span className="tm-stat-label">Pending Approval</span>
+                <div className="tm-stat-icon"><FaUserClock /></div>
+              </div>
+              <div className="tm-stat-value">{stats.pending}</div>
+            </div>
+
+            <div className="tm-stat-card" style={{ '--accent-color': '#10b981', '--icon-bg': 'rgba(16,185,129,0.1)', '--icon-color': '#10b981' }}>
+              <div className="tm-stat-header">
+                <span className="tm-stat-label">Approved</span>
+                <div className="tm-stat-icon"><FaCheckCircle /></div>
+              </div>
+              <div className="tm-stat-value">{stats.approved}</div>
+            </div>
+
+            <div className="tm-stat-card" style={{ '--accent-color': '#1a6fb5', '--icon-bg': 'rgba(26,111,181,0.1)', '--icon-color': '#1a6fb5' }}>
+              <div className="tm-stat-header">
+                <span className="tm-stat-label">Class Assigned</span>
+                <div className="tm-stat-icon"><FaChalkboard /></div>
+              </div>
+              <div className="tm-stat-value">{stats.withClass}</div>
+            </div>
           </div>
 
-          <div className="tm-stat-card" style={{ '--accent-color': 'var(--accent)', '--icon-bg': 'rgba(240,165,0,0.1)', '--icon-color': 'var(--accent)' }}>
-            <div className="tm-stat-header">
-              <span className="tm-stat-label">Pending</span>
-              <div className="tm-stat-icon"><FaUserClock /></div>
-            </div>
-            <div className="tm-stat-value">{stats.pending}</div>
-          </div>
-
-          <div className="tm-stat-card" style={{ '--accent-color': '#10b981', '--icon-bg': 'rgba(16,185,129,0.1)', '--icon-color': '#10b981' }}>
-            <div className="tm-stat-header">
-              <span className="tm-stat-label">Approved</span>
-              <div className="tm-stat-icon"><FaCheckCircle /></div>
-            </div>
-            <div className="tm-stat-value">{stats.approved}</div>
-          </div>
-
-          <div className="tm-stat-card" style={{ '--accent-color': 'var(--sky)', '--icon-bg': 'rgba(26,111,181,0.1)', '--icon-color': 'var(--sky)' }}>
-            <div className="tm-stat-header">
-              <span className="tm-stat-label">With Class</span>
-              <div className="tm-stat-icon"><FaChalkboard /></div>
-            </div>
-            <div className="tm-stat-value">{stats.withClass}</div>
-          </div>
-        </div>
-
-        {/* Filter Bar */}
-        <div className="tm-filter-bar">
-          <div className="tm-filter-row">
-            <div className="tm-search-box">
-              <FaSearch className="tm-search-icon" />
-              <input
-                type="text"
-                className="tm-search-input"
-                placeholder="Search by name or email..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            
-            <div className="tm-filter-tabs">
-              <button
-                className={`tm-tab ${statusFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('all')}
-              >
-                All ({stats.total})
-              </button>
-              <button
-                className={`tm-tab ${statusFilter === 'pending' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('pending')}
-              >
-                Pending ({stats.pending})
-              </button>
-              <button
-                className={`tm-tab ${statusFilter === 'approved' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('approved')}
-              >
-                Approved ({stats.approved})
-              </button>
-              <button
-                className={`tm-tab ${statusFilter === 'rejected' ? 'active' : ''}`}
-                onClick={() => setStatusFilter('rejected')}
-              >
-                Rejected ({stats.rejected})
-              </button>
+          {/* Filter Bar */}
+          <div className="tm-filter-bar">
+            <div className="tm-filter-row">
+              <div className="tm-search-box">
+                <FaSearch className="tm-search-icon" />
+                <input
+                  type="text"
+                  className="tm-search-input"
+                  placeholder="Search by name or email..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              
+              <div className="tm-filter-tabs">
+                <button
+                  className={`tm-tab ${statusFilter === 'all' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('all')}
+                >
+                  All ({stats.total})
+                </button>
+                <button
+                  className={`tm-tab ${statusFilter === 'pending' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('pending')}
+                >
+                  Pending ({stats.pending})
+                </button>
+                <button
+                  className={`tm-tab ${statusFilter === 'approved' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('approved')}
+                >
+                  ✓ Approved ({stats.approved})
+                </button>
+                <button
+                  className={`tm-tab ${statusFilter === 'rejected' ? 'active' : ''}`}
+                  onClick={() => setStatusFilter('rejected')}
+                >
+                  ✗ Rejected ({stats.rejected})
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Table */}
-        <div className="tm-table-container">
-          {filteredTeachers.length === 0 ? (
-            <div className="tm-empty">
-              <div className="tm-empty-icon"><FaUsers /></div>
-              <p>No teachers found</p>
-            </div>
-          ) : (
-            <table className="tm-table">
-              <thead>
-                <tr>
-                  <th>Teacher</th>
-                  <th>Subjects</th>
-                  <th>Status</th>
-                  <th>Class Assigned</th>
-                  <th>Join Date</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTeachers.map((teacher) => (
-                  <tr key={teacher.id}>
-                    <td>
-                      <div className="tm-teacher-info">
-                        <div className="tm-avatar">{getInitials(teacher.name)}</div>
-                        <div>
-                          <div className="tm-teacher-name">{teacher.name}</div>
-                          <div className="tm-teacher-email">{teacher.email}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      {teacher.subjects && teacher.subjects.length > 0 ? (
-                        teacher.subjects.map((subject, idx) => (
-                          <span key={idx} className="tm-subject-tag">{subject}</span>
-                        ))
-                      ) : (
-                        <span style={{ color: 'var(--gray)', fontSize: '0.875rem', fontStyle: 'italic' }}>
-                          No subjects
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <span className={`tm-badge tm-badge-${teacher.status}`}>
-                        {teacher.status === 'pending' && <FaClock />}
-                        {teacher.status === 'approved' && <FaCheckCircle />}
-                        {teacher.status === 'rejected' && <FaTimesCircle />}
-                        {teacher.status.charAt(0).toUpperCase() + teacher.status.slice(1)}
-                      </span>
-                    </td>
-                    <td>
-                      {teacher.inchargeClass ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <span style={{ fontWeight: 500 }}>{teacher.inchargeClass}</span>
-                          <span className="tm-badge" style={{ 
-                            background: 'rgba(26,111,181,0.1)', 
-                            color: 'var(--sky)', 
-                            borderColor: 'rgba(26,111,181,0.3)',
-                            fontSize: '0.7rem'
-                          }}>
-                            Incharge
-                          </span>
-                        </div>
-                      ) : (
-                        <span style={{ color: 'var(--gray)', fontSize: '0.875rem', fontStyle: 'italic' }}>
-                          Not assigned
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.875rem', color: 'var(--gray)' }}>
-                        {teacher.createdAt ? new Date(teacher.createdAt).toLocaleDateString() : 'N/A'}
-                      </span>
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                        {teacher.status === 'pending' && (
-                          <button
-                            className="tm-action-btn tm-action-approve"
-                            onClick={() => handleApprove(teacher)}
-                          >
-                            <FaCheck /> Approve
-                          </button>
-                        )}
-                        {teacher.status === 'approved' && (
-                          <button
-                            className="tm-action-btn tm-action-assign"
-                            onClick={() => handleAssign(teacher)}
-                          >
-                            <FaUserPlus /> {teacher.inchargeClass ? 'Edit' : 'Assign'}
-                          </button>
-                        )}
-                      </div>
-                    </td>
+          {/* Table */}
+          <div className="tm-table-container">
+            {filteredTeachers.length === 0 ? (
+              <div className="tm-empty">
+                <div className="tm-empty-icon"><FaUsers /></div>
+                <p>No teachers found</p>
+              </div>
+            ) : (
+              <table className="tm-table">
+                <thead>
+                  <tr>
+                    <th>Teacher</th>
+                    <th>Subjects</th>
+                    <th>Status</th>
+                    <th>Class Assigned</th>
+                    <th>Join Date</th>
+                    <th>Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                </thead>
+                <tbody>
+                  {filteredTeachers.map((teacher) => (
+                    <tr key={teacher.id}>
+                      <td>
+                        <div className="tm-teacher-info">
+                          <div className="tm-avatar">{getInitials(teacher.name)}</div>
+                          <div>
+                            <div className="tm-teacher-name">{teacher.name}</div>
+                            <div className="tm-teacher-email">{teacher.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        {teacher.subjects && teacher.subjects.length > 0 ? (
+                          teacher.subjects.map((subject, idx) => (
+                            <span key={idx} className="tm-subject-tag">{subject}</span>
+                          ))
+                        ) : (
+                          <span style={{ color: 'var(--gray)', fontSize: '0.875rem', fontStyle: 'italic' }}>
+                            No subjects
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        <span className={`tm-badge tm-badge-${teacher.status}`}>
+                          {teacher.status === 'pending' && <FaClock />}
+                          {teacher.status === 'approved' && <FaCheckCircle />}
+                          {teacher.status === 'rejected' && <FaTimesCircle />}
+                          {teacher.status.charAt(0).toUpperCase() + teacher.status.slice(1)}
+                        </span>
+                      </td>
+                      <td>
+                        {teacher.inchargeClass ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <span style={{ fontWeight: 500 }}>{teacher.inchargeClass}</span>
+                            <span className="tm-badge" style={{ 
+                              background: 'rgba(26,111,181,0.1)', 
+                              color: '#1a6fb5', 
+                              borderColor: 'rgba(26,111,181,0.3)',
+                              fontSize: '0.7rem'
+                            }}>
+                              Incharge
+                            </span>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--gray)', fontSize: '0.875rem', fontStyle: 'italic' }}>
+                            Not assigned
+                          </span>
+                        )}
+                      </td>
+                      <td>
+                        <span style={{ fontSize: '0.875rem', color: 'var(--gray)' }}>
+                          {teacher.createdAt ? new Date(teacher.createdAt).toLocaleDateString() : 'N/A'}
+                        </span>
+                      </td>
+                      <td>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {teacher.status === 'pending' && (
+                            <button
+                              className="tm-action-btn tm-action-approve"
+                              onClick={() => handleApprove(teacher)}
+                            >
+                              <FaCheck /> Approve
+                            </button>
+                          )}
+                          {teacher.status === 'approved' && (
+                            <button
+                              className="tm-action-btn tm-action-assign"
+                              onClick={() => handleAssign(teacher)}
+                            >
+                              <FaUserPlus /> {teacher.inchargeClass ? 'Edit' : 'Assign'}
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
-
         {/* Approval Modal */}
         {modalType === 'approval' && selectedTeacher && (
           <div className="tm-modal-overlay" onClick={handleCloseModal}>
