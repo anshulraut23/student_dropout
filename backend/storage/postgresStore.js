@@ -1425,6 +1425,244 @@ class PostgresStore {
     await this.query('DELETE FROM interventions WHERE id = $1', [id]);
     return true;
   }
+
+  // Gamification
+  async getTeacherGamification(teacherId) {
+    const result = await this.query(
+      'SELECT * FROM teacher_gamification WHERE teacher_id = $1',
+      [teacherId]
+    );
+    if (!result.rows[0]) return null;
+    const row = result.rows[0];
+    return {
+      teacherId: row.teacher_id,
+      totalXP: row.total_xp,
+      currentLevel: row.current_level,
+      loginStreak: row.login_streak,
+      tasksCompleted: row.tasks_completed,
+      studentsHelped: row.students_helped,
+      studentsAdded: row.students_added,
+      attendanceRecords: row.attendance_records,
+      highRiskStudentsHelped: row.high_risk_students_helped,
+      weeklyTaskCompletion: row.weekly_task_completion,
+      lastActiveDate: row.last_active_date
+    };
+  }
+
+  async createTeacherGamification(teacherId, initialData = {}) {
+    const query = `
+      INSERT INTO teacher_gamification (
+        teacher_id, total_xp, current_level, login_streak, tasks_completed,
+        students_helped, students_added, attendance_records, high_risk_students_helped,
+        weekly_task_completion, last_active_date
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      RETURNING *
+    `;
+    const values = [
+      teacherId,
+      initialData.totalXP || 0,
+      initialData.currentLevel || 1,
+      initialData.loginStreak || 0,
+      initialData.tasksCompleted || 0,
+      initialData.studentsHelped || 0,
+      initialData.studentsAdded || 0,
+      initialData.attendanceRecords || 0,
+      initialData.highRiskStudentsHelped || 0,
+      initialData.weeklyTaskCompletion || 0,
+      initialData.lastActiveDate || null
+    ];
+    const result = await this.query(query, values);
+    const row = result.rows[0];
+    return {
+      teacherId: row.teacher_id,
+      totalXP: row.total_xp,
+      currentLevel: row.current_level,
+      loginStreak: row.login_streak,
+      tasksCompleted: row.tasks_completed,
+      studentsHelped: row.students_helped,
+      studentsAdded: row.students_added,
+      attendanceRecords: row.attendance_records,
+      highRiskStudentsHelped: row.high_risk_students_helped,
+      weeklyTaskCompletion: row.weekly_task_completion,
+      lastActiveDate: row.last_active_date
+    };
+  }
+
+  async updateTeacherGamification(teacherId, updates) {
+    const convertToSnakeCase = (str) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+    const fields = Object.keys(updates).map((key, i) => `${convertToSnakeCase(key)} = $${i + 2}`).join(', ');
+    if (!fields) return null;
+    const values = [teacherId, ...Object.values(updates)];
+    const result = await this.query(`UPDATE teacher_gamification SET ${fields} WHERE teacher_id = $1 RETURNING *`, values);
+    if (!result.rows[0]) return null;
+    const row = result.rows[0];
+    return {
+      teacherId: row.teacher_id,
+      totalXP: row.total_xp,
+      currentLevel: row.current_level,
+      loginStreak: row.login_streak,
+      tasksCompleted: row.tasks_completed,
+      studentsHelped: row.students_helped,
+      studentsAdded: row.students_added,
+      attendanceRecords: row.attendance_records,
+      highRiskStudentsHelped: row.high_risk_students_helped,
+      weeklyTaskCompletion: row.weekly_task_completion,
+      lastActiveDate: row.last_active_date
+    };
+  }
+
+  async addXPLog(log) {
+    const query = `
+      INSERT INTO xp_logs (teacher_id, action_type, xp_earned, created_at)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `;
+    const values = [log.teacherId, log.actionType, log.xpEarned, log.createdAt || new Date().toISOString()];
+    const result = await this.query(query, values);
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      teacherId: row.teacher_id,
+      actionType: row.action_type,
+      xpEarned: row.xp_earned,
+      createdAt: row.created_at
+    };
+  }
+
+  async getXPLogsForTeacher(teacherId, { startDate, endDate } = {}) {
+    let query = 'SELECT * FROM xp_logs WHERE teacher_id = $1';
+    const values = [teacherId];
+
+    if (startDate) {
+      values.push(startDate);
+      query += ` AND created_at >= $${values.length}`;
+    }
+    if (endDate) {
+      values.push(endDate);
+      query += ` AND created_at <= $${values.length}`;
+    }
+
+    query += ' ORDER BY created_at DESC';
+
+    const result = await this.query(query, values);
+    return result.rows.map((row) => ({
+      id: row.id,
+      teacherId: row.teacher_id,
+      actionType: row.action_type,
+      xpEarned: row.xp_earned,
+      createdAt: row.created_at
+    }));
+  }
+
+  async getBadgeDefinitions() {
+    const result = await this.query('SELECT * FROM badges');
+    return result.rows.map((row) => ({
+      badgeId: row.badge_id,
+      title: row.title,
+      description: row.description,
+      icon: row.icon,
+      criteria: row.criteria
+    }));
+  }
+
+  async getTeacherBadges(teacherId) {
+    const result = await this.query(
+      `
+      SELECT tb.badge_id, tb.earned_at
+      FROM teacher_badges tb
+      WHERE tb.teacher_id = $1
+      ORDER BY tb.earned_at DESC
+      `,
+      [teacherId]
+    );
+    return result.rows.map((row) => ({
+      badgeId: row.badge_id,
+      earnedAt: row.earned_at
+    }));
+  }
+
+  async addTeacherBadge(teacherId, badgeId, earnedAt) {
+    const query = `
+      INSERT INTO teacher_badges (teacher_id, badge_id, earned_at)
+      VALUES ($1, $2, $3)
+      ON CONFLICT (teacher_id, badge_id) DO NOTHING
+      RETURNING *
+    `;
+    const result = await this.query(query, [teacherId, badgeId, earnedAt || new Date().toISOString()]);
+    return result.rows[0] || null;
+  }
+
+  async getLeaderboard({ start, end, useLogs }) {
+    if (useLogs) {
+      const result = await this.query(
+        `
+        SELECT
+          u.id AS teacher_id,
+          u.full_name,
+          u.school_id,
+          s.name AS school_name,
+          COALESCE(SUM(xl.xp_earned), 0) AS total_xp,
+          COALESCE(g.current_level, 1) AS level,
+          COALESCE(tb.badges_count, 0) AS badges_count
+        FROM users u
+        LEFT JOIN teacher_gamification g ON g.teacher_id = u.id
+        LEFT JOIN schools s ON s.id = u.school_id
+        LEFT JOIN xp_logs xl ON xl.teacher_id = u.id AND xl.created_at >= $1 AND xl.created_at <= $2
+        LEFT JOIN (
+          SELECT teacher_id, COUNT(*) AS badges_count
+          FROM teacher_badges
+          GROUP BY teacher_id
+        ) tb ON tb.teacher_id = u.id
+        WHERE u.role = 'teacher'
+        GROUP BY u.id, s.name, g.current_level, tb.badges_count
+        ORDER BY total_xp DESC
+        `,
+        [start, end]
+      );
+
+      return result.rows.map((row) => ({
+        teacherId: row.teacher_id,
+        name: row.full_name,
+        schoolName: row.school_name,
+        totalXP: Number(row.total_xp || 0),
+        level: Number(row.level || 1),
+        badgesCount: Number(row.badges_count || 0)
+      }));
+    }
+
+    const result = await this.query(
+      `
+      SELECT
+        u.id AS teacher_id,
+        u.full_name,
+        u.school_id,
+        s.name AS school_name,
+        COALESCE(g.total_xp, 0) AS total_xp,
+        COALESCE(g.current_level, 1) AS level,
+        COALESCE(tb.badges_count, 0) AS badges_count
+      FROM users u
+      LEFT JOIN teacher_gamification g ON g.teacher_id = u.id
+      LEFT JOIN schools s ON s.id = u.school_id
+      LEFT JOIN (
+        SELECT teacher_id, COUNT(*) AS badges_count
+        FROM teacher_badges
+        GROUP BY teacher_id
+      ) tb ON tb.teacher_id = u.id
+      WHERE u.role = 'teacher'
+      ORDER BY total_xp DESC
+      `
+    );
+
+    return result.rows.map((row) => ({
+      teacherId: row.teacher_id,
+      name: row.full_name,
+      schoolName: row.school_name,
+      totalXP: Number(row.total_xp || 0),
+      level: Number(row.level || 1),
+      badgesCount: Number(row.badges_count || 0)
+    }));
+  }
 }
 
 export default new PostgresStore();
