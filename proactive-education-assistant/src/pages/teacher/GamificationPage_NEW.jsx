@@ -9,13 +9,13 @@ import DailyTasks from '../../components/gamification/DailyTasks';
 import gamificationService from '../../services/gamificationService';
 
 export default function GamificationPage() {
-  const { applyServerStats } = useGame();
+  const { gamificationData, updateMetric } = useGame();
 
   useEffect(() => {
     // Update login streak on page load
     gamificationService.updateLoginStreak().then((response) => {
-      if (response && response.stats) {
-        applyServerStats(response.stats);
+      if (response.streak) {
+        updateMetric('loginStreak', response.streak);
       }
     });
   }, []);

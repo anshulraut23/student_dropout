@@ -16,6 +16,7 @@ import examPeriodRoutes from './routes/examPeriodRoutes.js';
 import profileRoutes from './routes/profileRoutes.js';
 import behaviorRoutes from './routes/behaviorRoutes.js';
 import interventionRoutes from './routes/interventionRoutes.js';
+import gamificationRoutes from './routes/gamificationRoutes.js';
 import facultyRoutes from './routes/facultyRoutes.js';
 
 dotenv.config();
@@ -62,6 +63,7 @@ app.use('/api/exam-periods', examPeriodRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/behavior', behaviorRoutes);
 app.use('/api/interventions', interventionRoutes);
+app.use('/api/gamification', gamificationRoutes);
 app.use('/api/faculty', facultyRoutes);
 
 // Health check
