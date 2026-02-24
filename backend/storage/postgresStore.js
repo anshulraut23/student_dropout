@@ -1672,6 +1672,168 @@ class PostgresStore {
       badgesCount: Number(row.badges_count || 0)
     }));
   }
+
+  // Faculty Connect Methods
+
+  async addFacultyInvite(invite) {
+    const query = `
+      INSERT INTO faculty_invites (id, sender_id, recipient_id, school_id, status, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *
+    `;
+    const values = [
+      invite.id,
+      invite.senderId,
+      invite.recipientId,
+      invite.schoolId,
+      invite.status || 'pending',
+      invite.createdAt || new Date().toISOString(),
+      invite.updatedAt || new Date().toISOString()
+    ];
+    const result = await this.query(query, values);
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  async getFacultyInvites() {
+    const result = await this.query('SELECT * FROM faculty_invites ORDER BY created_at DESC');
+    return result.rows.map(row => ({
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+  }
+
+  async getFacultyInvitesBySchool(schoolId) {
+    const result = await this.query(
+      'SELECT * FROM faculty_invites WHERE school_id = $1 ORDER BY created_at DESC',
+      [schoolId]
+    );
+    return result.rows.map(row => ({
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    }));
+  }
+
+  async updateFacultyInvite(inviteId, updates) {
+    const query = `
+      UPDATE faculty_invites 
+      SET status = $1, updated_at = $2
+      WHERE id = $3
+      RETURNING *
+    `;
+    const result = await this.query(query, [updates.status, updates.updatedAt, inviteId]);
+    if (!result.rows[0]) return null;
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  async deleteFacultyInvite(inviteId) {
+    const result = await this.query('DELETE FROM faculty_invites WHERE id = $1', [inviteId]);
+    return result.rowCount > 0;
+  }
+
+  async addMessage(message) {
+    const query = `
+      INSERT INTO faculty_messages (id, sender_id, recipient_id, school_id, text, attachment_name, attachment_type, attachment_data, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    `;
+    const values = [
+      message.id,
+      message.senderId,
+      message.recipientId,
+      message.schoolId,
+      message.text || null,
+      message.attachmentName || null,
+      message.attachmentType || null,
+      message.attachmentData || null,
+      message.createdAt || new Date().toISOString()
+    ];
+    const result = await this.query(query, values);
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      text: row.text,
+      attachmentName: row.attachment_name,
+      attachmentType: row.attachment_type,
+      attachmentData: row.attachment_data,
+      createdAt: row.created_at
+    };
+  }
+
+  async getConversation(userId, facultyId, schoolId, limit = 50) {
+    const query = `
+      SELECT * FROM faculty_messages
+      WHERE school_id = $1
+      AND (
+        (sender_id = $2 AND recipient_id = $3) OR
+        (sender_id = $3 AND recipient_id = $2)
+      )
+      ORDER BY created_at DESC
+      LIMIT $4
+    `;
+    const result = await this.query(query, [schoolId, userId, facultyId, limit]);
+    
+    // Return in chronological order (oldest first)
+    return result.rows.reverse().map(row => ({
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      text: row.text,
+      attachmentName: row.attachment_name,
+      attachmentType: row.attachment_type,
+      attachmentData: row.attachment_data,
+      createdAt: row.created_at
+    }));
+  }
+
+  async getMessagesBySchool(schoolId, limit = 100) {
+    const result = await this.query(
+      'SELECT * FROM faculty_messages WHERE school_id = $1 ORDER BY created_at DESC LIMIT $2',
+      [schoolId, limit]
+    );
+    return result.rows.map(row => ({
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      text: row.text,
+      attachmentName: row.attachment_name,
+      attachmentType: row.attachment_type,
+      attachmentData: row.attachment_data,
+      createdAt: row.created_at
+    }));
+  }
 }
 
 export default new PostgresStore();
