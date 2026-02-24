@@ -491,6 +491,7 @@
 import { useState, useEffect } from "react";
 import { FaSpinner, FaCheck, FaEdit, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import apiService from "../../../services/apiService";
+import { useGameification } from "../../../hooks/useGameification";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -568,6 +569,8 @@ const HORIZON_STYLES = `
 `;
 
 export default function ScoresTab() {
+  const { awardMarksXP } = useGameification();
+  
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
   const [students, setStudents] = useState([]);
@@ -749,9 +752,18 @@ export default function ScoresTab() {
       });
       
       if (result.success) {
+        // Award XP for entering marks (+30 XP)
+        try {
+          await awardMarksXP();
+          console.log('✅ XP awarded for marks entry!');
+        } catch (xpError) {
+          console.error('Failed to award XP:', xpError);
+          // Don't fail the whole operation if XP award fails
+        }
+        
         setMessage({ 
           type: "success", 
-          text: `✓ ${isEditMode ? 'Updated' : 'Saved'} marks! ${result.entered} student${result.entered !== 1 ? 's' : ''} processed.${result.failed > 0 ? ` (${result.failed} failed)` : ''}` 
+          text: `✓ ${isEditMode ? 'Updated' : 'Saved'} marks! ${result.entered} student${result.entered !== 1 ? 's' : ''} processed.${result.failed > 0 ? ` (${result.failed} failed)` : ''} +30 XP earned!` 
         });
         
         await checkExistingMarks();

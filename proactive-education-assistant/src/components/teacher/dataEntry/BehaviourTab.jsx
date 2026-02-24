@@ -372,6 +372,7 @@
 import { useState, useEffect } from "react";
 import { FaSpinner, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import apiService from "../../../services/apiService";
+import { useGameification } from "../../../hooks/useGameification";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -441,6 +442,8 @@ const HORIZON_STYLES = `
 `;
 
 export default function BehaviourTab() {
+  const { awardBehaviorXP } = useGameification();
+  
   const [classes, setClasses] = useState([]);
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -539,7 +542,16 @@ export default function BehaviourTab() {
       const result = await apiService.createBehaviourRecord(behaviourData);
       
       if (result.success) {
-        setMessage({ type: "success", text: "✓ Behaviour observation saved successfully!" });
+        // Award XP for logging behavior (+20 XP)
+        try {
+          await awardBehaviorXP();
+          console.log('✅ XP awarded for behavior logging!');
+        } catch (xpError) {
+          console.error('Failed to award XP:', xpError);
+          // Don't fail the whole operation if XP award fails
+        }
+        
+        setMessage({ type: "success", text: "✓ Behaviour observation saved successfully! +20 XP earned!" });
         
         setTimeout(() => {
           setFormData({

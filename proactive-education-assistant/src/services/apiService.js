@@ -46,6 +46,8 @@ class ApiService {
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.error('Non-JSON response:', text);
+        console.error('Status:', response.status);
+        console.error('Endpoint:', endpoint);
         
         // Check if it's a connection error
         if (text.includes('Cannot GET') || text.includes('Cannot POST')) {
@@ -58,7 +60,13 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
+        console.error('❌ API Error Response:', {
+          endpoint,
+          status: response.status,
+          statusText: response.statusText,
+          data
+        });
+        throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
       }
 
       return data;

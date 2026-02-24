@@ -1,5 +1,6 @@
 // PostgreSQL Store for Supabase
 import pg from 'pg';
+import { generateId } from '../utils/helpers.js';
 const { Pool } = pg;
 
 class PostgresStore {
@@ -1490,7 +1491,12 @@ class PostgresStore {
   }
 
   async updateTeacherGamification(teacherId, updates) {
-    const convertToSnakeCase = (str) => str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
+    const convertToSnakeCase = (str) => {
+      return str
+        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')  // Handle consecutive capitals like "XP"
+        .replace(/([a-z])([A-Z])/g, '$1_$2')         // Handle normal camelCase
+        .toLowerCase();
+    };
     const fields = Object.keys(updates).map((key, i) => `${convertToSnakeCase(key)} = $${i + 2}`).join(', ');
     if (!fields) return null;
     const values = [teacherId, ...Object.values(updates)];
@@ -1513,12 +1519,13 @@ class PostgresStore {
   }
 
   async addXPLog(log) {
+    const id = generateId();
     const query = `
-      INSERT INTO xp_logs (teacher_id, action_type, xp_earned, created_at)
-      VALUES ($1, $2, $3, $4)
+      INSERT INTO xp_logs (id, teacher_id, action_type, xp_earned, created_at)
+      VALUES ($1, $2, $3, $4, $5)
       RETURNING *
     `;
-    const values = [log.teacherId, log.actionType, log.xpEarned, log.createdAt || new Date().toISOString()];
+    const values = [id, log.teacherId, log.actionType, log.xpEarned, log.createdAt || new Date().toISOString()];
     const result = await this.query(query, values);
     const row = result.rows[0];
     return {
@@ -1531,29 +1538,30 @@ class PostgresStore {
   }
 
   async getXPLogsForTeacher(teacherId, { startDate, endDate } = {}) {
-    let query = 'SELECT * FROM xp_logs WHERE teacher_id = $1';
-    const values = [teacherId];
+      let query = 'SELECT * FROM xp_logs WHERE teacher_id = $1';
+      const values = [teacherId];
 
-    if (startDate) {
-      values.push(startDate);
-      query += ` AND created_at >= $${values.length}`;
+      if (startDate) {
+        values.push(startDate);
+        query += ` AND created_at >= $${values.length}`;
+      }
+      if (endDate) {
+        values.push(endDate);
+        query += ` AND created_at <= $${values.length}`;
+      }
+
+      query += ' ORDER BY created_at DESC';
+
+      const result = await this.query(query, values);
+      return result.rows.map((row) => ({
+        id: row.id,
+        teacherId: row.teacher_id,
+        actionType: row.action_type,
+        xpEarned: row.xp_earned,
+        createdAt: row.created_at
+      }));
     }
-    if (endDate) {
-      values.push(endDate);
-      query += ` AND created_at <= $${values.length}`;
-    }
 
-    query += ' ORDER BY created_at DESC';
-
-    const result = await this.query(query, values);
-    return result.rows.map((row) => ({
-      id: row.id,
-      teacherId: row.teacher_id,
-      actionType: row.action_type,
-      xpEarned: row.xp_earned,
-      createdAt: row.created_at
-    }));
-  }
 
   async getBadgeDefinitions() {
     const result = await this.query('SELECT * FROM badges');
@@ -1583,13 +1591,14 @@ class PostgresStore {
   }
 
   async addTeacherBadge(teacherId, badgeId, earnedAt) {
+    const id = generateId();
     const query = `
-      INSERT INTO teacher_badges (teacher_id, badge_id, earned_at)
-      VALUES ($1, $2, $3)
+      INSERT INTO teacher_badges (id, teacher_id, badge_id, earned_at)
+      VALUES ($1, $2, $3, $4)
       ON CONFLICT (teacher_id, badge_id) DO NOTHING
       RETURNING *
     `;
-    const result = await this.query(query, [teacherId, badgeId, earnedAt || new Date().toISOString()]);
+    const result = await this.query(query, [id, teacherId, badgeId, earnedAt || new Date().toISOString()]);
     return result.rows[0] || null;
   }
 
