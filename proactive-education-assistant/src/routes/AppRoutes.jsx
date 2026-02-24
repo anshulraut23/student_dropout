@@ -13,6 +13,7 @@ import StudentProfilePage from "../pages/teacher/StudentProfilePage";
 import ProfilePage from "../pages/teacher/ProfilePage";
 import DataEntryPage from "../pages/teacher/DataEntryPage";
 import AttendanceHistoryPage from "../pages/teacher/AttendanceHistoryPage";
+import InterventionsHistoryPage from "../pages/teacher/InterventionsHistoryPage";
 import MarksEntryPage from "../pages/teacher/MarksEntryPage";
 import ScoreHistoryPage from "../pages/teacher/ScoreHistoryPage";
 import GamificationPage from "../pages/teacher/GamificationPage";
@@ -138,6 +139,7 @@ export default function AppRoutes() {
             <Route path="/teacher/marks/entry/:examId" element={<MarksEntryPage />} />
             <Route path="/data-entry" element={<DataEntryPage />} />
             <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
+            <Route path="/interventions-history" element={<InterventionsHistoryPage />} />
             <Route path="/score-history" element={<ScoreHistoryPage />} />
             <Route path="/gamification" element={<GamificationPage />} />
             <Route path="/faculty-connect" element={<FacultyConnect />} />
@@ -157,6 +159,7 @@ export default function AppRoutes() {
           <Route path="/teacher/marks/entry/:examId" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/data-entry" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/attendance-history" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/interventions-history" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/score-history" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/gamification" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/faculty-connect" element={<Navigate to="/teacher/login" replace />} />

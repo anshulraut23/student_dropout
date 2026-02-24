@@ -492,6 +492,7 @@ function MainLayout() {
     { path: "/add-student", label: "Add Student", icon: FaUserPlus },
     { path: "/data-entry", label: t("nav.dataEntry", "Data Entry"), icon: FaClipboardList },
     { path: "/attendance-history", label: "Attendance History", icon: FaHistory },
+    { path: "/interventions-history", label: "Interventions History", icon: FaHandsHelping },
     { path: "/score-history", label: "Score History", icon: FaChartBar },
     { path: "/gamification", label: "Progress", icon: FaTrophy },
     { path: "/faculty-connect", label: "Faculty Chat", icon: FaComments },

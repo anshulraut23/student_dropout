@@ -23,6 +23,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Initialize database connection
+let dbInitialized = false;
+const initializeDatabase = async () => {
+  if (!dbInitialized) {
+    try {
+      await connectPostgres();
+      dbInitialized = true;
+      console.log('✅ Database connection initialized for ML service');
+    } catch (error) {
+      console.error('❌ Failed to initialize database connection:', error.message);
+      console.log('⚠️  ML risk prediction features will not be available');
+    }
+  }
+};
+
+// Initialize database on startup
+initializeDatabase();
+
 // Middleware
 app.use(cors());
 app.use(express.json());

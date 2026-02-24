@@ -5,13 +5,13 @@ import dataStore from '../storage/dataStore.js';
 /**
  * Calculate attendance percentage for a student
  */
-export const calculateAttendancePercentage = (studentId, startDate, endDate, subjectId = null) => {
+export const calculateAttendancePercentage = async (studentId, startDate, endDate, subjectId = null) => {
   const filters = { startDate, endDate };
   if (subjectId) {
     filters.subjectId = subjectId;
   }
   
-  const records = dataStore.getAttendanceByStudent(studentId, filters);
+  const records = await dataStore.getAttendanceByStudent(studentId, filters);
   
   if (records.length === 0) {
     return {
@@ -109,8 +109,8 @@ export const getAttendanceStatistics = (classId, startDate, endDate, subjectId =
 /**
  * Get attendance summary for a student
  */
-export const getStudentAttendanceSummary = (studentId, startDate, endDate, subjectId = null) => {
-  const student = dataStore.getStudentById(studentId);
+export const getStudentAttendanceSummary = async (studentId, startDate, endDate, subjectId = null) => {
+  const student = await dataStore.getStudentById(studentId);
   
   if (!student) {
     throw new Error('Student not found');
@@ -121,16 +121,16 @@ export const getStudentAttendanceSummary = (studentId, startDate, endDate, subje
     filters.subjectId = subjectId;
   }
   
-  const records = dataStore.getAttendanceByStudent(studentId, filters);
+  const records = await dataStore.getAttendanceByStudent(studentId, filters);
   
   // Calculate statistics
-  const statistics = calculateAttendancePercentage(studentId, startDate, endDate, subjectId);
+  const statistics = await calculateAttendancePercentage(studentId, startDate, endDate, subjectId);
   
   // Enrich records with additional information
-  const enrichedRecords = records.map(record => {
-    const classData = dataStore.getClassById(record.classId);
-    const subject = record.subjectId ? dataStore.getSubjectById(record.subjectId) : null;
-    const markedByUser = dataStore.getUserById(record.markedBy);
+  const enrichedRecords = await Promise.all(records.map(async record => {
+    const classData = await dataStore.getClassById(record.classId);
+    const subject = record.subjectId ? await dataStore.getSubjectById(record.subjectId) : null;
+    const markedByUser = record.markedBy ? await dataStore.getUserById(record.markedBy) : null;
     
     return {
       id: record.id,
@@ -142,7 +142,7 @@ export const getStudentAttendanceSummary = (studentId, startDate, endDate, subje
       markedAt: record.createdAt,
       notes: record.notes
     };
-  });
+  }));
   
   // Sort by date (most recent first)
   enrichedRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
