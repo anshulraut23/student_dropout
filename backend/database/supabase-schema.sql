@@ -151,6 +151,30 @@ CREATE TABLE IF NOT EXISTS marks (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Faculty Invites Table
+CREATE TABLE IF NOT EXISTS faculty_invites (
+    id TEXT PRIMARY KEY,
+    sender_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    school_id TEXT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'rejected')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Faculty Chat Messages Table
+CREATE TABLE IF NOT EXISTS faculty_messages (
+    id TEXT PRIMARY KEY,
+    sender_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    recipient_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    school_id TEXT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
+    text TEXT,
+    attachment_name VARCHAR(255),
+    attachment_type VARCHAR(100),
+    attachment_data BYTEA,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_users_school_id ON users(school_id);
@@ -169,4 +193,11 @@ CREATE INDEX IF NOT EXISTS idx_attendance_date ON attendance(date);
 CREATE INDEX IF NOT EXISTS idx_attendance_class_id ON attendance(class_id);
 CREATE INDEX IF NOT EXISTS idx_exams_class_id ON exams(class_id);
 CREATE INDEX IF NOT EXISTS idx_marks_exam_id ON marks(exam_id);
-CREATE INDEX IF NOT EXISTS idx_marks_student_id ON marks(student_id);
+CREATE INDEX IF NOT EXISTS idx_marks_student_id ON marks(student_id);CREATE INDEX IF NOT EXISTS idx_faculty_invites_sender_id ON faculty_invites(sender_id);
+CREATE INDEX IF NOT EXISTS idx_faculty_invites_recipient_id ON faculty_invites(recipient_id);
+CREATE INDEX IF NOT EXISTS idx_faculty_invites_school_id ON faculty_invites(school_id);
+CREATE INDEX IF NOT EXISTS idx_faculty_invites_status ON faculty_invites(status);
+CREATE INDEX IF NOT EXISTS idx_faculty_messages_sender_id ON faculty_messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_faculty_messages_recipient_id ON faculty_messages(recipient_id);
+CREATE INDEX IF NOT EXISTS idx_faculty_messages_school_id ON faculty_messages(school_id);
+CREATE INDEX IF NOT EXISTS idx_faculty_messages_created_at ON faculty_messages(created_at);

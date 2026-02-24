@@ -267,7 +267,7 @@ export const getStudentAttendance = async (req, res) => {
       });
     }
 
-    const classData = dataStore.getClassById(student.classId);
+    const classData = await dataStore.getClassById(student.classId);
     if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({
         success: false,
@@ -276,7 +276,7 @@ export const getStudentAttendance = async (req, res) => {
     }
 
     // Get attendance summary
-    const summary = attendanceCalculator.getStudentAttendanceSummary(
+    const summary = await attendanceCalculator.getStudentAttendanceSummary(
       studentId,
       startDate,
       endDate,
@@ -323,7 +323,7 @@ export const updateAttendance = async (req, res) => {
     }
 
     // Verify class belongs to user's school
-    const classData = dataStore.getClassById(existingAttendance.classId);
+    const classData = await dataStore.getClassById(existingAttendance.classId);
     if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({
         success: false,

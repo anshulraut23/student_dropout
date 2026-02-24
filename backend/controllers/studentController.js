@@ -4,8 +4,12 @@ import { generateId } from '../utils/helpers.js';
 // Get students (filtered by class if provided)
 export const getStudents = async (req, res) => {
   try {
+    console.log('getStudents called by user:', req.user);
+    
     const { schoolId, role } = req.user;
     const { classId } = req.query;
+
+    console.log('Fetching students for school:', schoolId, 'classId:', classId);
 
     let students = [];
 
@@ -31,11 +35,17 @@ export const getStudents = async (req, res) => {
       students = await dataStore.getStudentsByClass(classId);
     } else {
       // Get all students for the school
+      console.log('Fetching all students...');
       const allStudents = await dataStore.getStudents();
+      console.log('Total students in DB:', allStudents.length);
+      
       const schoolClasses = await dataStore.getClassesBySchool(schoolId);
+      console.log('School classes:', schoolClasses.length);
+      
       const schoolClassIds = new Set(schoolClasses.map(c => c.id));
       
       students = allStudents.filter(s => schoolClassIds.has(s.classId));
+      console.log('Filtered students for school:', students.length);
     }
 
     // Enrich with class information
@@ -49,15 +59,19 @@ export const getStudents = async (req, res) => {
       };
     }));
 
+    console.log('Returning', enrichedStudents.length, 'students');
+
     res.json({
       success: true,
       students: enrichedStudents
     });
   } catch (error) {
     console.error('Get students error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({ 
       success: false, 
-      error: 'Failed to get students' 
+      error: 'Failed to get students',
+      message: error.message
     });
   }
 };

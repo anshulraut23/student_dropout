@@ -645,7 +645,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import apiService from "../../services/apiService";
-import { FaArrowLeft, FaDownload, FaUser, FaCalendarCheck, FaChartBar, FaUserCheck, FaHandsHelping, FaPlus, FaSpinner } from "react-icons/fa";
+import { FaArrowLeft, FaDownload, FaUser, FaCalendarCheck, FaChartBar, FaUserCheck, FaHandsHelping, FaPlus, FaSpinner, FaExclamationTriangle } from "react-icons/fa";
+import { StudentRiskCard } from "../../components/risk";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -690,14 +691,30 @@ export default function StudentProfilePage() {
   const [behaviorData, setBehaviorData] = useState([]);
   const [interventionsData, setInterventionsData] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
+  const [riskData, setRiskData] = useState(null);
+  const [loadingRisk, setLoadingRisk] = useState(false);
+  const [riskError, setRiskError] = useState(null);
 
   useEffect(() => {
     loadStudentData();
   }, [id]);
 
   useEffect(() => {
+    // Load overview data when student is loaded
+    if (student) {
+      loadAttendanceHistory();
+      loadScoresHistory();
+      loadBehaviorHistory();
+    }
+  }, [student]);
+
+  useEffect(() => {
     if (student && activeTab !== "overview" && activeTab !== "personal") {
-      loadTabData();
+      if (activeTab === "risk") {
+        loadRiskData();
+      } else {
+        loadTabData();
+      }
     }
   }, [activeTab, student]);
 
@@ -782,6 +799,31 @@ export default function StudentProfilePage() {
     } catch (error) {
       console.error('Error loading interventions:', error);
       setInterventionsData([]);
+    }
+  };
+
+  const loadRiskData = async () => {
+    setLoadingRisk(true);
+    setRiskError(null);
+    try {
+      const response = await apiService.getStudentRiskPrediction(id);
+      if (response.success) {
+        setRiskData(response);
+      } else {
+        setRiskError(response.error || 'Failed to load risk prediction');
+      }
+    } catch (error) {
+      console.error('Error loading risk data:', error);
+      // Check if it's an insufficient data error (400)
+      if (error.message?.includes('Insufficient data') || error.message?.includes('data_tier')) {
+        // Set a special flag for insufficient data - don't treat as error
+        setRiskData({ insufficientData: true });
+        setRiskError(null);
+      } else {
+        setRiskError(error.message || 'Failed to load risk prediction');
+      }
+    } finally {
+      setLoadingRisk(false);
     }
   };
 
@@ -906,7 +948,8 @@ export default function StudentProfilePage() {
                   { key: "attendance", label: "Attendance", icon: FaCalendarCheck },
                   { key: "scores", label: "Scores", icon: FaChartBar },
                   { key: "behavior", label: "Behavior", icon: FaUserCheck },
-                  { key: "interventions", label: "Interventions", icon: FaHandsHelping }
+                  { key: "interventions", label: "Interventions", icon: FaHandsHelping },
+                  { key: "risk", label: "Risk Analysis", icon: FaExclamationTriangle }
                 ].map(tab => {
                   const Icon = tab.icon;
                   return (
@@ -941,8 +984,8 @@ export default function StudentProfilePage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <InfoBox label="Date of Birth" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'N/A'} />
                         <InfoBox label="Gender" value={student.gender || 'N/A'} />
-                        <InfoBox label="Parent Name" value={student.parentName || 'N/A'} />
-                        <InfoBox label="Parent Contact" value={student.parentContact || 'N/A'} />
+                        <InfoBox label="Parent Name" value={student.fatherName || student.motherName || 'N/A'} />
+                        <InfoBox label="Parent Contact" value={student.contactNumber || 'N/A'} />
                         <InfoBox label="Email" value={student.email || 'N/A'} />
                         <InfoBox label="Address" value={student.address || 'N/A'} />
                       </div>
@@ -962,14 +1005,14 @@ export default function StudentProfilePage() {
                 {/* Personal Tab */}
                 {activeTab === "personal" && (
                   <div className="grid md:grid-cols-2 gap-4">
-                    <InfoBox label="Full Name" value={`${student.firstName} ${student.lastName}`} />
+                    <InfoBox label="Full Name" value={student.name || 'N/A'} />
                     <InfoBox label="Class" value={student.className || 'N/A'} />
                     <InfoBox label="Enrollment Number" value={student.enrollmentNo || 'N/A'} />
                     <InfoBox label="Date of Birth" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'N/A'} />
                     <InfoBox label="Gender" value={student.gender || 'N/A'} />
                     <InfoBox label="Status" value={student.status || 'Active'} />
-                    <InfoBox label="Parent Name" value={student.parentName || 'N/A'} />
-                    <InfoBox label="Parent Contact" value={student.parentContact || 'N/A'} />
+                    <InfoBox label="Parent Name" value={student.fatherName || student.motherName || 'N/A'} />
+                    <InfoBox label="Parent Contact" value={student.contactNumber || 'N/A'} />
                     <InfoBox label="Email" value={student.email || 'N/A'} />
                     <InfoBox label="Address" value={student.address || 'N/A'} />
                   </div>
@@ -1208,6 +1251,38 @@ export default function StudentProfilePage() {
                             </div>
                           </div>
                         ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Risk Analysis Tab */}
+                {activeTab === "risk" && (
+                  <div className="space-y-4">
+                    {loadingRisk ? (
+                      <div className="text-center py-12">
+                        <FaSpinner className="animate-spin text-3xl mx-auto" style={{ color: 'var(--primary-blue)' }} />
+                        <p className="text-sm mt-3" style={{ color: 'var(--gray)' }}>Loading risk analysis...</p>
+                      </div>
+                    ) : riskError ? (
+                      <div className="text-center py-12">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'rgba(239, 68, 68, 0.1)' }}>
+                          <FaExclamationTriangle style={{ fontSize: '2rem', color: '#ef4444' }} />
+                        </div>
+                        <p className="text-sm" style={{ color: 'var(--gray)' }}>{riskError}</p>
+                        <button
+                          onClick={loadRiskData}
+                          className="mt-4 px-4 py-2 rounded-lg text-sm font-semibold text-white"
+                          style={{ background: 'var(--primary-blue)' }}
+                        >
+                          Retry
+                        </button>
+                      </div>
+                    ) : riskData ? (
+                      <StudentRiskCard data={riskData} />
+                    ) : (
+                      <div className="text-center py-12" style={{ color: 'var(--gray)' }}>
+                        No risk data available
                       </div>
                     )}
                   </div>
