@@ -3,7 +3,7 @@
 
 import dotenv from 'dotenv';
 import bcrypt from 'bcryptjs';
-import dataStore from './storage/dataStore.js';
+import dataStore from '../storage/dataStore.js';
 
 // Load environment variables
 dotenv.config();

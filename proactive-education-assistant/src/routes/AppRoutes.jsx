@@ -20,6 +20,8 @@ import GamificationPage from "../pages/teacher/GamificationPage";
 import AddStudentPage from "../pages/teacher/AddStudentPage";
 import MyClassesPage from "../pages/teacher/MyClassesPage";
 import LoginPage from "../pages/teacher/LoginPage";
+import FacultyConnect from "../pages/teacher/FacultyConnect";
+import FacultyChat from "../pages/teacher/FacultyChat";
 
 import MainLayout from "../layouts/MainLayout";
 
@@ -140,6 +142,8 @@ export default function AppRoutes() {
             <Route path="/interventions-history" element={<InterventionsHistoryPage />} />
             <Route path="/score-history" element={<ScoreHistoryPage />} />
             <Route path="/gamification" element={<GamificationPage />} />
+            <Route path="/faculty-connect" element={<FacultyConnect />} />
+            <Route path="/faculty-chat" element={<FacultyChat />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
           </Route>
@@ -158,6 +162,8 @@ export default function AppRoutes() {
           <Route path="/interventions-history" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/score-history" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/gamification" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/faculty-connect" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/faculty-chat" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/profile" element={<Navigate to="/teacher/login" replace />} />
         </>
       )}

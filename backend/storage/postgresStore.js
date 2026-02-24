@@ -1425,6 +1425,115 @@ class PostgresStore {
     await this.query('DELETE FROM interventions WHERE id = $1', [id]);
     return true;
   }
+
+  // Faculty Invite operations
+  async addFacultyInvite(invite) {
+    const query = `
+      INSERT INTO faculty_invites (id, sender_id, recipient_id, school_id, status, created_at, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *
+    `;
+    const result = await this.query(query, [
+      invite.id,
+      invite.senderId,
+      invite.recipientId,
+      invite.schoolId,
+      invite.status,
+      invite.createdAt,
+      invite.updatedAt
+    ]);
+    if (!result.rows[0]) throw new Error('Failed to insert faculty invite');
+    return this._mapFacultyInvite(result.rows[0]);
+  }
+
+  async getFacultyInvites() {
+    const result = await this.query('SELECT * FROM faculty_invites');
+    return result.rows.map(row => this._mapFacultyInvite(row));
+  }
+
+  async getFacultyInvitesBySchool(schoolId) {
+    const result = await this.query('SELECT * FROM faculty_invites WHERE school_id = $1', [schoolId]);
+    return result.rows.map(row => this._mapFacultyInvite(row));
+  }
+
+  async updateFacultyInvite(inviteId, updates) {
+    const query = `
+      UPDATE faculty_invites 
+      SET status = $1, updated_at = $2
+      WHERE id = $3
+      RETURNING *
+    `;
+    const result = await this.query(query, [updates.status, updates.updatedAt, inviteId]);
+    if (!result.rows[0]) throw new Error('Faculty invite not found');
+    return this._mapFacultyInvite(result.rows[0]);
+  }
+
+  async deleteFacultyInvite(inviteId) {
+    await this.query('DELETE FROM faculty_invites WHERE id = $1', [inviteId]);
+    return true;
+  }
+
+  _mapFacultyInvite(row) {
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      status: row.status,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
+
+  // Faculty Messages operations
+  async addMessage(message) {
+    const query = `
+      INSERT INTO faculty_messages (id, sender_id, recipient_id, school_id, text, attachment_name, attachment_type, attachment_data, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING *
+    `;
+    const result = await this.query(query, [
+      message.id,
+      message.senderId,
+      message.recipientId,
+      message.schoolId,
+      message.text || null,
+      message.attachmentName || null,
+      message.attachmentType || null,
+      message.attachmentData || null,
+      message.createdAt
+    ]);
+    if (!result.rows[0]) throw new Error('Failed to insert message');
+    return this._mapMessage(result.rows[0]);
+  }
+
+  async getConversation(userId1, userId2, schoolId, limit = 50) {
+    const query = `
+      SELECT * FROM faculty_messages
+      WHERE school_id = $1 AND (
+        (sender_id = $2 AND recipient_id = $3) OR
+        (sender_id = $3 AND recipient_id = $2)
+      )
+      ORDER BY created_at ASC
+      LIMIT $4
+    `;
+    const result = await this.query(query, [schoolId, userId1, userId2, limit]);
+    return result.rows.map(row => this._mapMessage(row));
+  }
+
+  _mapMessage(row) {
+    return {
+      id: row.id,
+      senderId: row.sender_id,
+      recipientId: row.recipient_id,
+      schoolId: row.school_id,
+      text: row.text,
+      attachmentName: row.attachment_name,
+      attachmentType: row.attachment_type,
+      attachmentData: row.attachment_data,
+      createdAt: row.created_at
+    };
+  }
 }
 
 export default new PostgresStore();

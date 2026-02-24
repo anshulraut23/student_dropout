@@ -199,7 +199,7 @@ import {
   FaTimes,
   FaHistory,
   FaChartBar,
-  FaHandsHelping
+  FaComments
 } from "react-icons/fa";
 import Header from "../components/layouts/Header";
 import DashboardFooter from "../components/layouts/DashboardFooter";
@@ -495,6 +495,7 @@ function MainLayout() {
     { path: "/interventions-history", label: "Interventions History", icon: FaHandsHelping },
     { path: "/score-history", label: "Score History", icon: FaChartBar },
     { path: "/gamification", label: "Progress", icon: FaTrophy },
+    { path: "/faculty-connect", label: "Faculty Chat", icon: FaComments },
   ];
 
   const closeSidebar = () => setSidebarOpen(false);
