@@ -279,6 +279,30 @@ function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_exam_periods_dates ON exam_periods(startDate, endDate);
   `);
 
+  // Faculty Invites table (NEW - for inter-teacher chat connectivity)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS faculty_invites (
+      id TEXT PRIMARY KEY,
+      senderId TEXT NOT NULL,
+      recipientId TEXT NOT NULL,
+      schoolId TEXT NOT NULL,
+      status TEXT NOT NULL,
+      createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL,
+      FOREIGN KEY (senderId) REFERENCES users(id),
+      FOREIGN KEY (recipientId) REFERENCES users(id),
+      FOREIGN KEY (schoolId) REFERENCES schools(id)
+    )
+  `);
+
+  // Create indexes for faculty_invites
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_faculty_invites_sender ON faculty_invites(senderId);
+    CREATE INDEX IF NOT EXISTS idx_faculty_invites_recipient ON faculty_invites(recipientId);
+    CREATE INDEX IF NOT EXISTS idx_faculty_invites_school ON faculty_invites(schoolId);
+    CREATE INDEX IF NOT EXISTS idx_faculty_invites_status ON faculty_invites(status);
+  `);
+
   console.log('✅ SQLite database initialized at:', dbPath);
 }
 
@@ -1417,6 +1441,50 @@ class SQLiteStore {
   deleteBehavior(behaviorId) {
     const stmt = db.prepare('DELETE FROM behavior WHERE id = ?');
     const result = stmt.run(behaviorId);
+    return result.changes > 0;
+  }
+
+  // Faculty Invite operations
+  addFacultyInvite(invite) {
+    const stmt = db.prepare(`
+      INSERT INTO faculty_invites (id, senderId, recipientId, schoolId, status, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(
+      invite.id,
+      invite.senderId,
+      invite.recipientId,
+      invite.schoolId,
+      invite.status,
+      invite.createdAt,
+      invite.updatedAt
+    );
+    return invite;
+  }
+
+  getFacultyInvites() {
+    const stmt = db.prepare('SELECT * FROM faculty_invites');
+    return stmt.all();
+  }
+
+  getFacultyInvitesBySchool(schoolId) {
+    const stmt = db.prepare('SELECT * FROM faculty_invites WHERE schoolId = ?');
+    return stmt.all(schoolId);
+  }
+
+  updateFacultyInvite(inviteId, updates) {
+    const stmt = db.prepare(`
+      UPDATE faculty_invites 
+      SET status = ?, updatedAt = ?
+      WHERE id = ?
+    `);
+    stmt.run(updates.status, updates.updatedAt, inviteId);
+    return stmt.all('SELECT * FROM faculty_invites WHERE id = ?')[0];
+  }
+
+  deleteFacultyInvite(inviteId) {
+    const stmt = db.prepare('DELETE FROM faculty_invites WHERE id = ?');
+    const result = stmt.run(inviteId);
     return result.changes > 0;
   }
 }
