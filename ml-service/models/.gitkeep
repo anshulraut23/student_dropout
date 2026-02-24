@@ -1,0 +1,2 @@
+# This directory stores trained ML models
+# Run generate_and_train.py to create dropout_model.pkl

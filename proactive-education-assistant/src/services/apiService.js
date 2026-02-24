@@ -754,6 +754,35 @@ class ApiService {
       auth: true,
     });
   }
+
+  // ML Risk Prediction endpoints
+  async getStudentRiskPrediction(studentId) {
+    return this.request(`/ml/risk/student/${studentId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getClassRiskPredictions(classId) {
+    return this.request(`/ml/risk/class/${classId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getSchoolRiskStatistics() {
+    return this.request('/ml/risk/statistics', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async retrainMLModel() {
+    return this.request('/ml/retrain', {
+      method: 'POST',
+      auth: true,
+    });
+  }
 }
 
 export default new ApiService();
