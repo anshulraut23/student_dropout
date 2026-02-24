@@ -1,178 +1,288 @@
-# Documentation Index
+# Education Assistant Platform - Documentation
 
-## Getting Started
+Complete documentation for the Proactive Education Assistant platform with ML-powered dropout prediction, gamification, and teacher collaboration features.
 
-1. **[Setup Guide](SETUP.md)** - Installation and configuration
-2. **[Testing Guide](TESTING.md)** - Running tests and verification
+## 📚 Documentation Index
 
-## Feature Documentation
+### Core System Documentation
 
-### Core Features (100% Backend Complete)
+#### Authentication & User Management
+- [Authentication System](./AUTHENTICATION_SYSTEM.md) - Login, registration, role-based access
+- [Teacher Management](./TEACHER_MANAGEMENT.md) - Teacher accounts and approval workflow
+- [Profile System](./PROFILE_SYSTEM.md) - User profiles and settings
 
-- **[Authentication System](AUTHENTICATION_SYSTEM.md)** - Complete authentication and authorization
-  - Admin and teacher registration
-  - Login and JWT tokens
-  - Approval workflow
-  - Role-based access control
+#### Academic Management
+- [Class Management](./CLASS_MANAGEMENT.md) - Class creation and organization
+- [Subject Management](./SUBJECT_MANAGEMENT.md) - Subject assignment and tracking
+- [Student Management](./STUDENT_MANAGEMENT.md) - Student enrollment and records
 
-- **[Teacher Management](TEACHER_MANAGEMENT.md)** - Teacher registration and management
-  - Teacher approval workflow
-  - Class incharge assignment
-  - Subject teacher assignment
-  - Workload management
+#### Data Tracking
+- [Attendance System](./ATTENDANCE_SYSTEM.md) - Daily and subject-wise attendance
+- [Exam Management](./EXAM_MANAGEMENT.md) - Exam templates and scheduling
+- [Marks Management](./MARKS_MANAGEMENT.md) - Grade entry and analytics
+- [Behavior System](./BEHAVIOR_SYSTEM.md) - Behavior logging and tracking
+- [Intervention System](./INTERVENTION_SYSTEM.md) - Student support interventions
 
-- **[Class Management](CLASS_MANAGEMENT.md)** - Class creation and management
-  - Daily and subject-wise attendance modes
-  - Class incharge assignment
-  - Student capacity tracking
-  - Grade and section organization
+### Advanced Features
 
-- **[Subject Management](SUBJECT_MANAGEMENT.md)** - Subject creation and assignment
-  - Subject-class mapping
-  - Subject teacher assignment
-  - Core and optional subjects
-  - Credits system
+#### AI/ML System
+- [ML Risk Prediction](./ML_RISK_PREDICTION.md) - AI-powered dropout risk prediction
+  - Random Forest classifier
+  - Google Gemini AI explanations
+  - Real-time risk scoring
+  - Automated recommendations
+  - Model retraining
 
-- **[Student Management](STUDENT_MANAGEMENT.md)** - Student enrollment and management
-  - Individual student addition
-  - Bulk import (CSV/Excel)
-  - Class assignment
-  - Parent information
-  - Student status tracking
+#### Gamification & Engagement
+- [Gamification System](./GAMIFICATION_SYSTEM.md) - Teacher engagement with XP and badges
+  - XP earning system
+  - Level progression (1-5)
+  - Achievement badges
+  - Daily task tracking
+  - Login streaks
 
-- **[Attendance System](ATTENDANCE_SYSTEM.md)** - Complete attendance management
-  - Daily and subject-wise attendance
-  - Marking, editing, and reporting
-  - Bulk upload
-  - Statistics and analytics
-  - 35+ automated tests
+- [Leaderboard System](./LEADERBOARD_SYSTEM.md) - Competitive rankings
+  - Real-time rankings
+  - Multiple timeframes
+  - Top 3 podium
+  - Statistics dashboard
 
-- **[Exam & Marks Management](EXAM_MANAGEMENT.md)** - Standardized exam and marks management
-  - Admin-controlled exam templates
-  - Automated exam generation
-  - Standardized marking scheme
-  - Performance tracking
+#### Teacher Collaboration
+- [Faculty Connect](./FACULTY_CONNECT.md) - Teacher-to-teacher communication
+  - Invitation-based connections
+  - One-on-one messaging
+  - File sharing (up to 1.5MB)
+  - Real-time chat
 
-- **[Marks Management](MARKS_MANAGEMENT.md)** - Detailed marks entry and tracking
-  - Subject-wise marks entry
-  - Grade calculation
-  - Performance analytics
-  - Report generation
+### Setup & Development
+- [Setup Guide](./SETUP.md) - Installation and configuration
+- [Testing Guide](./TESTING.md) - Testing procedures
+- [Backend Implementation Plan](./BACKEND_IMPLEMENTATION_PLAN.md) - Architecture overview
 
-### Advanced Features (Backend Complete, Frontend Pending)
+## 🚀 Quick Start
 
-- **[Behavior Tracking System](BEHAVIOR_SYSTEM.md)** - Student behavior monitoring
-  - Positive and negative behavior recording
-  - Severity levels and categories
-  - Follow-up tracking
-  - Behavior history and trends
+### Prerequisites
+- Node.js 18+
+- PostgreSQL (Supabase)
+- Python 3.8+ (for ML service)
+- Google Gemini API key
 
-- **[Intervention System](INTERVENTION_SYSTEM.md)** - Student support and intervention
-  - Intervention plan creation
-  - Progress tracking
-  - Priority management
-  - Outcome monitoring
-
-- **[Profile & Dashboard System](PROFILE_SYSTEM.md)** - Comprehensive student profiles
-  - Academic performance overview
-  - Attendance summary
-  - Behavior history
-  - Risk assessment
-  - Performance trends
-
-## Quick Reference
-
-### Common Commands
-
+### Installation
 ```bash
-# Start backend
-cd backend && npm run dev
+# Clone repository
+git clone <repository-url>
 
-# Start frontend
-cd proactive-education-assistant && npm run dev
+# Install backend dependencies
+cd backend
+npm install
 
-# Run tests
-cd backend && node test-attendance-system.js
+# Install frontend dependencies
+cd ../proactive-education-assistant
+npm install
 
-# Create test data
-cd backend && node add-test-data.js
-
-# View test data
-cd backend && node show-test-data.js
-
-# Clear attendance
-cd backend && node clear-attendance.js
+# Install ML service dependencies
+cd ../ml-service
+pip install -r requirements.txt
 ```
 
-### Test Credentials
-
-**Admin**: `admin@school.com` / `admin123`
-**Teachers**: `teacher1@school.com` to `teacher4@school.com` / `admin123`
-
-## Documentation Structure
-
-```
-docs/
-├── README.md                          # This file
-├── SETUP.md                           # Installation guide
-├── TESTING.md                         # Testing guide
-├── AUTHENTICATION_SYSTEM.md           # Auth documentation
-├── TEACHER_MANAGEMENT.md              # Teacher docs
-├── CLASS_MANAGEMENT.md                # Class docs
-├── SUBJECT_MANAGEMENT.md              # Subject docs
-├── STUDENT_MANAGEMENT.md              # Student docs
-├── ATTENDANCE_SYSTEM.md               # Attendance docs
-├── EXAM_MANAGEMENT.md                 # Exam system docs
-├── MARKS_MANAGEMENT.md                # Marks system docs
-├── BEHAVIOR_SYSTEM.md                 # Behavior tracking (NEW)
-├── INTERVENTION_SYSTEM.md             # Intervention system (NEW)
-├── PROFILE_SYSTEM.md                  # Profile & dashboard (NEW)
-└── BACKEND_IMPLEMENTATION_PLAN.md     # Future features
+### Database Setup
+```bash
+cd backend
+node scripts/apply-complete-schema.js
 ```
 
-## Development Status
+### Environment Configuration
+```bash
+# Backend (.env)
+DATABASE_URL=your_supabase_url
+JWT_SECRET=your_secret_key
+ML_SERVICE_URL=http://localhost:5001
 
-### ✅ Backend Complete (100%)
-- Authentication & Authorization - 100%
-- School Management - 100%
-- User Management - 100%
-- Teacher Management - 100%
-- Class Management - 100%
-- Subject Management - 100%
-- Student Management - 100%
-- Attendance System - 100%
-- Exam Management System - 100%
-- Marks Management System - 100%
-- Behavior Tracking System - 100%
-- Intervention System - 100%
-- Profile & Dashboard System - 100%
-- Data Storage (PostgreSQL/Supabase) - 100%
+# ML Service (.env)
+GEMINI_API_KEY=your_gemini_api_key
+PORT=5001
+```
 
-### 🚧 Frontend Status
-- Core Features (Auth, Classes, Students, Teachers) - 80%
-- Attendance System - 90%
-- Exam & Marks System - 70%
-- Behavior System - 0% (Backend ready)
-- Intervention System - 0% (Backend ready)
-- Profile & Dashboard - 40%
+### Running the Application
+```bash
+# Terminal 1: Backend
+cd backend
+npm start
 
-### 📋 Pending
-- Behavior tracking UI
-- Intervention management UI
-- Advanced analytics dashboard
-- Parent portal
-- Mobile app
-- Notification system
+# Terminal 2: Frontend
+cd proactive-education-assistant
+npm run dev
 
-## Support
+# Terminal 3: ML Service
+cd ml-service
+python app.py
+```
 
-For questions or issues:
-1. Check the relevant documentation file
-2. Review test scripts for examples
-3. Check console logs for errors
-4. Refer to API reference in feature docs
+## 📊 System Architecture
+
+### Technology Stack
+- **Frontend**: React 18, Vite, TailwindCSS
+- **Backend**: Node.js, Express, PostgreSQL
+- **ML Service**: Python, Flask, scikit-learn, Google Gemini
+- **Database**: PostgreSQL (Supabase)
+
+### Key Components
+1. **Core Platform**: Student data management
+2. **ML Engine**: Risk prediction and recommendations
+3. **Gamification**: Teacher engagement system
+4. **Communication**: Faculty collaboration tools
+
+## 🎯 Feature Overview
+
+### For Teachers
+- ✅ Mark attendance (daily/subject-wise)
+- ✅ Enter exam marks
+- ✅ Log student behavior
+- ✅ Create interventions
+- ✅ View at-risk students
+- ✅ Earn XP and badges
+- ✅ Compete on leaderboards
+- ✅ Chat with colleagues
+
+### For Admins
+- ✅ Manage schools and teachers
+- ✅ Create classes and subjects
+- ✅ Approve teacher registrations
+- ✅ View school-wide analytics
+- ✅ Monitor teacher engagement
+- ✅ Access ML predictions
+- ✅ Export reports
+
+## 📈 ML Risk Prediction
+
+### How It Works
+1. System collects student data (attendance, marks, behavior)
+2. ML service extracts features and calculates risk score
+3. Google Gemini AI generates personalized recommendations
+4. Teachers receive alerts for high-risk students
+5. Interventions are tracked and outcomes measured
+
+### Risk Levels
+- **Low** (0.0-0.3): Student performing well
+- **Medium** (0.3-0.6): Minor concerns, monitor closely
+- **High** (0.6-0.8): Significant risk, intervention needed
+- **Critical** (0.8-1.0): Urgent action required
+
+## 🎮 Gamification System
+
+### XP Earning
+- Mark Attendance: +20 XP
+- Enter Marks: +30 XP
+- Log Behavior: +20 XP
+- Create Intervention: +40 XP
+- Daily Login: +10 XP
+
+### Levels
+- Level 1: 0-299 XP
+- Level 2: 300-999 XP
+- Level 3: 1000-1999 XP
+- Level 4: 2000-3999 XP
+- Level 5: 4000+ XP
+
+### Badges
+- 👥 First 10 Students
+- 🔥 7 Day Streak
+- 📊 100 Attendance Records
+- 💙 Student Supporter
+- ⭐ Consistency Star
+
+## 🔗 Faculty Connect
+
+### Connection Process
+1. Browse teachers in your school
+2. Send invitation
+3. Wait for acceptance
+4. Start chatting
+
+### Features
+- Text messaging
+- File attachments (PDF, DOC, images)
+- Real-time updates
+- Conversation history
+- Search and filter
+
+## 📱 API Documentation
+
+### Base URLs
+- Backend API: `http://localhost:5000/api`
+- ML Service: `http://localhost:5001`
+
+### Key Endpoints
+- `/api/auth/*` - Authentication
+- `/api/students/*` - Student management
+- `/api/attendance/*` - Attendance tracking
+- `/api/marks/*` - Marks management
+- `/api/ml/*` - ML predictions
+- `/api/gamification/*` - Gamification
+- `/api/faculty/*` - Faculty Connect
+
+## 🧪 Testing
+
+### Run Tests
+```bash
+# Backend tests
+cd backend
+npm test
+
+# ML service tests
+cd ml-service
+python -m pytest
+
+# Frontend tests
+cd proactive-education-assistant
+npm test
+```
+
+### Test Scripts
+```bash
+# Test gamification
+node backend/scripts/test-gamification-api.js
+
+# Test faculty connect
+node backend/scripts/test-faculty-connect.js
+
+# Test leaderboard
+node backend/scripts/test-leaderboard.js
+```
+
+## 🐛 Troubleshooting
+
+### Common Issues
+1. **Database connection failed**: Check DATABASE_URL in .env
+2. **ML service not responding**: Ensure Python service is running
+3. **XP not awarded**: Verify gamification tables exist
+4. **Chat not working**: Check faculty_invites and faculty_messages tables
+
+### Debug Mode
+```bash
+# Enable debug logging
+NODE_ENV=development npm start
+```
+
+## 📝 Contributing
+
+### Code Style
+- Use ES6+ features
+- Follow existing patterns
+- Add comments for complex logic
+- Write tests for new features
+
+### Commit Messages
+- feat: New feature
+- fix: Bug fix
+- docs: Documentation
+- refactor: Code refactoring
+- test: Testing
+
+## 👥 Support
+For issues and questions, please refer to the specific documentation files or contact the development team.
 
 ---
 
-**Last Updated**: February 24, 2026  
-**Version**: 2.0.0
+**Last Updated**: February 2026
+**Version**: 1.0.0

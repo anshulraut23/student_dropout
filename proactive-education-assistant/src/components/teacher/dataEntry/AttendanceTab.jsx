@@ -832,6 +832,7 @@ import { useState, useEffect } from "react";
 import { FaCheck, FaTimes, FaSpinner, FaUpload, FaDownload, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import apiService from "../../../services/apiService";
+import { useGameification } from "../../../hooks/useGameification";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -918,6 +919,8 @@ const HORIZON_STYLES = `
 `;
 
 export default function AttendanceTab() {
+  const { awardAttendanceXP } = useGameification();
+  
   const [mode, setMode] = useState("manual");
   const [selectedClass, setSelectedClass] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
@@ -1144,9 +1147,18 @@ export default function AttendanceTab() {
         const successCount = result.marked || 0;
         const failCount = result.failed || 0;
         
+        // Award XP for attendance marking (+20 XP)
+        try {
+          await awardAttendanceXP();
+          console.log('✅ XP awarded for attendance!');
+        } catch (xpError) {
+          console.error('Failed to award XP:', xpError);
+          // Don't fail the whole operation if XP award fails
+        }
+        
         let messageText = '';
         if (failCount === 0) {
-          messageText = `✓ Attendance saved successfully! ${successCount} student${successCount !== 1 ? 's' : ''} marked.`;
+          messageText = `✓ Attendance saved successfully! ${successCount} student${successCount !== 1 ? 's' : ''} marked. +20 XP earned!`;
         } else {
           messageText = `⚠ Attendance partially saved. ${successCount} successful, ${failCount} failed.`;
         }
@@ -1284,9 +1296,17 @@ export default function AttendanceTab() {
       const result = await apiService.markBulkAttendance(bulkData);
       
       if (result.success) {
+        // Award XP for bulk attendance upload (+20 XP)
+        try {
+          await awardAttendanceXP();
+          console.log('✅ XP awarded for bulk attendance!');
+        } catch (xpError) {
+          console.error('Failed to award XP:', xpError);
+        }
+        
         setMessage({ 
           type: "success", 
-          text: `✓ Uploaded! ${result.marked} students marked, ${result.failed} failed.` 
+          text: `✓ Uploaded! ${result.marked} students marked, ${result.failed} failed. +20 XP earned!` 
         });
         setBulkFile(null);
         setParsedData([]);

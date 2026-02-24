@@ -18,6 +18,9 @@ import behaviorRoutes from './routes/behaviorRoutes.js';
 import interventionRoutes from './routes/interventionRoutes.js';
 import gamificationRoutes from './routes/gamificationRoutes.js';
 import facultyRoutes from './routes/facultyRoutes.js';
+import mlRoutes from './ml-integration/routes.js';
+import dataStore from './storage/dataStore.js';
+import { connectPostgres } from './database/connection.js';
 
 dotenv.config();
 
@@ -65,6 +68,7 @@ app.use('/api/behavior', behaviorRoutes);
 app.use('/api/interventions', interventionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/faculty', facultyRoutes);
+app.use('/api/ml', mlRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -138,7 +142,7 @@ app.get('/api/debug/data', (req, res) => {
 });
 
 // Import dataStore for debug endpoint
-import dataStore from './storage/dataStore.js';
+// (already imported at top)
 
 // Error handling middleware
 app.use((err, req, res, next) => {

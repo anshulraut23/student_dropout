@@ -17,6 +17,8 @@ class GamificationService {
 
       const xpAmount = amount || xpMap[actionType] || 0;
 
+      console.log(`🎮 Awarding ${xpAmount} XP for ${actionType}...`);
+
       // Call backend to save XP log
       const response = await apiService.request('/gamification/award-xp', {
         method: 'POST',
@@ -27,11 +29,12 @@ class GamificationService {
         }),
       });
 
+      console.log('✅ XP awarded successfully:', response);
       return response;
     } catch (error) {
-      console.error('Error awarding XP:', error);
-      // Still award XP locally even if backend fails
-      return { success: true, xpEarned: amount };
+      console.error('❌ Error awarding XP:', error);
+      console.error('Error details:', error.message);
+      return { success: false, error: error.message };
     }
   }
 
@@ -58,16 +61,36 @@ class GamificationService {
         auth: true,
       });
 
+      console.log('✅ Gamification stats loaded:', response);
       return response;
     } catch (error) {
-      console.error('Error fetching gamification stats:', error);
-      // Return mock data if backend fails
+      console.error('❌ Error fetching gamification stats:', error);
+      console.error('Error details:', error.message);
+      // Return empty stats instead of mock data
       return {
-        totalXP: 680,
-        currentLevel: 3,
-        loginStreak: 7,
-        tasksCompleted: 45,
-        badges: [],
+        success: false,
+        error: error.message,
+        stats: {
+          totalXP: 0,
+          currentLevel: 1,
+          loginStreak: 0,
+          tasksCompleted: 0,
+          studentsHelped: 0,
+          studentsAdded: 0,
+          attendanceRecords: 0,
+          highRiskStudentsHelped: 0,
+          weeklyTaskCompletion: 0,
+          badges: [],
+          earnedBadges: [],
+          dailyTasksCompleted: {
+            attendance: false,
+            marks: false,
+            behaviour: false,
+            intervention: false,
+            login: false
+          },
+          lastActiveDate: null
+        }
       };
     }
   }

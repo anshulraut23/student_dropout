@@ -46,6 +46,8 @@ class ApiService {
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text();
         console.error('Non-JSON response:', text);
+        console.error('Status:', response.status);
+        console.error('Endpoint:', endpoint);
         
         // Check if it's a connection error
         if (text.includes('Cannot GET') || text.includes('Cannot POST')) {
@@ -58,7 +60,13 @@ class ApiService {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || `Request failed with status ${response.status}`);
+        console.error('❌ API Error Response:', {
+          endpoint,
+          status: response.status,
+          statusText: response.statusText,
+          data
+        });
+        throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
       }
 
       return data;
@@ -758,9 +766,6 @@ class ApiService {
   // Faculty endpoints
   async getSchoolTeachers() {
     return this.request('/faculty/teachers', {
-  // ML Risk Prediction endpoints
-  async getStudentRiskPrediction(studentId) {
-    return this.request(`/ml/risk/student/${studentId}`, {
       method: 'GET',
       auth: true,
     });
@@ -776,8 +781,6 @@ class ApiService {
 
   async getMyFacultyInvites() {
     return this.request('/faculty/invites', {
-  async getClassRiskPredictions(classId) {
-    return this.request(`/ml/risk/class/${classId}`, {
       method: 'GET',
       auth: true,
     });
@@ -801,8 +804,6 @@ class ApiService {
 
   async getAcceptedConnections() {
     return this.request('/faculty/connections', {
-  async getSchoolRiskStatistics() {
-    return this.request('/ml/risk/statistics', {
       method: 'GET',
       auth: true,
     });
@@ -819,6 +820,32 @@ class ApiService {
   async getConversation(facultyId, limit = 50) {
     return this.request(`/faculty/messages/conversation/${facultyId}?limit=${limit}`, {
       method: 'GET',
+      auth: true,
+    });
+  }
+
+  // ML Risk Prediction endpoints
+  async getStudentRiskPrediction(studentId) {
+    return this.request(`/ml/risk/student/${studentId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getClassRiskPredictions(classId) {
+    return this.request(`/ml/risk/class/${classId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getSchoolRiskStatistics() {
+    return this.request('/ml/risk/statistics', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
   async retrainMLModel() {
     return this.request('/ml/retrain', {
       method: 'POST',
