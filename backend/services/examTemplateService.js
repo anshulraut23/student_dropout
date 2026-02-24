@@ -124,6 +124,8 @@ export async function getTemplateById(templateId) {
  * Update exam template
  */
 export async function updateTemplate(templateId, updates, userId) {
+  console.log('🔧 Service updateTemplate called:', { templateId, updates, userId });
+  
   const existingTemplate = await dataStore.getExamTemplateById(templateId);
   if (!existingTemplate) {
     console.log('❌ Template not found:', templateId);
@@ -168,6 +170,8 @@ export async function updateTemplate(templateId, updates, userId) {
   console.log('📝 Updates after conversion:', updates);
 
   const updatedTemplate = await dataStore.updateExamTemplate(templateId, updates);
+  console.log('✅ Template updated in dataStore:', updatedTemplate);
+  
   return updatedTemplate;
 }
 

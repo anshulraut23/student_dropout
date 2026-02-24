@@ -139,7 +139,7 @@ const LAYOUT_STYLES = `
     border-radius: 30px;
     background: var(--light, #f5f8fb);
     border: 1px solid rgba(26,111,181,0.12);
-    cursor: default;
+    cursor: pointer;
     transition: border-color 0.2s ease, background 0.2s ease;
   }
   .hal-user-chip:hover {
@@ -297,14 +297,18 @@ function AdminLayout() {
             {/* ── Right controls ── */}
             <div className="hal-right">
 
-              {/* User chip — desktop */}
-              <div className="hal-user-chip hidden sm:flex">
+              {/* User chip — desktop - clickable to go to profile */}
+              <button
+                onClick={() => navigate('/admin/profile')}
+                className="hal-user-chip hidden sm:flex"
+                title="View Profile"
+              >
                 <div className="hal-avatar">AD</div>
                 <div className="hidden md:block">
                   <div className="hal-user-name">Admin</div>
                   <div className="hal-user-role">Super Admin</div>
                 </div>
-              </div>
+              </button>
 
               <div className="hal-vdivider hidden sm:block" />
 

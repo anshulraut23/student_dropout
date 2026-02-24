@@ -171,6 +171,7 @@ export const updateTemplate = async (req, res) => {
     }
 
     const existingTemplate = await examTemplateService.getTemplateById(templateId);
+    console.log('📋 Existing template:', existingTemplate);
 
     // Verify template belongs to user's school
     if (existingTemplate.schoolId !== schoolId) {

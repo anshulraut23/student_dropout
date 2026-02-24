@@ -200,7 +200,8 @@ export default function ScoresTab() {
     setMessage({ type: "", text: "" });
 
     try {
-      const marksArray = Object.entries(scores)
+      // Use the marks API instead of performance API
+      const marksRecords = Object.entries(scores)
         .filter(([_, score]) => score.obtainedMarks !== "")
         .map(([studentId, score]) => ({
           studentId,
@@ -209,11 +210,11 @@ export default function ScoresTab() {
           remarks: score.remarks || ""
         }));
 
-      console.log('Submitting marks:', { examId: selectedExam.id, marks: marksArray });
+      console.log('Submitting marks:', { examId: selectedExam.id, marks: marksRecords });
 
       const result = await apiService.enterBulkMarks({
         examId: selectedExam.id,
-        marks: marksArray
+        marks: marksRecords
       });
       
       console.log('Marks submission result:', result);
