@@ -403,6 +403,8 @@ export default function StudentListPage() {
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [riskPredictions, setRiskPredictions] = useState({});
+  const [loadingRisk, setLoadingRisk] = useState(false);
   
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -434,7 +436,13 @@ export default function StudentListPage() {
       // Load students
       const studentsResult = await apiService.getStudents();
       if (studentsResult.success) {
-        setStudents(studentsResult.students || []);
+        const loadedStudents = studentsResult.students || [];
+        setStudents(loadedStudents);
+        
+        // Load risk predictions for all students
+        if (loadedStudents.length > 0) {
+          loadRiskPredictions(loadedStudents);
+        }
       } else {
         setError(studentsResult.error || 'Failed to load students');
       }
@@ -446,10 +454,49 @@ export default function StudentListPage() {
     }
   };
 
-  // Calculate risk level (placeholder - you can implement actual logic)
+  const loadRiskPredictions = async (studentList) => {
+    setLoadingRisk(true);
+    try {
+      const predictions = {};
+      
+      // Fetch risk predictions for each student
+      await Promise.all(
+        studentList.map(async (student) => {
+          try {
+            const result = await apiService.getStudentRiskPrediction(student.id);
+            if (result.success && result.prediction) {
+              predictions[student.id] = result.prediction.risk_level || 'low';
+            } else {
+              predictions[student.id] = 'gathering'; // No prediction available
+            }
+          } catch (err) {
+            // Check if it's an insufficient data error
+            if (err.message?.includes('Insufficient data') || err.message?.includes('data_tier')) {
+              predictions[student.id] = 'gathering'; // Insufficient data
+            } else {
+              console.error(`Error loading risk for student ${student.id}:`, err);
+              predictions[student.id] = 'gathering'; // Default to gathering on error
+            }
+          }
+        })
+      );
+      
+      setRiskPredictions(predictions);
+    } catch (err) {
+      console.error('Error loading risk predictions:', err);
+    } finally {
+      setLoadingRisk(false);
+    }
+  };
+
+  // Get risk level from ML predictions
   const getRiskLevel = (student) => {
-    // This is a placeholder. Implement your actual risk calculation logic
-    return student.riskLevel || 'low';
+    const prediction = riskPredictions[student.id];
+    // If no prediction or insufficient data, return 'gathering'
+    if (!prediction || prediction === 'insufficient') {
+      return 'gathering';
+    }
+    return prediction;
   };
 
   const getRiskBadge = (level) => {

@@ -1,4 +1,4 @@
-const { getPool } = require('../database/connection');
+import { getPostgresPool } from '../database/connection.js';
 
 /**
  * Feature Extractor for ML Dropout Prediction
@@ -14,7 +14,7 @@ class FeatureExtractor {
    * @returns {Promise<Object>} Features object with data_tier
    */
   async extractFeatures(studentId, schoolId) {
-    const pool = getPool();
+    const pool = getPostgresPool();
     
     try {
       // Extract all features in parallel
@@ -83,11 +83,10 @@ class FeatureExtractor {
         END as attendance_rate
       FROM attendance
       WHERE student_id = $1 
-        AND school_id = $2
         AND status IS NOT NULL
     `;
     
-    const result = await pool.query(query, [studentId, schoolId]);
+    const result = await pool.query(query, [studentId]);
     const row = result.rows[0];
     
     return {
@@ -106,19 +105,20 @@ class FeatureExtractor {
     const query = `
       SELECT 
         COUNT(*) as exams_completed,
-        COALESCE(SUM(marks_obtained), 0) as total_marks_obtained,
-        COALESCE(SUM(total_marks), 0) as total_marks_possible,
+        COALESCE(SUM(m.marks_obtained), 0) as total_marks_obtained,
+        COALESCE(SUM(e.total_marks), 0) as total_marks_possible,
         CASE 
-          WHEN SUM(total_marks) > 0 
-          THEN (CAST(SUM(marks_obtained) AS FLOAT) / SUM(total_marks)) * 100
+          WHEN SUM(e.total_marks) > 0 
+          THEN (CAST(SUM(m.marks_obtained) AS FLOAT) / SUM(e.total_marks)) * 100
           ELSE 0
         END as avg_marks_percentage
-      FROM marks
-      WHERE student_id = $1 
-        AND school_id = $2
-        AND status IN ('submitted', 'verified')
-        AND marks_obtained IS NOT NULL
-        AND total_marks > 0
+      FROM marks m
+      JOIN exams e ON m.exam_id = e.id
+      WHERE m.student_id = $1 
+        AND e.school_id = $2
+        AND m.status IN ('submitted', 'verified')
+        AND m.marks_obtained IS NOT NULL
+        AND e.total_marks > 0
     `;
     
     const result = await pool.query(query, [studentId, schoolId]);
@@ -140,18 +140,17 @@ class FeatureExtractor {
     const query = `
       SELECT 
         COUNT(*) as total_incidents,
-        COUNT(*) FILTER (WHERE type = 'positive') as positive_incidents,
-        COUNT(*) FILTER (WHERE type = 'negative') as negative_incidents,
+        COUNT(*) FILTER (WHERE behavior_type = 'positive') as positive_incidents,
+        COUNT(*) FILTER (WHERE behavior_type = 'negative') as negative_incidents,
         CASE 
           WHEN COUNT(*) = 0 THEN 100
-          ELSE GREATEST(0, 100 - (COUNT(*) FILTER (WHERE type = 'negative') * 10))
+          ELSE GREATEST(0, 100 - (COUNT(*) FILTER (WHERE behavior_type = 'negative') * 10))
         END as behavior_score
       FROM behavior
-      WHERE student_id = $1 
-        AND school_id = $2
+      WHERE student_id = $1
     `;
     
-    const result = await pool.query(query, [studentId, schoolId]);
+    const result = await pool.query(query, [studentId]);
     const row = result.rows[0];
     
     return {
@@ -217,4 +216,4 @@ class FeatureExtractor {
   }
 }
 
-module.exports = new FeatureExtractor();
+export default new FeatureExtractor();

@@ -1,4 +1,4 @@
-const axios = require('axios');
+import axios from 'axios';
 
 /**
  * ML Service Client
@@ -94,6 +94,49 @@ class MLClient {
       };
     }
   }
+  
+  /**
+   * Retrain the ML model with latest data
+   * @param {Array} trainingData - Array of feature objects with dropout labels
+   * @returns {Promise<Object>} Retrain result
+   */
+  async retrainModel(trainingData) {
+    try {
+      // Increase timeout for training (5 minutes)
+      const response = await this.client.post('/retrain', {
+        training_data: trainingData
+      }, {
+        timeout: 300000 // 5 minutes
+      });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      if (error.response) {
+        // ML service returned an error
+        return {
+          success: false,
+          error: error.response.data.error || 'Retrain failed',
+          message: error.response.data.message || error.message,
+          status: error.response.status
+        };
+      } else if (error.request) {
+        // ML service not reachable
+        return {
+          success: false,
+          error: 'ML service unavailable',
+          message: 'Could not connect to ML service for retraining'
+        };
+      } else {
+        return {
+          success: false,
+          error: 'Request failed',
+          message: error.message
+        };
+      }
+    }
+  }
 }
 
-module.exports = new MLClient();
+export default new MLClient();
