@@ -52,11 +52,15 @@ class RiskController {
       // Step 5: Store prediction in database
       await this._storePrediction(studentId, schoolId, prediction.data);
       
-      // Step 6: Return result
+      // Step 6: Calculate risk breakdown components
+      const components = this._calculateRiskBreakdown(featureData.features, prediction.data.prediction);
+      
+      // Step 7: Return result
       return res.json({
         success: true,
         student_id: studentId,
         prediction: prediction.data.prediction,
+        components: components,
         feature_importance: prediction.data.feature_importance,
         explanation: prediction.data.explanation,
         recommendations: prediction.data.recommendations,
@@ -396,6 +400,27 @@ class RiskController {
       JSON.stringify(componentScores),
       JSON.stringify(predictionData.recommendations)
     ]);
+  }
+
+  /**
+   * Calculate risk breakdown components from features
+   * Returns attendance_risk, academic_risk, behavior_risk (0-1 scale)
+   */
+  _calculateRiskBreakdown(features, prediction) {
+    // Attendance risk: inverse of attendance rate
+    const attendance_risk = 1 - (features.attendance_rate / 100);
+    
+    // Academic risk: inverse of average marks percentage
+    const academic_risk = 1 - (features.avg_marks_percentage / 100);
+    
+    // Behavior risk: inverse of behavior score
+    const behavior_risk = 1 - (features.behavior_score / 100);
+    
+    return {
+      attendance_risk: Math.round(attendance_risk * 100) / 100,
+      academic_risk: Math.round(academic_risk * 100) / 100,
+      behavior_risk: Math.round(behavior_risk * 100) / 100
+    };
   }
 }
 

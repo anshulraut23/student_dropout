@@ -503,13 +503,15 @@ export default function StudentListPage() {
     const styles = {
       high: 'bg-red-100 text-red-800 border-red-200',
       medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      low: 'bg-green-100 text-green-800 border-green-200'
+      low: 'bg-green-100 text-green-800 border-green-200',
+      gathering: 'bg-gray-100 text-gray-600 border-gray-200'
     };
     
     const labels = {
       high: 'High Risk',
       medium: 'Medium Risk',
-      low: 'Low Risk'
+      low: 'Low Risk',
+      gathering: '⏳ Gathering Data'
     };
 
     return (

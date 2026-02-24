@@ -700,6 +700,15 @@ export default function StudentProfilePage() {
   }, [id]);
 
   useEffect(() => {
+    // Load overview data when student is loaded
+    if (student) {
+      loadAttendanceHistory();
+      loadScoresHistory();
+      loadBehaviorHistory();
+    }
+  }, [student]);
+
+  useEffect(() => {
     if (student && activeTab !== "overview" && activeTab !== "personal") {
       if (activeTab === "risk") {
         loadRiskData();
@@ -975,8 +984,8 @@ export default function StudentProfilePage() {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <InfoBox label="Date of Birth" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'N/A'} />
                         <InfoBox label="Gender" value={student.gender || 'N/A'} />
-                        <InfoBox label="Parent Name" value={student.parentName || 'N/A'} />
-                        <InfoBox label="Parent Contact" value={student.parentContact || 'N/A'} />
+                        <InfoBox label="Parent Name" value={student.fatherName || student.motherName || 'N/A'} />
+                        <InfoBox label="Parent Contact" value={student.contactNumber || 'N/A'} />
                         <InfoBox label="Email" value={student.email || 'N/A'} />
                         <InfoBox label="Address" value={student.address || 'N/A'} />
                       </div>
@@ -996,14 +1005,14 @@ export default function StudentProfilePage() {
                 {/* Personal Tab */}
                 {activeTab === "personal" && (
                   <div className="grid md:grid-cols-2 gap-4">
-                    <InfoBox label="Full Name" value={`${student.firstName} ${student.lastName}`} />
+                    <InfoBox label="Full Name" value={student.name || 'N/A'} />
                     <InfoBox label="Class" value={student.className || 'N/A'} />
                     <InfoBox label="Enrollment Number" value={student.enrollmentNo || 'N/A'} />
                     <InfoBox label="Date of Birth" value={student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString() : 'N/A'} />
                     <InfoBox label="Gender" value={student.gender || 'N/A'} />
                     <InfoBox label="Status" value={student.status || 'Active'} />
-                    <InfoBox label="Parent Name" value={student.parentName || 'N/A'} />
-                    <InfoBox label="Parent Contact" value={student.parentContact || 'N/A'} />
+                    <InfoBox label="Parent Name" value={student.fatherName || student.motherName || 'N/A'} />
+                    <InfoBox label="Parent Contact" value={student.contactNumber || 'N/A'} />
                     <InfoBox label="Email" value={student.email || 'N/A'} />
                     <InfoBox label="Address" value={student.address || 'N/A'} />
                   </div>
