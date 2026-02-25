@@ -1,6 +1,7 @@
-// API Service - Handles all backend API calls
+// API Service - Handles all backend API calls with offline support
 
 import offlineQueue from './offlineQueue';
+import storageAdapter from './storageAdapter';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -34,27 +35,60 @@ class ApiService {
   async request(endpoint, options = {}) {
     const { method = 'GET', data, auth = false, offlineSupport = false } = options;
 
-    // Check if offline and operation supports offline
-    if (!navigator.onLine && offlineSupport && method !== 'GET') {
-      console.log('📴 Offline mode: Queuing request', endpoint);
+    // ============================================================================
+    // OFFLINE HANDLING
+    // ============================================================================
+    
+    // Check if offline
+    if (!navigator.onLine) {
+      // For write operations (POST, PUT, DELETE) with offline support, queue them
+      if (offlineSupport && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+        console.log('📴 Offline mode: Queuing request', endpoint);
+        
+        // Queue the request
+        const queueItem = await offlineQueue.add('API_CALL', {
+          endpoint,
+          method,
+          data
+        });
+        
+        // Return mock success response
+        return {
+          success: true,
+          offline: true,
+          queueId: queueItem.id,
+          message: 'Saved locally. Will sync when online.'
+        };
+      }
       
-      // Queue the request
-      const queueItem = await offlineQueue.add(endpoint, {
-        method,
-        data,
-        endpoint
-      });
+      // For GET requests, try to return cached data
+      if (method === 'GET') {
+        console.log('📴 Offline mode: Checking cache for', endpoint);
+        const cached = await storageAdapter.get(`cache:${endpoint}`);
+        
+        if (cached) {
+          console.log('✓ Returning cached data for', endpoint);
+          return {
+            ...cached,
+            fromCache: true,
+            message: 'Showing cached data (offline)'
+          };
+        }
+        
+        // No cache available
+        console.warn('📴 Offline: No cached data for', endpoint);
+        throw new Error('This feature requires an internet connection. Please connect to WiFi and try again.');
+      }
       
-      // Return success response
-      return {
-        success: true,
-        offline: true,
-        queueId: queueItem.id,
-        message: 'Saved locally. Will sync when online.'
-      };
+      // For operations without offline support
+      console.warn('📴 Offline: Operation not supported offline', endpoint);
+      throw new Error('This feature requires an internet connection. Please connect to WiFi and try again.');
     }
 
-    // Normal online request
+    // ============================================================================
+    // ONLINE REQUEST
+    // ============================================================================
+    
     try {
       const headers = this.getHeaders(auth);
       
@@ -86,6 +120,10 @@ class ApiService {
 
       const responseData = await response.json();
 
+      // ============================================================================
+      // ERROR HANDLING WITH OFFLINE FALLBACK
+      // ============================================================================
+      
       if (!response.ok) {
         console.error('❌ API Error Response:', {
           endpoint,
@@ -93,16 +131,112 @@ class ApiService {
           statusText: response.statusText,
           data: responseData
         });
-        throw new Error(responseData.error || responseData.message || `Request failed with status ${response.status}`);
+        
+        // Check for 5xx server errors - fallback to offline queue
+        if (response.status >= 500 && response.status < 600) {
+          if (offlineSupport && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+            console.log('🔴 Server error (5xx): Queuing request', endpoint);
+            
+            const queueItem = await offlineQueue.add('API_CALL', {
+              endpoint,
+              method,
+              data
+            });
+            
+            return {
+              success: true,
+              offline: true,
+              queueId: queueItem.id,
+              message: 'Server temporarily unavailable. Saved locally and will sync later.'
+            };
+          }
+        }
+        
+        // Check if backend error is due to database connection
+        const errorMsg = responseData.error || responseData.message || '';
+        if (errorMsg.includes('ENOTFOUND') || errorMsg.includes('getaddrinfo') || errorMsg.includes('supabase')) {
+          if (offlineSupport && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+            console.log('📴 Backend offline: Queuing request', endpoint);
+            
+            const queueItem = await offlineQueue.add('API_CALL', {
+              endpoint,
+              method,
+              data
+            });
+            
+            return {
+              success: true,
+              offline: true,
+              queueId: queueItem.id,
+              message: 'Saved locally. Will sync when online.'
+            };
+          }
+        }
+        
+        throw new Error(errorMsg || `Request failed with status ${response.status}`);
+      }
+
+      // ============================================================================
+      // SUCCESS - CACHE GET RESPONSES
+      // ============================================================================
+      
+      // Cache successful GET responses for offline use
+      if (method === 'GET' && responseData) {
+        try {
+          await storageAdapter.set(`cache:${endpoint}`, responseData);
+          console.log('💾 Cached response for', endpoint);
+        } catch (cacheError) {
+          console.warn('Failed to cache response:', cacheError);
+        }
       }
 
       return responseData;
-    } catch (error) {
-      console.error('API request error:', error);
       
-      // Provide more helpful error messages
-      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        throw new Error('Cannot connect to backend server. Please make sure the backend is running on http://localhost:5000');
+    } catch (error) {
+      // ============================================================================
+      // NETWORK ERROR HANDLING
+      // ============================================================================
+      
+      // Handle fetch failures (network errors, timeouts)
+      if (error.message.includes('Failed to fetch') || 
+          error.message.includes('NetworkError') ||
+          error.message.includes('timeout')) {
+        
+        // For write operations with offline support, queue them
+        if (offlineSupport && (method === 'POST' || method === 'PUT' || method === 'DELETE')) {
+          console.log('📴 Network error: Queuing request', endpoint);
+          
+          const queueItem = await offlineQueue.add('API_CALL', {
+            endpoint,
+            method,
+            data
+          });
+          
+          return {
+            success: true,
+            offline: true,
+            queueId: queueItem.id,
+            message: 'Saved locally. Will sync when online.'
+          };
+        }
+        
+        // For GET requests, try cache
+        if (method === 'GET') {
+          const cached = await storageAdapter.get(`cache:${endpoint}`);
+          if (cached) {
+            console.log('✓ Returning cached data after network error', endpoint);
+            return {
+              ...cached,
+              fromCache: true,
+              message: 'Showing cached data (network error)'
+            };
+          }
+        }
+        
+        if (!navigator.onLine) {
+          throw new Error('No internet connection. Please connect to WiFi to load data.');
+        }
+        throw new Error('Cannot connect to backend server. Please make sure the backend is running.');
       }
       
       throw error;
@@ -113,21 +247,21 @@ class ApiService {
   async registerAdmin(formData) {
     return this.request('/auth/register/admin', {
       method: 'POST',
-      body: JSON.stringify(formData),
+      data: formData,
     });
   }
 
   async registerTeacher(formData) {
     return this.request('/auth/register/teacher', {
       method: 'POST',
-      body: JSON.stringify(formData),
+      data: formData,
     });
   }
 
   async login(email, password) {
     return this.request('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      data: { email, password },
     });
   }
 
@@ -176,7 +310,7 @@ class ApiService {
   async approveTeacher(teacherId, classIds = []) {
     return this.request(`/approvals/approve/${teacherId}`, {
       method: 'POST',
-      body: JSON.stringify({ classIds }),
+      data: { classIds },
       auth: true,
     });
   }
@@ -206,7 +340,7 @@ class ApiService {
   async createClass(classData) {
     return this.request('/classes', {
       method: 'POST',
-      body: JSON.stringify(classData),
+      data: classData,
       auth: true,
     });
   }
@@ -214,7 +348,7 @@ class ApiService {
   async updateClass(classId, classData) {
     return this.request(`/classes/${classId}`, {
       method: 'PUT',
-      body: JSON.stringify(classData),
+      data: classData,
       auth: true,
     });
   }
@@ -244,7 +378,7 @@ class ApiService {
   async createSubject(subjectData) {
     return this.request('/subjects', {
       method: 'POST',
-      body: JSON.stringify(subjectData),
+      data: subjectData,
       auth: true,
     });
   }
@@ -252,7 +386,7 @@ class ApiService {
   async updateSubject(subjectId, subjectData) {
     return this.request(`/subjects/${subjectId}`, {
       method: 'PUT',
-      body: JSON.stringify(subjectData),
+      data: subjectData,
       auth: true,
     });
   }
@@ -283,7 +417,7 @@ class ApiService {
   async createStudent(studentData) {
     return this.request('/students', {
       method: 'POST',
-      body: JSON.stringify(studentData),
+      data: studentData,
       auth: true,
     });
   }
@@ -291,7 +425,7 @@ class ApiService {
   async createStudentsBulk(classId, students) {
     return this.request('/students/bulk', {
       method: 'POST',
-      body: JSON.stringify({ classId, students }),
+      data: { classId, students },
       auth: true,
     });
   }
@@ -299,7 +433,7 @@ class ApiService {
   async updateStudent(studentId, studentData) {
     return this.request(`/students/${studentId}`, {
       method: 'PUT',
-      body: JSON.stringify(studentData),
+      data: studentData,
       auth: true,
     });
   }
@@ -330,7 +464,7 @@ class ApiService {
   async createExam(examData) {
     return this.request('/exams', {
       method: 'POST',
-      body: JSON.stringify(examData),
+      data: examData,
       auth: true,
     });
   }
@@ -338,7 +472,7 @@ class ApiService {
   async updateExam(examId, examData) {
     return this.request(`/exams/${examId}`, {
       method: 'PUT',
-      body: JSON.stringify(examData),
+      data: examData,
       auth: true,
     });
   }
@@ -353,7 +487,7 @@ class ApiService {
   async changeExamStatus(examId, status) {
     return this.request(`/exams/${examId}/status`, {
       method: 'POST',
-      body: JSON.stringify({ status }),
+      data: { status },
       auth: true,
     });
   }
@@ -377,7 +511,7 @@ class ApiService {
   async createExamTemplate(templateData) {
     return this.request('/exam-templates', {
       method: 'POST',
-      body: JSON.stringify(templateData),
+      data: templateData,
       auth: true,
     });
   }
@@ -385,7 +519,7 @@ class ApiService {
   async updateExamTemplate(templateId, templateData) {
     return this.request(`/exam-templates/${templateId}`, {
       method: 'PUT',
-      body: JSON.stringify(templateData),
+      data: templateData,
       auth: true,
     });
   }
@@ -423,7 +557,7 @@ class ApiService {
   async createExamPeriod(periodData) {
     return this.request('/exam-periods', {
       method: 'POST',
-      body: JSON.stringify(periodData),
+      data: periodData,
       auth: true,
     });
   }
@@ -431,7 +565,7 @@ class ApiService {
   async updateExamPeriod(periodId, periodData) {
     return this.request(`/exam-periods/${periodId}`, {
       method: 'PUT',
-      body: JSON.stringify(periodData),
+      data: periodData,
       auth: true,
     });
   }
@@ -494,7 +628,7 @@ class ApiService {
   async updateMarks(marksId, updates) {
     return this.request(`/marks/${marksId}`, {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      data: updates,
       auth: true,
     });
   }
@@ -571,7 +705,7 @@ class ApiService {
   async updateAttendance(attendanceId, updates) {
     return this.request(`/attendance/${attendanceId}`, {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      data: updates,
       auth: true,
     });
   }
@@ -615,7 +749,7 @@ class ApiService {
   async createPerformanceRecord(performanceData) {
     return this.request('/performance', {
       method: 'POST',
-      body: JSON.stringify(performanceData),
+      data: performanceData,
       auth: true,
     });
   }
@@ -630,10 +764,10 @@ class ApiService {
 
     return this.request('/marks/bulk', {
       method: 'POST',
-      body: JSON.stringify({ 
+      data: { 
         examId: performanceRecords[0]?.examId,
         marks 
-      }),
+      },
       auth: true,
     });
   }
@@ -682,7 +816,7 @@ class ApiService {
   async updateBehaviorRecord(behaviorId, updates) {
     return this.request(`/behavior/${behaviorId}`, {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      data: updates,
       auth: true,
     });
   }
@@ -722,7 +856,7 @@ class ApiService {
   async updateBehaviourRecord(behaviorId, updates) {
     return this.request(`/behavior/${behaviorId}`, {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      data: updates,
       auth: true,
     });
   }
@@ -762,7 +896,7 @@ class ApiService {
   async updateIntervention(interventionId, updates) {
     return this.request(`/interventions/${interventionId}`, {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      data: updates,
       auth: true,
     });
   }
@@ -785,7 +919,7 @@ class ApiService {
   async updateProfile(updates) {
     return this.request('/profile', {
       method: 'PUT',
-      body: JSON.stringify(updates),
+      data: updates,
       auth: true,
     });
   }
@@ -808,7 +942,7 @@ class ApiService {
   async sendFacultyInvite(recipientId) {
     return this.request('/faculty/invites/send', {
       method: 'POST',
-      body: JSON.stringify({ recipientId }),
+      data: { recipientId },
       auth: true,
     });
   }
@@ -823,7 +957,7 @@ class ApiService {
   async acceptFacultyInvite(inviteId) {
     return this.request('/faculty/invites/accept', {
       method: 'POST',
-      body: JSON.stringify({ inviteId }),
+      data: { inviteId },
       auth: true,
     });
   }
@@ -831,7 +965,7 @@ class ApiService {
   async rejectFacultyInvite(inviteId) {
     return this.request('/faculty/invites/reject', {
       method: 'POST',
-      body: JSON.stringify({ inviteId }),
+      data: { inviteId },
       auth: true,
     });
   }
@@ -846,7 +980,7 @@ class ApiService {
   async sendMessage(recipientId, text, attachmentName = null, attachmentType = null, attachmentData = null) {
     return this.request('/faculty/messages/send', {
       method: 'POST',
-      body: JSON.stringify({ recipientId, text, attachmentName, attachmentType, attachmentData }),
+      data: { recipientId, text, attachmentName, attachmentType, attachmentData },
       auth: true,
     });
   }
@@ -889,3 +1023,4 @@ class ApiService {
 }
 
 export default new ApiService();
+

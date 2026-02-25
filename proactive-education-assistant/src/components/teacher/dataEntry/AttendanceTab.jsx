@@ -820,14 +820,6 @@
 
 
 
-
-
-
-
-
-
-
-
 import { useState, useEffect } from "react";
 import { FaCheck, FaTimes, FaSpinner, FaUpload, FaDownload, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
 import * as XLSX from "xlsx";
@@ -1142,6 +1134,21 @@ export default function AttendanceTab() {
       };
 
       const result = await apiService.markBulkAttendance(bulkData);
+      
+      // Handle offline response
+      if (result.offline) {
+        setMessage({ 
+          type: "success", 
+          text: `✓ Saved locally! Will sync when online. (${attendanceArray.length} students queued)`
+        });
+        
+        // Clear form
+        setAttendance({});
+        
+        setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+        setLoading(false);
+        return;
+      }
       
       if (result.success) {
         const successCount = result.marked || 0;
