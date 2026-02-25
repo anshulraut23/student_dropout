@@ -153,8 +153,24 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`API available at http://localhost:${PORT}/api`);
-  console.log(`✨ Database is clean - Register your school to get started`);
-});
+// Initialize database connection and start server
+async function startServer() {
+  try {
+    // Initialize PostgreSQL connection if using postgres
+    if (dbType === 'postgres') {
+      await connectPostgres();
+      console.log('✅ Database connection initialized');
+    }
+    
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+      console.log(`API available at http://localhost:${PORT}/api`);
+      console.log(`✨ Database is clean - Register your school to get started`);
+    });
+  } catch (error) {
+    console.error('❌ Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
