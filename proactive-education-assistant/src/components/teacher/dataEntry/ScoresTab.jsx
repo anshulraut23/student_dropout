@@ -742,7 +742,7 @@ export default function ScoresTab() {
         .map(([studentId, score]) => ({
           studentId,
           marksObtained: parseFloat(score.obtainedMarks),
-          status: 'present',
+          status: 'submitted',
           remarks: score.remarks || ""
         }));
 

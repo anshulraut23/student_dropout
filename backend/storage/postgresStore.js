@@ -1011,25 +1011,33 @@ class PostgresStore {
 
   async addMarks(marks) {
     const query = `
-      INSERT INTO marks (id, exam_id, student_id, marks_obtained, percentage, grade, grade_point, status, remarks, entered_by, entered_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO marks (id, exam_id, student_id, class_id, marks_obtained, percentage, grade, status, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
     const values = [
-      marks.id, marks.examId, marks.studentId, marks.marksObtained || null,
-      marks.percentage || null, marks.grade || null, marks.gradePoint || null,
-      marks.status, marks.remarks || null, marks.enteredBy || null, marks.enteredAt
+      marks.id,
+      marks.examId,
+      marks.studentId,
+      marks.classId,
+      marks.marksObtained || null,
+      marks.percentage || null,
+      marks.grade || null,
+      marks.status || 'submitted',
+      marks.createdAt || new Date().toISOString()
     ];
     const result = await this.query(query, values);
     const row = result.rows[0];
     return {
-      ...row,
+      id: row.id,
       examId: row.exam_id,
       studentId: row.student_id,
+      classId: row.class_id,
       marksObtained: row.marks_obtained,
-      gradePoint: row.grade_point,
-      enteredBy: row.entered_by,
-      enteredAt: row.entered_at
+      percentage: row.percentage,
+      grade: row.grade,
+      status: row.status,
+      createdAt: row.created_at
     };
   }
 

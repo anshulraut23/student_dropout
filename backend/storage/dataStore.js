@@ -1,12 +1,12 @@
 // Data Store selector based on DB_TYPE
 
-import sqliteStore from './sqliteStore.js';
+//import sqliteStore from './sqliteStore.js';
 import postgresStore from './postgresStore.js';
 import memoryStore from './memoryStore.js';
 
-const dbType = (process.env.DB_TYPE || 'sqlite').toLowerCase();
+const dbType = (process.env.DB_TYPE ).toLowerCase();
 
-let store = sqliteStore;
+let store ;
 if (dbType === 'postgres') {
 	store = postgresStore;
 } else if (dbType === 'memory') {

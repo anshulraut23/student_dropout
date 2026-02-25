@@ -7,7 +7,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("teacher");
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const isDarkMode = false;
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [isOnline] = useState(true);
@@ -34,8 +34,6 @@ export default function LoginPage() {
         // Store token and user info
         localStorage.setItem("token", result.token);
         localStorage.setItem("role", actualRole);
-        localStorage.setItem("themeMode", isDarkMode ? "dark" : "light");
-        
         window.dispatchEvent(new Event("localStorageUpdate"));
         
         // Navigate based on role
@@ -59,7 +57,6 @@ export default function LoginPage() {
     const actualRole = role === "coordinator" ? "admin" : "teacher";
     localStorage.setItem("token", "demo-guest-token");
     localStorage.setItem("role", actualRole);
-    localStorage.setItem("themeMode", isDarkMode ? "dark" : "light");
     
     const guestUser = {
       email: "guest@school.org",
@@ -88,62 +85,15 @@ export default function LoginPage() {
   return (
     <div 
       className="min-h-screen flex items-center justify-center p-4 relative transition-colors duration-300"
-      style={isDarkMode ? { 
-        background: 'linear-gradient(135deg, #0B0F1A 0%, #0F172A 50%, #000000 100%)'
-      } : { 
+      style={{ 
         background: 'linear-gradient(135deg, #EFF6FF 0%, #FFFFFF 50%, #F0FDFA 100%)' 
       }}
     >
-      {/* Theme Toggle Button */}
-      <button
-        onClick={() => setIsDarkMode(!isDarkMode)}
-        className="absolute top-6 right-6 p-3 rounded-full transition-all duration-300"
-        style={isDarkMode ? {
-          backgroundColor: 'rgba(34, 211, 238, 0.15)',
-          border: '2px solid rgba(34, 211, 238, 0.7)',
-          color: '#22D3EE',
-          cursor: 'pointer'
-        } : {
-          backgroundColor: '#DBEAFE',
-          border: '2px solid #93C5FD',
-          color: '#2563EB',
-          cursor: 'pointer'
-        }}
-        onMouseEnter={(e) => {
-          if (isDarkMode) {
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(34,211,238,0.6)';
-            e.currentTarget.style.borderColor = 'rgba(34, 211, 238, 1)';
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (isDarkMode) {
-            e.currentTarget.style.boxShadow = 'none';
-            e.currentTarget.style.borderColor = 'rgba(34, 211, 238, 0.7)';
-          }
-        }}
-        title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
-      >
-        {isDarkMode ? (
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 18a6 6 0 100-12 6 6 0 000 12zM12 2v4m0 12v4M4.22 4.22l2.83 2.83m5.9 5.9l2.83 2.83M2 12h4m12 0h4M4.22 19.78l2.83-2.83m5.9-5.9l2.83-2.83" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" />
-          </svg>
-        ) : (
-          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-          </svg>
-        )}
-      </button>
-
       <div className="w-full max-w-md">
         {/* Card */}
         <div 
           className="p-8 rounded-2xl transition-all duration-300"
-          style={isDarkMode ? {
-            backgroundColor: 'rgba(255, 255, 255, 0.05)',
-            backdropFilter: 'blur(12px)',
-            border: '2px solid rgba(34, 211, 238, 0.3)',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3), 0 0 40px rgba(34, 211, 238, 0.1)'
-          } : {
+          style={{
             backgroundColor: '#FFFFFF',
             boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
             border: 'none'
@@ -154,10 +104,7 @@ export default function LoginPage() {
             {/* Icon Badge */}
             <div 
               className="w-20 h-20 rounded-full flex items-center justify-center mb-4"
-              style={isDarkMode ? {
-                background: 'linear-gradient(135deg, #22D3EE 0%, #A78BFA 100%)',
-                boxShadow: '0 0 25px rgba(34, 211, 238, 0.8), 0 0 50px rgba(167, 139, 250, 0.4)'
-              } : {
+              style={{
                 background: 'linear-gradient(135deg, #3B82F6 0%, #14B8A6 100%)',
                 boxShadow: '0 10px 20px rgba(0, 0, 0, 0.1)'
               }}
@@ -170,10 +117,7 @@ export default function LoginPage() {
             {/* Heading */}
             <h1 
               className="text-3xl font-bold text-center mb-2"
-              style={isDarkMode ? {
-                color: '#22D3EE',
-                textShadow: '0 0 10px rgba(34, 211, 238, 0.3)'
-              } : {
+              style={{
                 color: '#1F2937'
               }}
             >

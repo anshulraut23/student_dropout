@@ -78,8 +78,14 @@ export const enterBulkMarks = async (req, res) => {
     const { examId, marks } = req.body;
     const { userId, role } = req.user;
 
+    console.log(`📝 Bulk marks entry request:`);
+    console.log(`   Exam ID: ${examId}`);
+    console.log(`   Number of students: ${marks?.length || 0}`);
+    console.log(`   User ID: ${userId}, Role: ${role}`);
+
     // Validation
     if (!examId || !marks || !Array.isArray(marks)) {
+      console.log(`❌ Validation failed: Missing examId or marks array`);
       return res.status(400).json({
         success: false,
         error: 'Exam ID and marks array are required'
@@ -90,6 +96,7 @@ export const enterBulkMarks = async (req, res) => {
     if (role !== 'admin') {
       const isAuthorized = await examService.checkTeacherAuthorization(userId, examId);
       if (!isAuthorized) {
+        console.log(`❌ Authorization failed for user ${userId} on exam ${examId}`);
         return res.status(403).json({
           success: false,
           error: 'You are not authorized to enter marks for this exam'
@@ -100,6 +107,8 @@ export const enterBulkMarks = async (req, res) => {
     // Enter bulk marks
     const results = await marksService.enterBulkMarks({ examId, marks }, userId);
 
+    console.log(`✅ Bulk marks entered: ${results.entered} successful, ${results.failed} failed`);
+
     res.status(201).json({
       success: true,
       message: `Bulk marks entered: ${results.entered} successful, ${results.failed} failed`,
@@ -109,7 +118,7 @@ export const enterBulkMarks = async (req, res) => {
       errors: results.errors
     });
   } catch (error) {
-    console.error('Enter bulk marks error:', error);
+    console.error('❌ Enter bulk marks error:', error);
     res.status(400).json({
       success: false,
       error: error.message || 'Failed to enter bulk marks'
@@ -222,9 +231,12 @@ export const getMarksByStudent = async (req, res) => {
     const { subjectId, startDate, endDate } = req.query;
     const { schoolId } = req.user;
 
+    console.log(`📊 Getting marks for student: ${studentId}`);
+
     // Verify student exists and belongs to user's school
     const student = await dataStore.getStudentById(studentId);
     if (!student) {
+      console.log(`❌ Student not found: ${studentId}`);
       return res.status(404).json({
         success: false,
         error: 'Student not found'
@@ -233,6 +245,7 @@ export const getMarksByStudent = async (req, res) => {
 
     const classData = await dataStore.getClassById(student.classId);
     if (!classData || classData.schoolId !== schoolId) {
+      console.log(`❌ Access denied for student: ${studentId}`);
       return res.status(403).json({
         success: false,
         error: 'Access denied'
@@ -246,6 +259,8 @@ export const getMarksByStudent = async (req, res) => {
       endDate
     });
 
+    console.log(`✅ Found ${performance.marks.length} marks for student ${studentId}`);
+
     res.json({
       success: true,
       studentId: performance.student.id,
@@ -257,7 +272,7 @@ export const getMarksByStudent = async (req, res) => {
       marks: performance.marks
     });
   } catch (error) {
-    console.error('Get marks by student error:', error);
+    console.error('❌ Get marks by student error:', error);
     res.status(500).json({
       success: false,
       error: error.message || 'Failed to get student marks'
