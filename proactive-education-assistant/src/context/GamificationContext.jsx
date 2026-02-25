@@ -113,9 +113,21 @@ export function GamificationProvider({ children }) {
     let isMounted = true;
 
     const loadStats = async () => {
-      const response = await gamificationService.getTeacherStats();
-      if (isMounted && response && response.stats) {
-        applyServerStats(response.stats);
+      // Only load stats if user is authenticated
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      if (!token) {
+        return; // Skip loading stats if not authenticated
+      }
+
+      try {
+        const response = await gamificationService.getTeacherStats();
+        if (isMounted && response && response.stats) {
+          applyServerStats(response.stats);
+        }
+      } catch (error) {
+        console.error('❌ Error fetching gamification stats:', error);
+        console.log('Error details:', error.message);
+        // Don't throw error, just log it - user might not be authenticated
       }
     };
 
