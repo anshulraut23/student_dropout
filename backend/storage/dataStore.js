@@ -8,7 +8,7 @@ const dbType = (process.env.DB_TYPE ).toLowerCase();
 
 let store ;
 if (dbType === 'postgres') {
-	store = postgresStore;
+   	store = postgresStore;
 } else if (dbType === 'memory') {
 	store = memoryStore;
 }

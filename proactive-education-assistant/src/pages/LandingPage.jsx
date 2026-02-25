@@ -18,6 +18,7 @@ import {
 } from "react-icons/fa";
 import LoginModal from "../components/auth/login";
 import RegisterModal from "../components/auth/register";
+import HomePageVideo from "../assets/video/HomePage.mp4";
 
 /* ─── CSS injected once ─────────────────────────────────────────────────── */
 const GLOBAL_STYLES = `
@@ -144,6 +145,61 @@ const GLOBAL_STYLES = `
     color: var(--sky);
     line-height: 1;
   }
+
+  /* ── Floating animation ── */
+  @keyframes floatVideo {
+    0%, 100% { 
+      transform: translateY(0px);
+    }
+    50% { 
+      transform: translateY(-15px);
+    }
+  }
+
+  .video-float {
+    animation: floatVideo 5s ease-in-out infinite;
+  }
+
+  /* ── Video container with beautiful background ── */
+  .video-container {
+    position: relative;
+    padding: 1.5rem;
+    border-radius: 24px;
+    background: linear-gradient(135deg, rgba(26,111,181,0.15) 0%, rgba(240,165,0,0.15) 100%);
+    backdrop-filter: blur(10px);
+    box-shadow: 
+      0 0 0 1.5px rgba(26,111,181,0.5),
+      0 0 20px rgba(26,111,181,0.4),
+      0 20px 60px rgba(26,111,181,0.3);
+    border: 1.5px solid rgba(26,111,181,0.6);
+  }
+
+  .video-container::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    background: linear-gradient(135deg, #1a6fb5, #f0a500);
+    border-radius: 28px;
+    z-index: -1;
+    opacity: 0.3;
+    filter: blur(30px);
+  }
+
+  .video-container::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(circle, rgba(26,111,181,0.2) 0%, transparent 70%);
+    transform: translate(-50%, -50%);
+    z-index: -2;
+    filter: blur(60px);
+  }
 `;
 
 /* ─── Scroll reveal hook ────────────────────────────────────────────────── */
@@ -188,8 +244,46 @@ export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [loginRedirectPath, setLoginRedirectPath] = useState(null);
+  const videoRef = useRef(null);
 
   useReveal();
+
+  // Auto-unmute video after it starts playing (works on initial load and refresh)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const attemptUnmute = () => {
+      video.muted = false;
+      video.volume = 0.7;
+    };
+
+    // Try to unmute immediately
+    attemptUnmute();
+
+    // Also try when video starts playing
+    const handlePlay = () => {
+      attemptUnmute();
+    };
+
+    const handleLoadedData = () => {
+      video.play().catch(() => {
+        // If blocked, play muted then unmute
+        video.muted = true;
+        video.play().then(() => {
+          setTimeout(attemptUnmute, 200);
+        });
+      });
+    };
+
+    video.addEventListener('play', handlePlay);
+    video.addEventListener('loadeddata', handleLoadedData);
+
+    return () => {
+      video.removeEventListener('play', handlePlay);
+      video.removeEventListener('loadeddata', handleLoadedData);
+    };
+  }, []);
 
   const features = [
     { icon: FaChartLine, title: "Risk Analytics",    desc: "Instant visual risk scoring for every student" },
@@ -258,7 +352,7 @@ export default function LandingPage() {
         {/* ══ HERO ══════════════════════════════════════════════════════════ */}
         <section
           className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden"
-          style={{ paddingTop: "100px", background: "linear-gradient(135deg, #1a6fb5 0%, #2d8fd4 50%, #7ec8e3 100%)" }}
+          style={{ paddingTop: "10px", background: "linear-gradient(135deg, #1a6fb5 0%, #2d8fd4 50%, #7ec8e3 100%)" }}
         >
           {/* Decorative blobs */}
           <div className="blob pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full opacity-30"
@@ -268,50 +362,76 @@ export default function LandingPage() {
           <div className="pointer-events-none absolute inset-0 opacity-5"
             style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='1'%3E%3Ccircle cx='30' cy='30' r='3'/%3E%3C/g%3E%3C/svg%3E\")" }} />
 
-          <div className="relative z-10 max-w-4xl mx-auto text-center anim-fade-up">
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full"
-              style={{ background: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.5)", color: "white", fontSize: "0.76rem", letterSpacing: "2px", fontWeight: 700 }}>
-              <FaShieldAlt />
-              EXPLAINABLE AI RISK ENGINE
-            </div>
+          <div className="relative z-10 max-w-[1400px] mx-auto w-full -mt-4 lg:-mt-10">
+            <div className="grid grid-cols-1 lg:grid-cols-[0.95fr_1.35fr] gap-8 lg:gap-14 items-center">
+              <div className="anim-fade-up text-center lg:text-left max-w-xl lg:max-w-[540px] lg:-ml-8">
+                {/* Badge */}
+                <div
+                  className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full"
+                  style={{ background: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.5)", color: "white", fontSize: "0.76rem", letterSpacing: "2px", fontWeight: 700 }}
+                >
+                  <FaShieldAlt />
+                  EXPLAINABLE AI RISK ENGINE
+                </div>
 
-            <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6"
-              style={{ fontFamily: "var(--font-heading)", color: "white", textShadow: "0 2px 12px rgba(14,74,128,0.15)" }}>
-              Predict Dropouts{" "}
-              <span className="gradient-text">Before</span>{" "}
-              They Happen.
-            </h1>
+                <h1
+                  className="text-4xl md:text-6xl font-extrabold leading-tight mb-6"
+                  style={{ fontFamily: "var(--font-heading)", color: "white", textShadow: "0 2px 12px rgba(14,74,128,0.15)" }}
+                >
+                  Predict Dropouts{" "}
+                  <span className="gradient-text">Before</span>{" "}
+                  They Happen.
+                </h1>
 
-            <p className="text-lg max-w-2xl mx-auto mb-4"
-              style={{ color: "rgba(255,255,255,0.92)", fontWeight: 400 }}>
-              AI-powered early warning system for schools, NGOs, and rural education programs.
-            </p>
+                <p
+                  className="text-lg max-w-2xl lg:mx-0 mx-auto mb-4"
+                  style={{ color: "rgba(255,255,255,0.92)", fontWeight: 400 }}
+                >
+                  AI-powered early warning system for schools, NGOs, and rural education programs.
+                </p>
 
-            {/* Bullet highlights */}
-            <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-10">
-              {["Real-time Risk Prediction", "Offline-First for Rural Areas", "Actionable Intervention Insights"].map((b) => (
-                <span key={b} className="flex items-center gap-1.5 text-sm" style={{ color: "rgba(255,255,255,0.95)", fontWeight: 500 }}>
-                  <FaCheckCircle style={{ color: "#f0a500" }} /> {b}
-                </span>
-              ))}
-            </div>
+                {/* Bullet highlights */}
+                <div className="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2 mb-10">
+                  {["Real-time Risk Prediction", "Offline-First for Rural Areas", "Actionable Intervention Insights"].map((b) => (
+                    <span key={b} className="flex items-center gap-1.5 text-sm" style={{ color: "rgba(255,255,255,0.95)", fontWeight: 500 }}>
+                      <FaCheckCircle style={{ color: "#f0a500" }} /> {b}
+                    </span>
+                  ))}
+                </div>
 
-            <div className="flex flex-wrap justify-center gap-4">
-              <button
-                onClick={() => setShowRegister(true)}
-                className="flex items-center gap-2 font-semibold rounded-lg transition-all hover:-translate-y-1 active:translate-y-0"
-                style={{ background: "var(--accent)", color: "#1e2c3a", padding: "0.9rem 2rem", borderRadius: "8px", fontWeight: 700, boxShadow: "0 4px 24px rgba(240,165,0,0.4)", fontSize: "0.95rem" }}
-              >
-                Start Free <FaArrowRight className="text-xs" />
-              </button>
-              <button
-                onClick={() => { setLoginRedirectPath("/dashboard"); setShowLogin(true); }}
-                className="font-semibold rounded-lg transition-all hover:bg-white/10 hover:border-white active:scale-95"
-                style={{ background: "transparent", color: "white", border: "1.5px solid rgba(255,255,255,0.45)", padding: "0.9rem 2rem", borderRadius: "8px", fontWeight: 600, fontSize: "0.95rem" }}
-              >
-                Sign In
-              </button>
+                <div className="flex flex-wrap justify-center lg:justify-start gap-4">
+                  <button
+                    onClick={() => setShowRegister(true)}
+                    className="flex items-center gap-2 font-semibold rounded-lg transition-all hover:-translate-y-1 active:translate-y-0"
+                    style={{ background: "var(--accent)", color: "#1e2c3a", padding: "0.9rem 2rem", borderRadius: "8px", fontWeight: 700, boxShadow: "0 4px 24px rgba(240,165,0,0.4)", fontSize: "0.95rem" }}
+                  >
+                    Start Free <FaArrowRight className="text-xs" />
+                  </button>
+                  <button
+                    onClick={() => { setLoginRedirectPath("/dashboard"); setShowLogin(true); }}
+                    className="font-semibold rounded-lg transition-all hover:bg-white/10 hover:border-white active:scale-95"
+                    style={{ background: "transparent", color: "white", border: "1.5px solid rgba(255,255,255,0.45)", padding: "0.9rem 2rem", borderRadius: "8px", fontWeight: 600, fontSize: "0.95rem" }}
+                  >
+                    Sign In
+                  </button>
+                </div>
+              </div>
+
+              <div className="anim-fade-up w-full lg:justify-self-end lg:max-w-[980px] xl:max-w-[1060px] px-4 sm:px-0 mt-8 lg:mt-12">
+                <div className="video-container video-float">
+                  <div className="rounded-2xl overflow-hidden bg-black shadow-2xl">
+                    <video
+                      ref={videoRef}
+                      src={HomePageVideo}
+                      className="w-full h-auto aspect-video object-cover block"
+                      autoPlay
+                      loop
+                      playsInline
+                      controls
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
