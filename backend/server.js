@@ -1,6 +1,6 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import schoolRoutes from './routes/schoolRoutes.js';
 import approvalRoutes from './routes/approvalRoutes.js';
@@ -22,28 +22,18 @@ import mlRoutes from './ml-integration/routes.js';
 import dataStore from './storage/dataStore.js';
 import { connectPostgres } from './database/connection.js';
 
-dotenv.config();
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Initialize database connection
-let dbInitialized = false;
-const initializeDatabase = async () => {
-  if (!dbInitialized) {
-    try {
-      await connectPostgres();
-      dbInitialized = true;
-      console.log('✅ Database connection initialized for ML service');
-    } catch (error) {
-      console.error('❌ Failed to initialize database connection:', error.message);
-      console.log('⚠️  ML risk prediction features will not be available');
-    }
-  }
-};
-
-// Initialize database on startup
-initializeDatabase();
+const dbType = (process.env.DB_TYPE || 'sqlite').toLowerCase();
+if (dbType === 'postgres') {
+  console.log('📊 Using PostgreSQL/Supabase for persistent data storage');
+} else if (dbType === 'memory') {
+  console.log('⚠️  Using in-memory storage (no persistence)');
+} else {
+  console.log('📊 Using SQLite for persistent data storage');
+  console.log('💾 Database file: ./storage/education_assistant.db');
+}
 
 // Middleware
 app.use(cors());

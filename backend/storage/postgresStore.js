@@ -18,18 +18,22 @@ class PostgresStore {
       throw new Error('DATABASE_URL environment variable is not set');
     }
 
+    console.log('🔌 Connecting to PostgreSQL/Supabase...');
+
+    // Configure connection pool for Supabase
     this.pool = new Pool({
       connectionString: connectionString,
-      ssl: false,
-      max: 1, // Only 1 connection at a time
-      min: 0, // No minimum connections
-      idleTimeoutMillis: 1000, // Close idle connections after 1 second
-      connectionTimeoutMillis: 10000,
-      allowExitOnIdle: true, // Allow process to exit when idle
+      ssl: { rejectUnauthorized: false }, // Required for Supabase
+      max: 5,
+      min: 1,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 20000, // Increased timeout
+      allowExitOnIdle: false,
+      application_name: 'StudentDropout'
     });
 
     this.pool.on('error', (err) => {
-      console.error('Unexpected error on idle client', err);
+      console.error('❌ Unexpected database error:', err.message);
     });
 
     // Test connection
@@ -39,11 +43,14 @@ class PostgresStore {
 
   async testConnection() {
     try {
-      const result = await this.pool.query('SELECT NOW()');
-      console.log('✅ PostgreSQL connected successfully');
+      console.log('🧪 Testing database connection...');
+      const result = await this.pool.query('SELECT NOW() as current_time, version()');
+      console.log('✅ PostgreSQL connection successful!');
+      console.log('   Database time:', result.rows[0].current_time);
       return true;
     } catch (error) {
       console.error('❌ PostgreSQL connection failed:', error.message);
+      console.error('   Ensure DATABASE_URL is correct in .env file');
       throw error;
     }
   }
@@ -148,10 +155,22 @@ class PostgresStore {
   }
 
   async updateUser(id, updates) {
-    const fields = Object.keys(updates).map((key, i) => `${key} = $${i + 2}`).join(', ');
+    // Convert camelCase to snake_case for column names
+    const convertToSnakeCase = (str) => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    const fields = Object.keys(updates).map((key, i) => `${convertToSnakeCase(key)} = $${i + 2}`).join(', ');
     const values = [id, ...Object.values(updates)];
     const result = await this.query(`UPDATE users SET ${fields} WHERE id = $1 RETURNING *`, values);
-    return result.rows[0];
+    
+    if (result.rows[0]) {
+      return {
+        ...result.rows[0],
+        fullName: result.rows[0].full_name,
+        schoolId: result.rows[0].school_id,
+        assignedClasses: result.rows[0].assigned_classes,
+        createdAt: result.rows[0].created_at
+      };
+    }
+    return null;
   }
 
   async getUsersByRole(role) {
@@ -208,11 +227,30 @@ class PostgresStore {
     }));
   }
 
-  async updateRequest(id, updates) {
-    const fields = Object.keys(updates).map((key, i) => `${key} = $${i + 2}`).join(', ');
-    const values = [id, ...Object.values(updates)];
-    const result = await this.query(`UPDATE requests SET ${fields} WHERE id = $1 RETURNING *`, values);
-    return result.rows[0];
+  async updateRequest(idOrTeacherId, updates) {
+    // Convert camelCase to snake_case for column names
+    const convertToSnakeCase = (str) => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    const fields = Object.keys(updates).map((key, i) => `${convertToSnakeCase(key)} = $${i + 2}`).join(', ');
+    const values = [idOrTeacherId, ...Object.values(updates)];
+    
+    // Try updating by id first
+    let result = await this.query(`UPDATE requests SET ${fields} WHERE id = $1 RETURNING *`, values);
+    
+    // If no rows updated, try by teacher_id
+    if (!result.rows[0]) {
+      result = await this.query(`UPDATE requests SET ${fields} WHERE teacher_id = $1 RETURNING *`, values);
+    }
+    
+    if (result.rows[0]) {
+      return {
+        ...result.rows[0],
+        teacherId: result.rows[0].teacher_id,
+        schoolId: result.rows[0].school_id,
+        createdAt: result.rows[0].created_at,
+        processedAt: result.rows[0].processed_at
+      };
+    }
+    return null;
   }
 
   // Classes
@@ -270,10 +308,24 @@ class PostgresStore {
   }
 
   async updateClass(id, updates) {
-    const fields = Object.keys(updates).map((key, i) => `${key} = $${i + 2}`).join(', ');
+    // Convert camelCase to snake_case for column names
+    const convertToSnakeCase = (str) => str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    const fields = Object.keys(updates).map((key, i) => `${convertToSnakeCase(key)} = $${i + 2}`).join(', ');
     const values = [id, ...Object.values(updates)];
     const result = await this.query(`UPDATE classes SET ${fields} WHERE id = $1 RETURNING *`, values);
-    return result.rows[0];
+    
+    if (result.rows[0]) {
+      return {
+        ...result.rows[0],
+        schoolId: result.rows[0].school_id,
+        teacherId: result.rows[0].teacher_id,
+        academicYear: result.rows[0].academic_year,
+        attendanceMode: result.rows[0].attendance_mode,
+        createdAt: result.rows[0].created_at,
+        updatedAt: result.rows[0].updated_at
+      };
+    }
+    return null;
   }
 
   async deleteClass(id) {

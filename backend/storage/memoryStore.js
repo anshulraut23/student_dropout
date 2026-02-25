@@ -14,6 +14,10 @@ class MemoryStore {
     this.examPeriods = [];
     this.exams = [];
     this.marks = [];
+    this.teacherGamification = [];
+    this.xpLogs = [];
+    this.teacherBadges = [];
+    this.badgeDefinitions = [];
   }
 
   // Schools
@@ -409,6 +413,10 @@ class MemoryStore {
     return results;
   }
 
+  getMarksByExam(examId) {
+    return this.marks.filter(m => m.examId === examId);
+  }
+
   getMarksById(id) {
     return this.marks.find(m => m.id === id);
   }
@@ -426,6 +434,81 @@ class MemoryStore {
     return true;
   }
 
+  // Gamification - Teacher Stats
+  async getTeacherGamification(teacherId) {
+    return this.teacherGamification.find(t => t.teacherId === teacherId);
+  }
+
+  async createTeacherGamification(teacherId, data) {
+    const newRecord = {
+      teacherId,
+      totalXP: 0,
+      currentLevel: 1,
+      loginStreak: 0,
+      tasksCompleted: 0,
+      studentsHelped: 0,
+      studentsAdded: 0,
+      attendanceRecords: 0,
+      highRiskStudentsHelped: 0,
+      weeklyTaskCompletion: 0,
+      lastActiveDate: null,
+      ...data
+    };
+    this.teacherGamification.push(newRecord);
+    return newRecord;
+  }
+
+  async updateTeacherGamification(teacherId, updates) {
+    const record = this.teacherGamification.find(t => t.teacherId === teacherId);
+    if (record) {
+      Object.assign(record, updates);
+    }
+    return record;
+  }
+
+  // Gamification - XP Logs
+  async addXPLog(log) {
+    this.xpLogs.push(log);
+    return log;
+  }
+
+  async getXPLogsForTeacher(teacherId, filters = {}) {
+    let logs = this.xpLogs.filter(log => log.teacherId === teacherId);
+    
+    if (filters.startDate) {
+      logs = logs.filter(log => new Date(log.createdAt) >= new Date(filters.startDate));
+    }
+    if (filters.endDate) {
+      logs = logs.filter(log => new Date(log.createdAt) <= new Date(filters.endDate));
+    }
+    
+    return logs;
+  }
+
+  // Gamification - Badges
+  async getBadgeDefinitions() {
+    return [...this.badgeDefinitions];
+  }
+
+  async addBadgeDefinition(badge) {
+    this.badgeDefinitions.push(badge);
+    return badge;
+  }
+
+  async getTeacherBadges(teacherId) {
+    return this.teacherBadges.filter(b => b.teacherId === teacherId);
+  }
+
+  async awardBadge(teacherId, badgeId) {
+    const badge = {
+      teacherId,
+      badgeId,
+      earnedAt: new Date().toISOString()
+    };
+    this.teacherBadges.push(badge);
+    return badge;
+  }
+
   // Clear all data
   clear() {
     this.schools = [];
@@ -439,6 +522,10 @@ class MemoryStore {
     this.examPeriods = [];
     this.exams = [];
     this.marks = [];
+    this.teacherGamification = [];
+    this.xpLogs = [];
+    this.teacherBadges = [];
+    this.badgeDefinitions = [];
   }
 }
 
