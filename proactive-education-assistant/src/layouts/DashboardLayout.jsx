@@ -3,12 +3,16 @@ import { Outlet } from "react-router-dom";
 import Header from "../components/layouts/Header";
 import DashboardFooter from "../components/layouts/DashboardFooter";
 import Sidebar from "../components/layouts/Slidebar";
+import OfflineIndicator from "../components/common/OfflineIndicator";
+import SyncStatusBar from "../components/common/SyncStatusBar";
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className="min-h-screen flex bg-gray-50">
+      {/* Offline Indicator - Shows at top when offline */}
+      <OfflineIndicator />
       
       {/* Sidebar */}
       <div
@@ -27,6 +31,8 @@ export default function DashboardLayout() {
           <Outlet />
         </main>
         <DashboardFooter />
+        {/* Sync Status Bar - Shows at bottom */}
+        <SyncStatusBar />
       </div>
 
     </div>
