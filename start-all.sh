@@ -1,66 +1,55 @@
 #!/bin/bash
 
-echo "========================================"
-echo "Starting Education Assistant Application"
-echo "========================================"
-echo ""
+# Start both Node.js backend and Python ML service
+echo "🚀 Starting combined services..."
 
-echo "[1/4] Checking backend dependencies..."
+# Set environment variables
+export ML_SERVICE_PORT=${ML_SERVICE_PORT:-5001}
+export PORT=${PORT:-5000}
+export ML_SERVICE_URL="http://localhost:${ML_SERVICE_PORT}"
+
+echo "📊 Backend will run on port $PORT"
+echo "🤖 ML Service will run on port $ML_SERVICE_PORT"
+
+# Start Python ML service in background
+cd ml-service
+echo "🤖 Starting ML service..."
+gunicorn --bind 0.0.0.0:$ML_SERVICE_PORT --workers 2 --timeout 120 app:app &
+ML_PID=$!
+cd ..
+
+# Wait for ML service to start
+sleep 5
+
+# Check if ML service is running
+if ps -p $ML_PID > /dev/null; then
+   echo "✅ ML service started (PID: $ML_PID)"
+else
+   echo "❌ ML service failed to start"
+   exit 1
+fi
+
+# Start Node.js backend
 cd backend
-if [ ! -d "node_modules" ]; then
-    echo "Installing backend dependencies..."
-    npm install
-else
-    echo "Backend dependencies already installed."
-fi
-echo ""
-
-echo "[2/4] Starting backend server..."
-npm start &
+echo "🚀 Starting Node.js backend..."
+node server.js &
 BACKEND_PID=$!
-sleep 3
-echo "Backend server started on http://localhost:5000 (PID: $BACKEND_PID)"
-echo ""
 
-echo "[3/4] Checking frontend dependencies..."
-cd ../proactive-education-assistant
-if [ ! -d "node_modules" ]; then
-    echo "Installing frontend dependencies..."
-    npm install
+# Wait for backend to start
+sleep 3
+
+# Check if backend is running
+if ps -p $BACKEND_PID > /dev/null; then
+   echo "✅ Backend started (PID: $BACKEND_PID)"
 else
-    echo "Frontend dependencies already installed."
-fi
-echo ""
-
-echo "[4/4] Starting frontend server..."
-npm run dev &
-FRONTEND_PID=$!
-sleep 3
-echo "Frontend server started on http://localhost:5173 (PID: $FRONTEND_PID)"
-echo ""
-
-echo "========================================"
-echo "Application Started Successfully!"
-echo "========================================"
-echo ""
-echo "Backend:  http://localhost:5000 (PID: $BACKEND_PID)"
-echo "Frontend: http://localhost:5173 (PID: $FRONTEND_PID)"
-echo ""
-echo "Opening application in browser..."
-sleep 2
-
-# Open browser based on OS
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    # macOS
-    open http://localhost:5173
-elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Linux
-    xdg-open http://localhost:5173
+   echo "❌ Backend failed to start"
+   kill $ML_PID
+   exit 1
 fi
 
-echo ""
-echo "To stop the servers, press Ctrl+C"
-echo ""
+echo "✅ All services running!"
+echo "📊 Backend: http://localhost:$PORT"
+echo "🤖 ML Service: http://localhost:$ML_SERVICE_PORT"
 
-# Wait for user interrupt
-wait
+# Wait for both processes
+wait $ML_PID $BACKEND_PID

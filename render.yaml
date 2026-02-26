@@ -1,0 +1,41 @@
+services:
+  # Combined Backend + ML Service
+  - type: web
+    name: student-dropout-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: |
+      # Install Node.js dependencies
+      echo "📦 Installing Node.js dependencies..."
+      cd backend && npm install && cd ..
+      # Install Python and dependencies
+      echo "🐍 Installing Python dependencies..."
+      cd ml-service && pip install -r requirements.txt && cd ..
+      # Train ML model if not exists
+      echo "🤖 Training ML model..."
+      cd ml-service && python generate_and_train.py && cd ..
+      # Make start script executable
+      chmod +x start-all.sh
+      echo "✅ Build complete!"
+    startCommand: bash start-all.sh
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_TYPE
+        value: postgres
+      - key: PORT
+        value: 10000
+      - key: ML_SERVICE_PORT
+        value: 5001
+      - key: FLASK_PORT
+        value: 5001
+      - key: ML_SERVICE_URL
+        value: http://localhost:5001
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+    healthCheckPath: /api/health
