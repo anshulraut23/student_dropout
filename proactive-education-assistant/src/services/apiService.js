@@ -1,10 +1,69 @@
 // API Service - Handles all backend API calls
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const LOCAL_BACKEND_URL = 'http://localhost:5000/api';
+const LOCAL_ML_URL = 'http://localhost:5001';
+const PRODUCTION_BACKEND_URL = import.meta.env.VITE_API_URL || 'https://student-dropout-backend-032b.onrender.com/api';
+const PRODUCTION_ML_URL = import.meta.env.VITE_ML_URL || 'https://student-dropout-1-dzck.onrender.com';
 
 class ApiService {
   constructor() {
-    this.baseUrl = API_BASE_URL;
+    this.backendUrl = LOCAL_BACKEND_URL;
+    this.mlUrl = LOCAL_ML_URL;
+    this.fallbackBackendUrl = PRODUCTION_BACKEND_URL;
+    this.fallbackMlUrl = PRODUCTION_ML_URL;
+    this.useLocalBackend = true;
+    this.useLocalMl = true;
+    this.serversChecked = false;
+  }
+
+  // Check if local servers are available
+  async checkLocalServers() {
+    if (this.serversChecked) return;
+    
+    // Check backend
+    try {
+      const response = await fetch(`${LOCAL_BACKEND_URL.replace('/api', '')}/api/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(2000) // 2 second timeout
+      });
+      this.useLocalBackend = response.ok;
+      console.log('🔌 Local backend:', this.useLocalBackend ? 'Available ✓' : 'Not available ✗');
+    } catch (error) {
+      this.useLocalBackend = false;
+      console.log('🌐 Using production backend (local not available)');
+    }
+    
+    // Check ML service
+    try {
+      const response = await fetch(`${LOCAL_ML_URL}/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(2000) // 2 second timeout
+      });
+      this.useLocalMl = response.ok;
+      console.log('🤖 Local ML service:', this.useLocalMl ? 'Available ✓' : 'Not available ✗');
+    } catch (error) {
+      this.useLocalMl = false;
+      console.log('🌐 Using production ML service (local not available)');
+    }
+    
+    this.serversChecked = true;
+    this.backendUrl = this.useLocalBackend ? LOCAL_BACKEND_URL : this.fallbackBackendUrl;
+    this.mlUrl = this.useLocalMl ? LOCAL_ML_URL : this.fallbackMlUrl;
+    
+    console.log('📊 Backend URL:', this.backendUrl);
+    console.log('🤖 ML Service URL:', this.mlUrl);
+  }
+
+  // Get current backend URL
+  async getBackendUrl() {
+    await this.checkLocalServers();
+    return this.backendUrl;
+  }
+
+  // Get current ML service URL
+  async getMlUrl() {
+    await this.checkLocalServers();
+    return this.mlUrl;
   }
 
   // Get auth token from storage
@@ -32,8 +91,9 @@ class ApiService {
   async request(endpoint, options = {}) {
     try {
       const headers = this.getHeaders(options.auth);
+      const baseUrl = await this.getBackendUrl();
       
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const response = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers: {
           ...headers,
@@ -51,7 +111,7 @@ class ApiService {
         
         // Check if it's a connection error
         if (text.includes('Cannot GET') || text.includes('Cannot POST')) {
-          throw new Error('Backend server endpoint not found. Make sure the backend server is running on port 5000.');
+          throw new Error('Backend server endpoint not found. Make sure the backend server is running.');
         }
         
         throw new Error('Backend server error. Please check if the server is running and try again.');
@@ -75,7 +135,7 @@ class ApiService {
       
       // Provide more helpful error messages
       if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        throw new Error('Cannot connect to backend server. Please make sure the backend is running on http://localhost:5000');
+        throw new Error('Cannot connect to backend server. Please check your connection.');
       }
       
       throw error;

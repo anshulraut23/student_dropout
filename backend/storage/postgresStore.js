@@ -20,15 +20,15 @@ class PostgresStore {
 
     console.log('🔌 Connecting to PostgreSQL/Supabase...');
 
-    // Configure connection pool for Supabase
+    // Configure connection pool for Supabase (free tier has max 3 connections)
     this.pool = new Pool({
       connectionString: connectionString,
       ssl: { rejectUnauthorized: false }, // Required for Supabase
-      max: 5,
-      min: 1,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 20000, // Increased timeout
-      allowExitOnIdle: false,
+      max: 2, // Reduced from 5 to 2 for free tier
+      min: 0, // Changed from 1 to 0 to allow closing idle connections
+      idleTimeoutMillis: 10000, // Reduced from 30s to 10s
+      connectionTimeoutMillis: 20000,
+      allowExitOnIdle: true, // Changed to true to close connections when idle
       application_name: 'StudentDropout'
     });
 
