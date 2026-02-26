@@ -1,5 +1,6 @@
 import dataStore from '../storage/dataStore.js';
 import { generateId } from '../utils/helpers.js';
+import { getTeacherAccessibleClassIds, canTeacherAccessStudent } from '../utils/teacherAccessControl.js';
 
 /**
  * Get all interventions with filters
@@ -12,13 +13,6 @@ export const getInterventions = async (req, res) => {
 
     const filters = {};
     
-    // Teachers can only see their own interventions or all for their school
-    if (role === 'teacher') {
-      if (!studentId) {
-        filters.initiatedBy = userId;
-      }
-    }
-
     if (studentId) filters.studentId = studentId;
     if (teacherId && role === 'admin') filters.initiatedBy = teacherId;
     if (status) filters.status = status;
@@ -28,12 +22,26 @@ export const getInterventions = async (req, res) => {
 
     const interventions = await dataStore.getInterventions(filters);
 
-    // Filter by school
+    // Filter by school and teacher access
     const schoolInterventions = [];
+    let teacherAccessibleClassIds = null;
+    
+    // For teachers, get their accessible class IDs once
+    if (role === 'teacher') {
+      teacherAccessibleClassIds = await getTeacherAccessibleClassIds(dataStore, userId, schoolId);
+    }
+    
     for (const intervention of interventions) {
       const student = await dataStore.getStudentById(intervention.studentId);
-      if (student && student.schoolId === schoolId) {
-        schoolInterventions.push(intervention);
+      if (student && student.classId) {
+        const classData = await dataStore.getClassById(student.classId);
+        if (classData && classData.schoolId === schoolId) {
+          // For teachers, check if they have access to the student's class
+          if (role === 'teacher' && !teacherAccessibleClassIds.has(student.classId)) {
+            continue; // Skip this intervention record
+          }
+          schoolInterventions.push(intervention);
+        }
       }
     }
 
@@ -73,7 +81,7 @@ export const getInterventions = async (req, res) => {
 export const getInterventionById = async (req, res) => {
   try {
     const { interventionId } = req.params;
-    const { schoolId } = req.user;
+    const { schoolId, role, userId } = req.user;
 
     const intervention = await dataStore.getInterventionById(interventionId);
 
@@ -86,11 +94,31 @@ export const getInterventionById = async (req, res) => {
 
     // Verify student belongs to user's school
     const student = await dataStore.getStudentById(intervention.studentId);
-    if (!student || student.schoolId !== schoolId) {
+    if (!student) {
       return res.status(403).json({
         success: false,
         error: 'Access denied'
       });
+    }
+    
+    // Check school via class
+    const classData = await dataStore.getClassById(student.classId);
+    if (!classData || classData.schoolId !== schoolId) {
+      return res.status(403).json({
+        success: false,
+        error: 'Access denied'
+      });
+    }
+    
+    // For teachers, check if they have access to this student's class
+    if (role === 'teacher') {
+      const hasAccess = await canTeacherAccessStudent(dataStore, userId, intervention.studentId, schoolId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          error: 'You do not have access to this intervention'
+        });
+      }
     }
 
     // Enrich with details
@@ -149,11 +177,24 @@ export const createIntervention = async (req, res) => {
       });
     }
 
-    if (student.schoolId !== schoolId) {
+    // Check if student belongs to school via class
+    const classData = await dataStore.getClassById(student.classId);
+    if (!classData || classData.schoolId !== schoolId) {
       return res.status(403).json({
         success: false,
         error: 'Student does not belong to your school'
       });
+    }
+    
+    // For teachers, verify they have access to this student's class
+    if (role === 'teacher') {
+      const hasAccess = await canTeacherAccessStudent(dataStore, userId, interventionData.studentId, schoolId);
+      if (!hasAccess) {
+        return res.status(403).json({
+          success: false,
+          error: 'You do not have access to this student'
+        });
+      }
     }
 
     const intervention = {

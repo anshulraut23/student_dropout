@@ -409,12 +409,12 @@ export default function ExamTemplateManagement() {
 
       {/* Info Banner */}
       <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
-        <FaInfoCircle className="text-blue-600 mt-1 flex-shrink-0" />
+        <FaInfoCircle className="text-blue-600 mt-1 shrink-0" />
         <div className="text-sm text-blue-900">
           <p className="font-medium mb-1">How Exam Templates Work</p>
           <p>
-            When you create a template, the system automatically generates exams for ALL subjects in ALL classes.
-            This ensures consistent marking schemes across your school and provides clean data for dropout prediction.
+            Templates define exam structures (marks, weightage, etc.). To create actual exams, use <strong>Exam Periods</strong> where you can generate exams for specific subjects and classes.
+            This gives you full control over which exams to create.
           </p>
         </div>
       </div>
@@ -503,20 +503,22 @@ export default function ExamTemplateManagement() {
               <div className="space-y-2 mb-4">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Total Marks:</span>
-                  <span className="font-medium text-gray-900">{template.totalMarks}</span>
+                  <span className="font-medium text-gray-900">{template.totalMarks || 0}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Passing Marks:</span>
-                  <span className="font-medium text-gray-900">{template.passingMarks}</span>
+                  <span className="font-medium text-gray-900">{template.passingMarks || 0}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Weightage:</span>
-                  <span className="font-medium text-gray-900">{(template.weightage * 100).toFixed(0)}%</span>
+                  <span className="font-medium text-gray-900">{template.weightage ? (template.weightage * 100).toFixed(0) : 0}%</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-500">Order:</span>
-                  <span className="font-medium text-gray-900">#{template.orderSequence}</span>
-                </div>
+                {template.orderSequence && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Order:</span>
+                    <span className="font-medium text-gray-900">#{template.orderSequence}</span>
+                  </div>
+                )}
               </div>
 
               {/* Usage Stats */}

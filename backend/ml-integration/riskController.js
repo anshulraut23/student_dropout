@@ -1,6 +1,8 @@
 import featureExtractor from './featureExtractor.js';
 import mlClient from './mlClient.js';
 import { getPostgresPool } from '../database/connection.js';
+import { canTeacherAccessClass, canTeacherAccessStudent } from '../utils/teacherAccessControl.js';
+import dataStore from '../storage/dataStore.js';
 
 /**
  * Risk Controller - Orchestrates ML prediction workflow
@@ -16,6 +18,19 @@ class RiskController {
     try {
       const { studentId } = req.params;
       const schoolId = req.user.schoolId;
+      const role = req.user.role;
+      const userId = req.user.userId;
+      
+      // For teachers, verify they have access to this student
+      if (role === 'teacher') {
+        const hasAccess = await canTeacherAccessStudent(dataStore, userId, studentId, schoolId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            error: 'Access denied',
+            message: 'You do not have access to this student'
+          });
+        }
+      }
       
       // Step 1: Extract features from database
       const featureData = await featureExtractor.extractFeatures(studentId, schoolId);
@@ -85,6 +100,19 @@ class RiskController {
     try {
       const { classId } = req.params;
       const schoolId = req.user.schoolId;
+      const role = req.user.role;
+      const userId = req.user.userId;
+      
+      // For teachers, verify they have access to this class
+      if (role === 'teacher') {
+        const hasAccess = await canTeacherAccessClass(dataStore, userId, classId, schoolId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            error: 'Access denied',
+            message: 'You do not have access to this class'
+          });
+        }
+      }
       
       // Get all students in class
       const pool = getPostgresPool();

@@ -23,19 +23,19 @@ export const createExam = async (examData, userId) => {
   }
 
   // Verify class exists
-  const classData = dataStore.getClassById(examData.classId);
+  const classData = await dataStore.getClassById(examData.classId);
   if (!classData) {
     throw new Error('Class not found');
   }
 
   // Verify subject exists
-  const subject = dataStore.getSubjectById(examData.subjectId);
+  const subject = await dataStore.getSubjectById(examData.subjectId);
   if (!subject) {
     throw new Error('Subject not found');
   }
 
   // Get user to verify school
-  const user = dataStore.getUserById(userId);
+  const user = await dataStore.getUserById(userId);
   if (!user) {
     throw new Error('User not found');
   }
@@ -67,7 +67,7 @@ export const createExam = async (examData, userId) => {
     updatedAt: new Date().toISOString()
   };
 
-  dataStore.addExam(exam);
+  await dataStore.addExam(exam);
 
   return exam;
 };

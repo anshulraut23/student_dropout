@@ -34,6 +34,7 @@ import TeacherManagement from "../pages/admin/TeacherManagement";
 import ClassManagement from "../pages/admin/ClassManagement";
 import SubjectManagement from "../pages/admin/SubjectManagement";
 import ExamTemplateManagement from "../pages/admin/ExamTemplateManagement";
+import ExamManagement from "../pages/admin/ExamManagement";
 import Analytics from "../pages/admin/Analytics";
 import AdminProfile from "../pages/admin/AdminProfile";
 
@@ -120,6 +121,7 @@ export default function AppRoutes() {
           <Route path="classes" element={<ClassManagement />} />
           <Route path="subjects" element={<SubjectManagement />} />
           <Route path="exam-templates" element={<ExamTemplateManagement />} />
+          <Route path="exams" element={<ExamManagement />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>

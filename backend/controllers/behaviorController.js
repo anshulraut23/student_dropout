@@ -1,5 +1,6 @@
 import dataStore from '../storage/dataStore.js';
 import { generateId } from '../utils/helpers.js';
+import { getTeacherAccessibleClassIds, canTeacherAccessStudent } from '../utils/teacherAccessControl.js';
 
 /**
  * Get all behavior records with filters
@@ -12,14 +13,6 @@ export const getBehaviors = async (req, res) => {
 
     const filters = {};
     
-    // Teachers can only see their own behavior records or all for their school
-    if (role === 'teacher') {
-      // If no studentId specified, show only this teacher's records
-      if (!studentId) {
-        filters.teacherId = userId;
-      }
-    }
-
     if (studentId) filters.studentId = studentId;
     if (teacherId && role === 'admin') filters.teacherId = teacherId;
     if (behaviorType) filters.behaviorType = behaviorType;
@@ -29,13 +22,24 @@ export const getBehaviors = async (req, res) => {
 
     const behaviors = await dataStore.getBehaviors(filters);
 
-    // Filter by school
+    // Filter by school and teacher access
     const schoolBehaviors = [];
+    let teacherAccessibleClassIds = null;
+    
+    // For teachers, get their accessible class IDs once
+    if (role === 'teacher') {
+      teacherAccessibleClassIds = await getTeacherAccessibleClassIds(dataStore, userId, schoolId);
+    }
+    
     for (const behavior of behaviors) {
       const student = await dataStore.getStudentById(behavior.studentId);
       if (student && student.classId) {
         const classData = await dataStore.getClassById(student.classId);
         if (classData && classData.schoolId === schoolId) {
+          // For teachers, check if they have access to the student's class
+          if (role === 'teacher' && !teacherAccessibleClassIds.has(student.classId)) {
+            continue; // Skip this behavior record
+          }
           schoolBehaviors.push(behavior);
         }
       }
@@ -77,7 +81,7 @@ export const getBehaviors = async (req, res) => {
 export const getBehaviorById = async (req, res) => {
   try {
     const { behaviorId } = req.params;
-    const { schoolId } = req.user;
+    const { schoolId, role, userId } = req.user;
 
     const behavior = await dataStore.getBehaviorById(behaviorId);
 
@@ -105,6 +109,17 @@ export const getBehaviorById = async (req, res) => {
           success: false,
           error: 'Access denied'
         });
+      }
+      
+      // For teachers, check if they have access to this student's class
+      if (role === 'teacher') {
+        const hasAccess = await canTeacherAccessStudent(dataStore, userId, behavior.studentId, schoolId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            success: false,
+            error: 'You do not have access to this behavior record'
+          });
+        }
       }
     }
 
@@ -172,6 +187,17 @@ export const createBehavior = async (req, res) => {
           success: false,
           error: 'Student does not belong to your school'
         });
+      }
+      
+      // For teachers, verify they have access to this student's class
+      if (role === 'teacher') {
+        const hasAccess = await canTeacherAccessStudent(dataStore, userId, behaviorData.studentId, schoolId);
+        if (!hasAccess) {
+          return res.status(403).json({
+            success: false,
+            error: 'You do not have access to this student'
+          });
+        }
       }
     } else {
       // If no classId, check schoolId directly (if it exists on student)
