@@ -6,10 +6,10 @@ export const getStudents = async (req, res) => {
   try {
     console.log('getStudents called by user:', req.user);
     
-    const { schoolId, role } = req.user;
+    const { schoolId, role, userId } = req.user;
     const { classId } = req.query;
 
-    console.log('Fetching students for school:', schoolId, 'classId:', classId);
+    console.log('Fetching students for school:', schoolId, 'classId:', classId, 'role:', role);
 
     let students = [];
 
@@ -34,18 +34,55 @@ export const getStudents = async (req, res) => {
 
       students = await dataStore.getStudentsByClass(classId);
     } else {
-      // Get all students for the school
-      console.log('Fetching all students...');
-      const allStudents = await dataStore.getStudents();
-      console.log('Total students in DB:', allStudents.length);
-      
-      const schoolClasses = await dataStore.getClassesBySchool(schoolId);
-      console.log('School classes:', schoolClasses.length);
-      
-      const schoolClassIds = new Set(schoolClasses.map(c => c.id));
-      
-      students = allStudents.filter(s => schoolClassIds.has(s.classId));
-      console.log('Filtered students for school:', students.length);
+      // For teachers: only show students from their assigned classes
+      if (role === 'teacher') {
+        console.log('Teacher requesting students - filtering by assigned classes');
+        
+        // Get teacher's assigned classes
+        const allClasses = await dataStore.getClassesBySchool(schoolId);
+        const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
+        
+        // Find classes where teacher is incharge or teaches a subject
+        const teacherClassIds = new Set();
+        
+        // Classes where teacher is incharge
+        allClasses.forEach(cls => {
+          if (cls.teacherId === userId) {
+            teacherClassIds.add(cls.id);
+          }
+        });
+        
+        // Classes where teacher teaches a subject
+        allSubjects.forEach(subject => {
+          if (subject.teacherId === userId) {
+            teacherClassIds.add(subject.classId);
+          }
+        });
+        
+        console.log('Teacher assigned to classes:', Array.from(teacherClassIds));
+        
+        if (teacherClassIds.size === 0) {
+          return res.json({
+            success: true,
+            students: []
+          });
+        }
+        
+        // Get students from teacher's classes only
+        const allStudents = await dataStore.getStudents();
+        students = allStudents.filter(s => teacherClassIds.has(s.classId));
+        
+        console.log('Filtered students for teacher:', students.length);
+      } else {
+        // For admins: show all students in school
+        console.log('Admin requesting students - showing all school students');
+        const allStudents = await dataStore.getStudents();
+        const schoolClasses = await dataStore.getClassesBySchool(schoolId);
+        const schoolClassIds = new Set(schoolClasses.map(c => c.id));
+        
+        students = allStudents.filter(s => schoolClassIds.has(s.classId));
+        console.log('Filtered students for admin:', students.length);
+      }
     }
 
     // Enrich with class information
