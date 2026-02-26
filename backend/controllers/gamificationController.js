@@ -125,11 +125,17 @@ const buildStatsResponse = async (teacherId) => {
   const badgeIds = badges.map((b) => b.badgeId);
 
   const { start, end } = getDateRange('today');
-  const logsToday = await dataStore.getXPLogsForTeacher(teacherId, { startDate: start, endDate: end });
+  const logsToday = await dataStore.getXPLogsForTeacher(teacherId, { 
+    startDate: start.toISOString(), 
+    endDate: end.toISOString() 
+  });
   const dailyTasksCompleted = buildDailyTasksCompleted(logsToday);
 
   const { start: weekStart, end: weekEnd } = getDateRange('week');
-  const logsWeek = await dataStore.getXPLogsForTeacher(teacherId, { startDate: weekStart, endDate: weekEnd });
+  const logsWeek = await dataStore.getXPLogsForTeacher(teacherId, { 
+    startDate: weekStart.toISOString(), 
+    endDate: weekEnd.toISOString() 
+  });
   const weeklyTaskCompletion = computeWeeklyTaskCompletion(logsWeek);
 
   if (weeklyTaskCompletion !== stats.weeklyTaskCompletion) {
@@ -157,12 +163,19 @@ const buildStatsResponse = async (teacherId) => {
 export const getTeacherStats = async (req, res) => {
   try {
     const { userId } = req.user;
+    console.log('📊 Fetching stats for userId:', userId);
     const stats = await buildStatsResponse(userId);
+    console.log('✅ Stats retrieved successfully');
 
     res.json({ success: true, stats });
   } catch (error) {
-    console.error('Get gamification stats error:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch stats' });
+    console.error('❌ GET GAMIFICATION STATS ERROR:', error.message);
+    console.error('Stack:', error.stack);
+    res.status(500).json({ 
+      success: false, 
+      error: error.message || 'Failed to fetch stats',
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    });
   }
 };
 

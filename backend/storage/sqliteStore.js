@@ -12,6 +12,14 @@ const db = new Database(dbPath);
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
 
+function addColumnIfMissing(tableName, columnName, columnDef) {
+  const columns = db.prepare(`PRAGMA table_info(${tableName})`).all();
+  const hasColumn = columns.some((col) => col.name === columnName);
+  if (!hasColumn) {
+    db.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDef}`);
+  }
+}
+
 // Initialize database tables
 function initializeDatabase() {
   // Schools table
@@ -39,10 +47,27 @@ function initializeDatabase() {
       schoolId TEXT NOT NULL,
       status TEXT NOT NULL,
       assignedClasses TEXT,
+      phone TEXT,
+      designation TEXT,
+      address TEXT,
+      city TEXT,
+      state TEXT,
+      pincode TEXT,
+      profilePicture TEXT,
       createdAt TEXT NOT NULL,
+      updatedAt TEXT,
       FOREIGN KEY (schoolId) REFERENCES schools(id)
     )
   `);
+
+  addColumnIfMissing('users', 'phone', 'TEXT');
+  addColumnIfMissing('users', 'designation', 'TEXT');
+  addColumnIfMissing('users', 'address', 'TEXT');
+  addColumnIfMissing('users', 'city', 'TEXT');
+  addColumnIfMissing('users', 'state', 'TEXT');
+  addColumnIfMissing('users', 'pincode', 'TEXT');
+  addColumnIfMissing('users', 'profilePicture', 'TEXT');
+  addColumnIfMissing('users', 'updatedAt', 'TEXT');
 
   // Teacher requests table
   db.exec(`
@@ -302,6 +327,90 @@ function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_faculty_invites_school ON faculty_invites(schoolId);
     CREATE INDEX IF NOT EXISTS idx_faculty_invites_status ON faculty_invites(status);
   `);
+
+  // Gamification: Teacher Gamification Stats
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS teacher_gamification (
+      teacherId TEXT PRIMARY KEY,
+      totalXP INTEGER DEFAULT 0,
+      currentLevel INTEGER DEFAULT 1,
+      loginStreak INTEGER DEFAULT 0,
+      tasksCompleted INTEGER DEFAULT 0,
+      studentsHelped INTEGER DEFAULT 0,
+      studentsAdded INTEGER DEFAULT 0,
+      attendanceRecords INTEGER DEFAULT 0,
+      weeklyTaskCompletion INTEGER DEFAULT 0,
+      highRiskStudentsHelped INTEGER DEFAULT 0,
+      lastActiveDate TEXT,
+      createdAt TEXT NOT NULL,
+      updatedAt TEXT NOT NULL,
+      FOREIGN KEY (teacherId) REFERENCES users(id)
+    )
+  `);
+
+  // Gamification: XP Logs
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS xp_logs (
+      id TEXT PRIMARY KEY,
+      teacherId TEXT NOT NULL,
+      actionType TEXT NOT NULL,
+      xpEarned INTEGER NOT NULL,
+      createdAt TEXT NOT NULL,
+      FOREIGN KEY (teacherId) REFERENCES users(id)
+    )
+  `);
+
+  // Gamification: Teacher Badges
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS teacher_badges (
+      id TEXT PRIMARY KEY,
+      teacherId TEXT NOT NULL,
+      badgeId TEXT NOT NULL,
+      earnedAt TEXT NOT NULL,
+      FOREIGN KEY (teacherId) REFERENCES users(id)
+    )
+  `);
+
+  // Gamification: Badge Definitions
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS badge_definitions (
+      badgeId TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      description TEXT,
+      icon TEXT,
+      createdAt TEXT NOT NULL
+    )
+  `);
+
+  // Create indexes for gamification tables
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_xp_logs_teacher ON xp_logs(teacherId);
+    CREATE INDEX IF NOT EXISTS idx_xp_logs_created ON xp_logs(createdAt);
+    CREATE INDEX IF NOT EXISTS idx_teacher_badges_teacher ON teacher_badges(teacherId);
+    CREATE INDEX IF NOT EXISTS idx_teacher_badges_badge ON teacher_badges(badgeId);
+  `);
+
+  // Insert default badge definitions
+  const badgeCheckStmt = db.prepare('SELECT COUNT(*) as count FROM badge_definitions');
+  const badgeCount = badgeCheckStmt.get();
+  if (badgeCount.count === 0) {
+    const badgeDefs = [
+      { badgeId: 'first_10_students', name: 'First 10 Students', description: 'Added 10 students', icon: '🎓' },
+      { badgeId: '7_day_streak', name: '7 Day Streak', description: 'Logged in 7 consecutive days', icon: '🔥' },
+      { badgeId: '100_records', name: '100 Records', description: 'Recorded 100 attendance entries', icon: '📊' },
+      { badgeId: 'risk_saver', name: 'Risk Saver', description: 'Helped 5 high-risk students', icon: '🚀' },
+      { badgeId: 'consistency_star', name: 'Consistency Star', description: 'Completed all tasks for 7 days', icon: '⭐' }
+    ];
+    
+    const insertBadgeStmt = db.prepare(`
+      INSERT INTO badge_definitions (badgeId, name, description, icon, createdAt)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    
+    badgeDefs.forEach(badge => {
+      insertBadgeStmt.run(badge.badgeId, badge.name, badge.description, badge.icon, new Date().toISOString());
+    });
+  }
 
   console.log('✅ SQLite database initialized at:', dbPath);
 }
@@ -1486,6 +1595,156 @@ class SQLiteStore {
     const stmt = db.prepare('DELETE FROM faculty_invites WHERE id = ?');
     const result = stmt.run(inviteId);
     return result.changes > 0;
+  }
+
+  // Gamification methods
+  getTeacherGamification(teacherId) {
+    const stmt = db.prepare('SELECT * FROM teacher_gamification WHERE teacherId = ?');
+    return stmt.get(teacherId);
+  }
+
+  createTeacherGamification(teacherId, initialData = {}) {
+    const now = new Date().toISOString();
+    const stmt = db.prepare(`
+      INSERT INTO teacher_gamification 
+      (teacherId, totalXP, currentLevel, loginStreak, tasksCompleted, studentsHelped, 
+       studentsAdded, attendanceRecords, weeklyTaskCompletion, highRiskStudentsHelped, createdAt, updatedAt)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    stmt.run(
+      teacherId,
+      initialData.totalXP || 0,
+      initialData.currentLevel || 1,
+      initialData.loginStreak || 0,
+      initialData.tasksCompleted || 0,
+      initialData.studentsHelped || 0,
+      initialData.studentsAdded || 0,
+      initialData.attendanceRecords || 0,
+      initialData.weeklyTaskCompletion || 0,
+      initialData.highRiskStudentsHelped || 0,
+      now,
+      now
+    );
+    
+    return this.getTeacherGamification(teacherId);
+  }
+
+  updateTeacherGamification(teacherId, updates) {
+    const now = new Date().toISOString();
+    const stats = this.getTeacherGamification(teacherId);
+    
+    if (!stats) {
+      return this.createTeacherGamification(teacherId, updates);
+    }
+
+    const updatedStats = { ...stats, ...updates, updatedAt: now };
+    
+    const stmt = db.prepare(`
+      UPDATE teacher_gamification 
+      SET totalXP = ?, currentLevel = ?, loginStreak = ?, tasksCompleted = ?, 
+          studentsHelped = ?, studentsAdded = ?, attendanceRecords = ?, 
+          weeklyTaskCompletion = ?, highRiskStudentsHelped = ?, lastActiveDate = ?, updatedAt = ?
+      WHERE teacherId = ?
+    `);
+    
+    stmt.run(
+      updatedStats.totalXP,
+      updatedStats.currentLevel,
+      updatedStats.loginStreak,
+      updatedStats.tasksCompleted,
+      updatedStats.studentsHelped,
+      updatedStats.studentsAdded,
+      updatedStats.attendanceRecords,
+      updatedStats.weeklyTaskCompletion,
+      updatedStats.highRiskStudentsHelped,
+      updatedStats.lastActiveDate || null,
+      now,
+      teacherId
+    );
+    
+    return this.getTeacherGamification(teacherId);
+  }
+
+  addXPLog(log) {
+    const logId = this.generateId?.() || `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const stmt = db.prepare(`
+      INSERT INTO xp_logs (id, teacherId, actionType, xpEarned, createdAt)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    
+    stmt.run(logId, log.teacherId, log.actionType, log.xpEarned, log.createdAt || new Date().toISOString());
+    return { id: logId, ...log };
+  }
+
+  getXPLogsForTeacher(teacherId, options = {}) {
+    let query = 'SELECT * FROM xp_logs WHERE teacherId = ?';
+    const params = [teacherId];
+    
+    if (options.startDate) {
+      query += ' AND createdAt >= ?';
+      params.push(options.startDate);
+    }
+    
+    if (options.endDate) {
+      query += ' AND createdAt <= ?';
+      params.push(options.endDate);
+    }
+    
+    query += ' ORDER BY createdAt DESC';
+    
+    const stmt = db.prepare(query);
+    return stmt.all(...params);
+  }
+
+  getTeacherBadges(teacherId) {
+    const stmt = db.prepare('SELECT * FROM teacher_badges WHERE teacherId = ? ORDER BY earnedAt DESC');
+    return stmt.all(teacherId);
+  }
+
+  addTeacherBadge(teacherId, badgeId, earnedAt) {
+    const id = `badge_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const stmt = db.prepare(`
+      INSERT INTO teacher_badges (id, teacherId, badgeId, earnedAt)
+      VALUES (?, ?, ?, ?)
+    `);
+    
+    stmt.run(id, teacherId, badgeId, earnedAt);
+    return { id, teacherId, badgeId, earnedAt };
+  }
+
+  getBadgeDefinitions() {
+    const stmt = db.prepare('SELECT * FROM badge_definitions ORDER BY badgeId');
+    return stmt.all();
+  }
+
+  getLeaderboard(options = {}) {
+    let query = `
+      SELECT 
+        tg.teacherId,
+        u.fullName,
+        u.email,
+        tg.totalXP,
+        tg.currentLevel,
+        tg.loginStreak,
+        tg.tasksCompleted,
+        COUNT(DISTINCT tb.badgeId) as badgeCount
+      FROM teacher_gamification tg
+      LEFT JOIN users u ON tg.teacherId = u.id
+      LEFT JOIN teacher_badges tb ON tg.teacherId = tb.teacherId
+    `;
+    
+    const params = [];
+    
+    if (options.schoolId) {
+      query += ' WHERE u.schoolId = ?';
+      params.push(options.schoolId);
+    }
+    
+    query += ' GROUP BY tg.teacherId ORDER BY tg.totalXP DESC LIMIT 100';
+    
+    const stmt = db.prepare(query);
+    return stmt.all(...params);
   }
 }
 

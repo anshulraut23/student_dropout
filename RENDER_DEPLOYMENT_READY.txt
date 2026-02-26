@@ -1,0 +1,30 @@
+﻿========================================
+  Render Deployment Ready!
+========================================
+
+Files created:
+✅ render.yaml - Render configuration
+✅ start-all.sh - Startup script for both services
+✅ Procfile - Process configuration
+✅ deploy-render.bat - Deployment script
+
+Next steps:
+
+OPTION 1: Deploy via Render Dashboard (Recommended)
+1. Go to https://dashboard.render.com
+2. Click "New +" → "Web Service"
+3. Connect your GitHub repository
+4. Render will auto-detect render.yaml
+5. Click "Apply" and deploy!
+
+OPTION 2: Deploy via Render CLI
+1. Install Render CLI: npm install -g @render/cli
+2. Login: render login
+3. Run: deploy-render.bat
+
+Environment Variables to Set in Render:
+- DATABASE_URL: Your Supabase connection string
+- JWT_SECRET: (auto-generated or set your own)
+- GEMINI_API_KEY: (optional, for AI explanations)
+
+Your backend will run on: https://student-dropout-backend.onrender.com
