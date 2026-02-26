@@ -1,10 +1,41 @@
 // API Service - Handles all backend API calls
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const LOCAL_API_URL = 'http://localhost:5000/api';
+const PRODUCTION_API_URL = import.meta.env.VITE_API_URL || 'https://student-dropout-alpha.vercel.app/api';
 
 class ApiService {
   constructor() {
-    this.baseUrl = API_BASE_URL;
+    this.baseUrl = LOCAL_API_URL;
+    this.fallbackUrl = PRODUCTION_API_URL;
+    this.useLocalServer = true;
+    this.localServerChecked = false;
+  }
+
+  // Check if local server is available
+  async checkLocalServer() {
+    if (this.localServerChecked) return this.useLocalServer;
+    
+    try {
+      const response = await fetch(`${LOCAL_API_URL.replace('/api', '')}/api/health`, {
+        method: 'GET',
+        signal: AbortSignal.timeout(2000) // 2 second timeout
+      });
+      this.useLocalServer = response.ok;
+      console.log('🔌 Local server:', this.useLocalServer ? 'Available' : 'Not available');
+    } catch (error) {
+      this.useLocalServer = false;
+      console.log('🌐 Using production server (local not available)');
+    }
+    
+    this.localServerChecked = true;
+    this.baseUrl = this.useLocalServer ? LOCAL_API_URL : this.fallbackUrl;
+    return this.useLocalServer;
+  }
+
+  // Get current base URL
+  async getBaseUrl() {
+    await this.checkLocalServer();
+    return this.baseUrl;
   }
 
   // Get auth token from storage
@@ -32,8 +63,9 @@ class ApiService {
   async request(endpoint, options = {}) {
     try {
       const headers = this.getHeaders(options.auth);
+      const baseUrl = await this.getBaseUrl();
       
-      const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      const response = await fetch(`${baseUrl}${endpoint}`, {
         ...options,
         headers: {
           ...headers,
