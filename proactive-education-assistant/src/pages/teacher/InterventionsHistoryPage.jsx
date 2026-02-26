@@ -128,35 +128,35 @@ export default function InterventionsHistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50" style={{ paddingTop: '5rem' }}>
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+    <div className="min-h-screen bg-gray-50 pb-6" style={{ paddingTop: '4.5rem' }}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6">
         
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-semibold text-gray-900">Interventions History</h1>
-          <p className="text-sm text-gray-500 mt-1">
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">Interventions History</h1>
+          <p className="text-xs md:text-sm text-gray-500 mt-1">
             {filteredInterventions.length} intervention{filteredInterventions.length !== 1 ? 's' : ''} found
           </p>
         </div>
 
         {/* Filters */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4 md:p-5 mb-6 space-y-4">
-          <div className="flex items-center gap-2 mb-2">
-            <FaFilter className="text-gray-500" />
+        <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 md:p-5 mb-4 md:mb-6 space-y-3 md:space-y-4">
+          <div className="flex items-center gap-2">
+            <FaFilter className="text-gray-500 text-sm" />
             <h2 className="text-sm font-medium text-gray-900">Filters</h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {/* Search */}
             <div className="relative">
-              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm" />
+              <FaSearch className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs md:text-sm" />
               <input
                 type="text"
                 name="searchQuery"
                 value={filters.searchQuery}
                 onChange={handleFilterChange}
-                placeholder="Search by student, type, or description..."
-                className="w-full pl-11 pr-4 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Search student, type..."
+                className="w-full pl-9 md:pl-11 pr-3 md:pr-4 py-2 md:py-2.5 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -166,7 +166,7 @@ export default function InterventionsHistoryPage() {
                 name="status"
                 value={filters.status}
                 onChange={handleFilterChange}
-                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="w-full px-3 py-2 md:py-2.5 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
                 <option value="all">All Statuses</option>
                 <option value="planned">Planned</option>
@@ -180,7 +180,7 @@ export default function InterventionsHistoryPage() {
           <div className="flex justify-end">
             <button
               onClick={clearFilters}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+              className="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
               Clear Filters
             </button>
