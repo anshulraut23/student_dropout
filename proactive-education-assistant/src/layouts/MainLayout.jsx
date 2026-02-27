@@ -486,15 +486,15 @@ function MainLayout() {
 
   const navItems = [
     { path: "/dashboard", label: t("nav.dashboard", "Dashboard"), icon: FaChartLine },
-    { path: "/my-classes", label: "My Classes", icon: FaChalkboard },
+    { path: "/my-classes", label: t("teacher_nav.my_classes", "My Classes"), icon: FaChalkboard },
     { path: "/students", label: t("nav.students", "Students"), icon: FaUsers },
-    { path: "/add-student", label: "Add Student", icon: FaUserPlus },
+    { path: "/add-student", label: t("teacher_nav.add_student", "Add Student"), icon: FaUserPlus },
     { path: "/data-entry", label: t("nav.dataEntry", "Data Entry"), icon: FaClipboardList },
-    { path: "/attendance-history", label: "Attendance History", icon: FaHistory },
-    { path: "/interventions-history", label: "Interventions History", icon: FaHandsHelping },
-    { path: "/score-history", label: "Score History", icon: FaChartBar },
-    { path: "/gamification", label: "Progress", icon: FaTrophy },
-    { path: "/faculty-connect", label: "Faculty Chat", icon: FaComments },
+    { path: "/attendance-history", label: t("teacher_nav.attendance_history", "Attendance History"), icon: FaHistory },
+    { path: "/interventions-history", label: t("teacher_nav.interventions_history", "Interventions History"), icon: FaHandsHelping },
+    { path: "/score-history", label: t("teacher_nav.score_history", "Score History"), icon: FaChartBar },
+    { path: "/gamification", label: t("teacher_nav.progress", "Progress"), icon: FaTrophy },
+    { path: "/faculty-connect", label: t("teacher_nav.faculty_chat", "Faculty Chat"), icon: FaComments },
   ];
 
   const closeSidebar = () => setSidebarOpen(false);
@@ -550,8 +550,8 @@ function MainLayout() {
                 <span style={{ color: 'white', fontSize: '1.1rem', fontWeight: '700', position: 'relative', zIndex: 1 }}>PE</span>
               </div>
               <div>
-                <div className="teacher-brand-name">Proactive Education</div>
-                <div className="teacher-brand-sub">Teacher Portal</div>
+                <div className="teacher-brand-name">{t("app.brand_full", "Proactive Education Assistant")}</div>
+                <div className="teacher-brand-sub">{t("teacher_nav.teacher_portal", "Teacher Portal")}</div>
               </div>
             </div>
 
@@ -567,7 +567,7 @@ function MainLayout() {
 
           {/* Navigation */}
           <nav className="teacher-nav-scroll flex-1 py-3">
-            <div className="teacher-section-label">Overview</div>
+            <div className="teacher-section-label">{t("teacher_nav.overview", "Overview")}</div>
 
             {/* First Group: Main navigation */}
             {navItems.slice(0, 4).map((item) => {
@@ -587,7 +587,7 @@ function MainLayout() {
             })}
 
             <div className="teacher-divider" />
-            <div className="teacher-section-label">Analytics & History</div>
+            <div className="teacher-section-label">{t("teacher_nav.analytics_history", "Analytics & History")}</div>
 
             {/* Second Group: Analytics and History */}
             {navItems.slice(4).map((item) => {
@@ -610,7 +610,7 @@ function MainLayout() {
           {/* Footer */}
           <div className="teacher-footer">
             <div className="teacher-footer-card">
-              <p className="teacher-footer-text">Proactive Education Assistant</p>
+              <p className="teacher-footer-text">{t("app.brand_full", "Proactive Education Assistant")}</p>
             </div>
           </div>
         </aside>
@@ -652,7 +652,7 @@ function MainLayout() {
                 className="text-sm font-semibold"
                 style={{ color: "#1e2c3a" }}
               >
-                Proactive Education
+                {t("app.brand_full", "Proactive Education Assistant")}
               </h2>
             </div>
           </div>

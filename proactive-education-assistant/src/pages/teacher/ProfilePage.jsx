@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useTeacher } from "../../context/TeacherContext";
 import { FaSpinner, FaUser, FaSchool, FaEnvelope, FaPhone, FaMapMarkerAlt, FaGraduationCap, FaBriefcase, FaEdit, FaSave, FaTimes } from "react-icons/fa";
@@ -7,6 +8,7 @@ import apiService from "../../services/apiService";
 export default function ProfilePage() {
   const navigate = useNavigate();
   const { teacher, logoutTeacher } = useTeacher();
+  const { t } = useTranslation();
 
   const [edit, setEdit] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -142,13 +144,13 @@ export default function ProfilePage() {
     <div className="bg-slate-100 min-h-screen px-4 md:px-6 py-6">
       <div className="max-w-6xl mx-auto space-y-6">
 
-        <h1 className="text-2xl font-semibold text-slate-900">My Profile</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">{t("auth.my_profile", "My Profile")}</h1>
 
         {/* Loading State */}
         {loading ? (
           <div className="bg-white rounded-xl p-12 flex flex-col items-center justify-center">
             <FaSpinner className="animate-spin text-4xl text-blue-600 mb-4" />
-            <p className="text-slate-600">Loading profile...</p>
+            <p className="text-slate-600">{t("teacher_profile.loading", "Loading profile...")}</p>
           </div>
         ) : (
           <>
@@ -182,13 +184,13 @@ export default function ProfilePage() {
                     </div>
                     {edit && (
                       <span className="absolute bottom-0 right-0 bg-white text-slate-900 text-xs px-2 py-1 rounded-md shadow-md group-hover:bg-blue-50 transition-colors">
-                        <FaEdit className="inline" /> Edit
+                        <FaEdit className="inline" /> {t("teacher_profile.edit", "Edit")}
                       </span>
                     )}
                   </label>
 
                   <div>
-                    <h2 className="text-2xl font-semibold">{form.fullName || "Teacher"}</h2>
+                    <h2 className="text-2xl font-semibold">{form.fullName || t("teacher_profile.teacher", "Teacher")}</h2>
                     <p className="text-sm opacity-90 flex items-center gap-2 mt-1">
                       <FaEnvelope className="text-xs" /> {form.email}
                     </p>
@@ -204,7 +206,7 @@ export default function ProfilePage() {
                       onClick={handleEdit}
                       className="bg-white text-blue-600 px-5 py-2 rounded-md hover:bg-blue-50 font-medium flex items-center gap-2 shadow-md transition-colors"
                     >
-                      <FaEdit /> Edit Profile
+                      <FaEdit /> {t("teacher_profile.edit_profile", "Edit Profile")}
                     </button>
                   ) : (
                     <>
@@ -213,7 +215,7 @@ export default function ProfilePage() {
                         disabled={saving}
                         className="bg-white text-slate-600 px-4 py-2 rounded-md hover:bg-slate-100 font-medium flex items-center gap-2 disabled:opacity-50 transition-colors"
                       >
-                        <FaTimes /> Cancel
+                        <FaTimes /> {t("teacher_profile.cancel", "Cancel")}
                       </button>
                       <button
                         onClick={handleSave}
@@ -222,11 +224,11 @@ export default function ProfilePage() {
                       >
                         {saving ? (
                           <>
-                            <FaSpinner className="animate-spin" /> Saving...
+                            <FaSpinner className="animate-spin" /> {t("teacher_profile.saving", "Saving...")}
                           </>
                         ) : (
                           <>
-                            <FaSave /> Save Changes
+                            <FaSave /> {t("teacher_profile.save_changes", "Save Changes")}
                           </>
                         )}
                       </button>
@@ -240,19 +242,19 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200">
                 <FaUser className="text-blue-600 text-lg" />
-                <h3 className="text-lg font-semibold text-slate-900">Personal Information</h3>
+                <h3 className="text-lg font-semibold text-slate-900">{t("teacher_profile.personal_information", "Personal Information")}</h3>
               </div>
 
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <Field label="Full Name" icon={FaUser} name="fullName" edit={edit} value={form.fullName} onChange={change} required />
-                <Field label="Email" icon={FaEnvelope} name="email" edit={false} value={form.email} onChange={change} disabled />
-                <Field label="Phone" icon={FaPhone} name="phone" edit={edit} value={form.phone} onChange={change} placeholder="+91 9876543210" />
-                <Field label="Designation" icon={FaBriefcase} name="designation" edit={edit} value={form.designation} onChange={change} placeholder="e.g., Senior Teacher" />
-                <Field label="City" icon={FaMapMarkerAlt} name="city" edit={edit} value={form.city} onChange={change} placeholder="e.g., Mumbai" />
-                <Field label="State" icon={FaMapMarkerAlt} name="state" edit={edit} value={form.state} onChange={change} placeholder="e.g., Maharashtra" />
-                <Field label="Pincode" icon={FaMapMarkerAlt} name="pincode" edit={edit} value={form.pincode} onChange={change} placeholder="e.g., 400001" />
+                <Field label={t("teacher_profile.full_name", "Full Name")} icon={FaUser} name="fullName" edit={edit} value={form.fullName} onChange={change} required t={t} />
+                <Field label={t("teacher_profile.email", "Email")} icon={FaEnvelope} name="email" edit={false} value={form.email} onChange={change} disabled t={t} />
+                <Field label={t("teacher_profile.phone", "Phone")} icon={FaPhone} name="phone" edit={edit} value={form.phone} onChange={change} placeholder="+91 9876543210" t={t} />
+                <Field label={t("teacher_profile.designation", "Designation")} icon={FaBriefcase} name="designation" edit={edit} value={form.designation} onChange={change} placeholder="e.g., Senior Teacher" t={t} />
+                <Field label={t("teacher_profile.city", "City")} icon={FaMapMarkerAlt} name="city" edit={edit} value={form.city} onChange={change} placeholder="e.g., Mumbai" t={t} />
+                <Field label={t("teacher_profile.state", "State")} icon={FaMapMarkerAlt} name="state" edit={edit} value={form.state} onChange={change} placeholder="e.g., Maharashtra" t={t} />
+                <Field label={t("teacher_profile.pincode", "Pincode")} icon={FaMapMarkerAlt} name="pincode" edit={edit} value={form.pincode} onChange={change} placeholder="e.g., 400001" t={t} />
                 <div className="sm:col-span-2 lg:col-span-3">
-                  <Field label="Address" icon={FaMapMarkerAlt} name="address" edit={edit} value={form.address} onChange={change} placeholder="Full address" />
+                  <Field label={t("teacher_profile.address", "Address")} icon={FaMapMarkerAlt} name="address" edit={edit} value={form.address} onChange={change} placeholder={t("teacher_profile.full_address", "Full address")} t={t} />
                 </div>
               </div>
             </div>
@@ -261,12 +263,12 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-center gap-2 mb-4 pb-3 border-b border-slate-200">
                 <FaSchool className="text-blue-600 text-lg" />
-                <h3 className="text-lg font-semibold text-slate-900">School Information</h3>
+                <h3 className="text-lg font-semibold text-slate-900">{t("teacher_profile.school_information", "School Information")}</h3>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-4">
-                <Field label="School Name" icon={FaSchool} name="schoolName" edit={false} value={form.schoolName} disabled />
-                <Field label="School Address" icon={FaMapMarkerAlt} name="schoolAddress" edit={false} value={form.schoolAddress} disabled />
+                <Field label={t("teacher_profile.school_name", "School Name")} icon={FaSchool} name="schoolName" edit={false} value={form.schoolName} disabled t={t} />
+                <Field label={t("teacher_profile.school_address", "School Address")} icon={FaMapMarkerAlt} name="schoolAddress" edit={false} value={form.schoolAddress} disabled t={t} />
               </div>
               
               <p className="text-xs text-slate-500 mt-4">
@@ -278,8 +280,8 @@ export default function ProfilePage() {
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex justify-between items-center">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-1">Account Status</h3>
-                  <p className="text-sm text-slate-600">Your account is active and verified</p>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-1">{t("teacher_profile.account_status", "Account Status")}</h3>
+                  <p className="text-sm text-slate-600">{t("teacher_profile.account_active", "Your account is active and verified")}</p>
                 </div>
                 <button
                   onClick={() => {
@@ -290,7 +292,7 @@ export default function ProfilePage() {
                   }}
                   className="bg-red-600 text-white px-6 py-2 rounded-md hover:bg-red-700 font-medium transition-colors"
                 >
-                  Logout
+                  {t("teacher_profile.logout", "Logout")}
                 </button>
               </div>
             </div>
@@ -304,7 +306,7 @@ export default function ProfilePage() {
 
 /* -------- FIELD COMPONENT -------- */
 
-function Field({ label, value, edit, name, onChange, icon: Icon, disabled, required, placeholder }) {
+function Field({ label, value, edit, name, onChange, icon: Icon, disabled, required, placeholder, t }) {
   return (
     <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 transition-all hover:border-slate-300">
       <div className="flex items-center gap-2 mb-2">
@@ -323,7 +325,7 @@ function Field({ label, value, edit, name, onChange, icon: Icon, disabled, requi
         />
       ) : (
         <p className="font-medium text-slate-900 min-h-[32px] flex items-center">
-          {value || <span className="text-slate-400">Not provided</span>}
+          {value || <span className="text-slate-400">{t("teacher_profile.not_provided", "Not provided")}</span>}
         </p>
       )}
     </div>
