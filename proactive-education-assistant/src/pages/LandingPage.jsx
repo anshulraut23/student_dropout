@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   FaShieldAlt,
   FaArrowRight,
@@ -16,6 +17,7 @@ import {
   FaTachometerAlt,
   FaCheckCircle,
 } from "react-icons/fa";
+import LanguageSelector from "../components/LanguageSelector";
 import LoginModal from "../components/auth/login";
 import RegisterModal from "../components/auth/register";
 import HomePageVideo from "../assets/video/HomePage.mp4";
@@ -241,6 +243,7 @@ function AnimCounter({ target, suffix = "", duration = 1800 }) {
 /* ══════════════════════════════════════════════════════════════════════════ */
 export default function LandingPage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showLogin, setShowLogin] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   const [loginRedirectPath, setLoginRedirectPath] = useState(null);
@@ -286,29 +289,131 @@ export default function LandingPage() {
   }, []);
 
   const features = [
-    { icon: FaChartLine, title: "Risk Analytics",    desc: "Instant visual risk scoring for every student" },
-    { icon: FaUsers,     title: "Class Management",  desc: "Organize classes, subjects, and student data" },
-    { icon: FaBrain,     title: "Smart Insights",    desc: "AI-style alerts for attendance drops and score dips" },
-    { icon: FaMobileAlt, title: "Offline First",     desc: "Works without internet, syncs when online" },
+    {
+      icon: FaChartLine,
+      title: t("landing_page.features.risk_analytics_title", "Risk Analytics"),
+      desc: t("landing_page.features.risk_analytics_desc", "Instant visual risk scoring for every student"),
+    },
+    {
+      icon: FaUsers,
+      title: t("landing_page.features.class_management_title", "Class Management"),
+      desc: t("landing_page.features.class_management_desc", "Organize classes, subjects, and student data"),
+    },
+    {
+      icon: FaBrain,
+      title: t("landing_page.features.smart_insights_title", "Smart Insights"),
+      desc: t("landing_page.features.smart_insights_desc", "AI-style alerts for attendance drops and score dips"),
+    },
+    {
+      icon: FaMobileAlt,
+      title: t("landing_page.features.offline_first_title", "Offline First"),
+      desc: t("landing_page.features.offline_first_desc", "Works without internet, syncs when online"),
+    },
   ];
 
   const problems = [
-    { icon: FaExclamationTriangle, title: "Dropout signals are missed",         desc: "Teachers can't manually track 40+ students daily. Early warning signs go unnoticed until it's too late." },
-    { icon: FaDatabase,            title: "Data scattered in registers & sheets", desc: "Attendance, marks, and behavior data live in separate places with no unified view or trend analysis." },
-    { icon: FaLightbulb,           title: "No early intervention system",        desc: "Without actionable alerts, well-meaning teachers have no structured process to intervene before a student drops out." },
+    {
+      icon: FaExclamationTriangle,
+      title: t("landing_page.problems.missed_signals_title", "Dropout signals are missed"),
+      desc: t(
+        "landing_page.problems.missed_signals_desc",
+        "Teachers can't manually track 40+ students daily. Early warning signs go unnoticed until it's too late."
+      ),
+    },
+    {
+      icon: FaDatabase,
+      title: t("landing_page.problems.scattered_data_title", "Data scattered in registers & sheets"),
+      desc: t(
+        "landing_page.problems.scattered_data_desc",
+        "Attendance, marks, and behavior data live in separate places with no unified view or trend analysis."
+      ),
+    },
+    {
+      icon: FaLightbulb,
+      title: t("landing_page.problems.no_intervention_title", "No early intervention system"),
+      desc: t(
+        "landing_page.problems.no_intervention_desc",
+        "Without actionable alerts, well-meaning teachers have no structured process to intervene before a student drops out."
+      ),
+    },
   ];
 
   const steps = [
-    { num: "01", icon: FaDatabase,   title: "Collect Data",       desc: "Attendance, marks, and behavior inputs — even offline via mobile." },
-    { num: "02", icon: FaBrain,      title: "AI Analyzes Trends", desc: "Our explainable AI engine scores each student's dropout risk in real time." },
-    { num: "03", icon: FaCheckCircle,title: "Teachers Act Early", desc: "Receive targeted intervention recommendations before it's too late." },
+    {
+      num: "01",
+      icon: FaDatabase,
+      title: t("landing_page.steps.collect_data_title", "Collect Data"),
+      desc: t("landing_page.steps.collect_data_desc", "Attendance, marks, and behavior inputs — even offline via mobile."),
+    },
+    {
+      num: "02",
+      icon: FaBrain,
+      title: t("landing_page.steps.ai_trends_title", "AI Analyzes Trends"),
+      desc: t(
+        "landing_page.steps.ai_trends_desc",
+        "Our explainable AI engine scores each student's dropout risk in real time."
+      ),
+    },
+    {
+      num: "03",
+      icon: FaCheckCircle,
+      title: t("landing_page.steps.act_early_title", "Teachers Act Early"),
+      desc: t(
+        "landing_page.steps.act_early_desc",
+        "Receive targeted intervention recommendations before it's too late."
+      ),
+    },
   ];
 
   const accessibility = [
-    { icon: FaWifi,            label: "Offline First" },
-    { icon: FaGlobe,           label: "Multilingual" },
-    { icon: FaUniversalAccess, label: "Accessible" },
-    { icon: FaTachometerAlt,   label: "Low Data Mode" },
+    { icon: FaWifi, label: t("landing_page.accessibility.offline_first", "Offline First") },
+    { icon: FaGlobe, label: t("landing_page.accessibility.multilingual", "Multilingual") },
+    { icon: FaUniversalAccess, label: t("landing_page.accessibility.accessible", "Accessible") },
+    { icon: FaTachometerAlt, label: t("landing_page.accessibility.low_data_mode", "Low Data Mode") },
+  ];
+
+  const heroHighlights = [
+    t("landing_page.hero.highlights.realtime", "Real-time Risk Prediction"),
+    t("landing_page.hero.highlights.offline", "Offline-First for Rural Areas"),
+    t("landing_page.hero.highlights.interventions", "Actionable Intervention Insights"),
+  ];
+
+  const riskStudents = [
+    { name: t("landing_page.preview.students.aarav", "Aarav Shah"), risk: "High", score: 87 },
+    { name: t("landing_page.preview.students.priya", "Priya Nair"), risk: "Medium", score: 54 },
+    { name: t("landing_page.preview.students.rahul", "Rahul Verma"), risk: "High", score: 91 },
+    { name: t("landing_page.preview.students.sana", "Sana Sheikh"), risk: "Low", score: 18 },
+    { name: t("landing_page.preview.students.dev", "Dev Patil"), risk: "Medium", score: 63 },
+  ];
+
+  const riskLabelMap = {
+    High: t("landing_page.preview.risk_high", "High"),
+    Medium: t("landing_page.preview.risk_medium", "Medium"),
+    Low: t("landing_page.preview.risk_low", "Low"),
+  };
+
+  const alertMessages = [
+    { msg: t("landing_page.preview.alert_1", "Aarav missed 8 of last 10 classes"), type: "high" },
+    { msg: t("landing_page.preview.alert_2", "Rahul's math score dropped 22pts"), type: "high" },
+    { msg: t("landing_page.preview.alert_3", "Dev showing disengagement pattern"), type: "medium" },
+  ];
+
+  const impactMetrics = [
+    {
+      target: 30,
+      suffix: "%",
+      label: t("landing_page.impact.earlier_detection", "Earlier Risk Detection"),
+    },
+    {
+      target: 60,
+      suffix: "%",
+      label: t("landing_page.impact.faster_response", "Faster Intervention Response"),
+    },
+    {
+      target: 100,
+      suffix: "%",
+      label: t("landing_page.impact.offline_compatibility", "Offline Compatibility"),
+    },
   ];
 
   return (
@@ -323,18 +428,19 @@ export default function LandingPage() {
           <div className="flex items-center justify-between h-full px-6 max-w-6xl mx-auto">
             <div className="flex items-center gap-2">
               <div className="flex h-9 w-9 items-center justify-center rounded-lg text-white font-bold text-sm" style={{ background: "var(--sky)" }}>
-                ES
+                {t("landing_page.brand_initials", "ES")}
               </div>
-              <span className="font-bold text-xl" style={{ fontFamily: "var(--font-heading)", color: "var(--text)" }}>EduShield</span>
+              <span className="font-bold text-xl" style={{ fontFamily: "var(--font-heading)", color: "var(--text)" }}>{t("landing_page.brand_name", "EduShield")}</span>
             </div>
 
             <div className="flex items-center gap-3">
+              <LanguageSelector />
               <button
                 onClick={() => setShowLogin(true)}
                 className="px-4 py-2 text-sm font-medium rounded-lg transition-colors hover:text-blue-600"
                 style={{ color: "var(--slate)", fontWeight: 500 }}
               >
-                Sign In
+                {t("landing_page.nav.sign_in", "Sign In")}
               </button>
               <button
                 onClick={() => setShowRegister(true)}
@@ -343,7 +449,7 @@ export default function LandingPage() {
                 onMouseEnter={(e) => (e.currentTarget.style.background = "var(--sky-deep)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "var(--sky)")}
               >
-                Get Started
+                {t("landing_page.nav.get_started", "Get Started")}
               </button>
             </div>
           </div>
@@ -371,28 +477,31 @@ export default function LandingPage() {
                   style={{ background: "rgba(255,255,255,0.25)", border: "1px solid rgba(255,255,255,0.5)", color: "white", fontSize: "0.76rem", letterSpacing: "2px", fontWeight: 700 }}
                 >
                   <FaShieldAlt />
-                  EXPLAINABLE AI RISK ENGINE
+                  {t("landing_page.hero.badge", "EXPLAINABLE AI RISK ENGINE")}
                 </div>
 
                 <h1
                   className="text-4xl md:text-6xl font-extrabold leading-tight mb-6"
                   style={{ fontFamily: "var(--font-heading)", color: "white", textShadow: "0 2px 12px rgba(14,74,128,0.15)" }}
                 >
-                  Predict Dropouts{" "}
-                  <span className="gradient-text">Before</span>{" "}
-                  They Happen.
+                  {t("landing_page.hero.title_prefix", "Predict Dropouts")} {" "}
+                  <span className="gradient-text">{t("landing_page.hero.title_highlight", "Before")}</span>{" "}
+                  {t("landing_page.hero.title_suffix", "They Happen.")}
                 </h1>
 
                 <p
                   className="text-lg max-w-2xl lg:mx-0 mx-auto mb-4"
                   style={{ color: "rgba(255,255,255,0.92)", fontWeight: 400 }}
                 >
-                  AI-powered early warning system for schools, NGOs, and rural education programs.
+                  {t(
+                    "landing_page.hero.subtitle",
+                    "AI-powered early warning system for schools, NGOs, and rural education programs."
+                  )}
                 </p>
 
                 {/* Bullet highlights */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-2 mb-10">
-                  {["Real-time Risk Prediction", "Offline-First for Rural Areas", "Actionable Intervention Insights"].map((b) => (
+                  {heroHighlights.map((b) => (
                     <span key={b} className="flex items-center gap-1.5 text-sm" style={{ color: "rgba(255,255,255,0.95)", fontWeight: 500 }}>
                       <FaCheckCircle style={{ color: "#f0a500" }} /> {b}
                     </span>
@@ -405,14 +514,14 @@ export default function LandingPage() {
                     className="flex items-center gap-2 font-semibold rounded-lg transition-all hover:-translate-y-1 active:translate-y-0"
                     style={{ background: "var(--accent)", color: "#1e2c3a", padding: "0.9rem 2rem", borderRadius: "8px", fontWeight: 700, boxShadow: "0 4px 24px rgba(240,165,0,0.4)", fontSize: "0.95rem" }}
                   >
-                    Start Free <FaArrowRight className="text-xs" />
+                    {t("landing_page.hero.start_free", "Start Free")} <FaArrowRight className="text-xs" />
                   </button>
                   <button
                     onClick={() => { setLoginRedirectPath("/dashboard"); setShowLogin(true); }}
                     className="font-semibold rounded-lg transition-all hover:bg-white/10 hover:border-white active:scale-95"
                     style={{ background: "transparent", color: "white", border: "1.5px solid rgba(255,255,255,0.45)", padding: "0.9rem 2rem", borderRadius: "8px", fontWeight: 600, fontSize: "0.95rem" }}
                   >
-                    Sign In
+                    {t("landing_page.nav.sign_in", "Sign In")}
                   </button>
                 </div>
               </div>
@@ -445,9 +554,9 @@ export default function LandingPage() {
         <section style={{ background: "var(--text)", padding: "6rem 5%" }}>
           <div className="max-w-5xl mx-auto">
             <div className="reveal text-center mb-12">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "3px" }}>The Challenge</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,0.4)", letterSpacing: "3px" }}>{t("landing_page.problem.badge", "The Challenge")}</span>
               <h2 className="mt-2 text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)", color: "white" }}>
-                The Problem Schools Face
+                {t("landing_page.problem.title", "The Problem Schools Face")}
               </h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -472,12 +581,12 @@ export default function LandingPage() {
         <section style={{ background: "var(--light)", padding: "6rem 5%" }}>
           <div className="max-w-5xl mx-auto">
             <div className="reveal text-center mb-14">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>The Solution</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>{t("landing_page.solution.badge", "The Solution")}</span>
               <h2 className="mt-2 text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)", color: "var(--text)" }}>
-                How EduShield Works
+                {t("landing_page.solution.title", "How EduShield Works")}
               </h2>
               <p className="mt-3 text-sm max-w-xl mx-auto" style={{ color: "var(--gray)", fontWeight: 300 }}>
-                A simple, three-step pipeline — from raw classroom data to timely teacher action.
+                {t("landing_page.solution.subtitle", "A simple, three-step pipeline — from raw classroom data to timely teacher action.")}
               </p>
             </div>
 
@@ -512,9 +621,9 @@ export default function LandingPage() {
         <section style={{ background: "var(--white)", padding: "6rem 5%" }}>
           <div className="max-w-5xl mx-auto">
             <div className="reveal text-center mb-10">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>Live Preview</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>{t("landing_page.preview.badge", "Live Preview")}</span>
               <h2 className="mt-2 text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)", color: "var(--text)" }}>
-                See Risk Intelligence in Action
+                {t("landing_page.preview.title", "See Risk Intelligence in Action")}
               </h2>
             </div>
 
@@ -525,20 +634,14 @@ export default function LandingPage() {
                 <div className="h-3 w-3 rounded-full bg-red-400" />
                 <div className="h-3 w-3 rounded-full bg-yellow-400" />
                 <div className="h-3 w-3 rounded-full bg-green-400" />
-                <span className="ml-3 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>EduShield Dashboard — Class 9B</span>
+                <span className="ml-3 text-xs" style={{ color: "rgba(255,255,255,0.4)" }}>{t("landing_page.preview.dashboard_header", "EduShield Dashboard — Class 9B")}</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x" style={{ background: "var(--light)", borderColor: "rgba(26,111,181,0.1)" }}>
                 {/* Student risk list */}
                 <div className="p-5 col-span-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--gray)" }}>Risk Overview</p>
-                  {[
-                    { name: "Aarav Shah",   risk: "High",   score: 87 },
-                    { name: "Priya Nair",   risk: "Medium", score: 54 },
-                    { name: "Rahul Verma",  risk: "High",   score: 91 },
-                    { name: "Sana Sheikh",  risk: "Low",    score: 18 },
-                    { name: "Dev Patil",    risk: "Medium", score: 63 },
-                  ].map((s) => (
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--gray)" }}>{t("landing_page.preview.risk_overview", "Risk Overview")}</p>
+                  {riskStudents.map((s) => (
                     <div key={s.name} className="flex items-center justify-between py-2 border-b last:border-0" style={{ borderColor: "rgba(26,111,181,0.07)" }}>
                       <div className="flex items-center gap-2">
                         <div className="h-7 w-7 rounded-full flex items-center justify-center text-xs font-bold text-white" style={{ background: "var(--sky)" }}>
@@ -546,14 +649,14 @@ export default function LandingPage() {
                         </div>
                         <span className="text-sm font-medium" style={{ color: "var(--text)" }}>{s.name}</span>
                       </div>
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full risk-${s.risk.toLowerCase()}`}>{s.risk}</span>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full risk-${s.risk.toLowerCase()}`}>{riskLabelMap[s.risk]}</span>
                     </div>
                   ))}
                 </div>
 
                 {/* Trend chart mock */}
                 <div className="p-5 col-span-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--gray)" }}>Attendance Trend</p>
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--gray)" }}>{t("landing_page.preview.attendance_trend", "Attendance Trend")}</p>
                   <div className="flex items-end gap-2 h-28">
                     {[72, 65, 58, 60, 45, 48, 38].map((h, i) => (
                       <div key={i} className="flex-1 rounded-t transition-all" style={{
@@ -563,7 +666,15 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <div className="flex justify-between mt-1">
-                    {["W1","W2","W3","W4","W5","W6","W7"].map(w => (
+                    {[
+                      t("landing_page.preview.weeks.w1", "W1"),
+                      t("landing_page.preview.weeks.w2", "W2"),
+                      t("landing_page.preview.weeks.w3", "W3"),
+                      t("landing_page.preview.weeks.w4", "W4"),
+                      t("landing_page.preview.weeks.w5", "W5"),
+                      t("landing_page.preview.weeks.w6", "W6"),
+                      t("landing_page.preview.weeks.w7", "W7"),
+                    ].map(w => (
                       <span key={w} className="text-xs" style={{ color: "var(--gray)" }}>{w}</span>
                     ))}
                   </div>
@@ -571,12 +682,8 @@ export default function LandingPage() {
 
                 {/* Alert box */}
                 <div className="p-5 col-span-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--gray)" }}>Active Alerts</p>
-                  {[
-                    { msg: "Aarav missed 8 of last 10 classes", type: "high" },
-                    { msg: "Rahul's math score dropped 22pts", type: "high" },
-                    { msg: "Dev showing disengagement pattern", type: "medium" },
-                  ].map((a, i) => (
+                  <p className="text-xs font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--gray)" }}>{t("landing_page.preview.active_alerts", "Active Alerts")}</p>
+                  {alertMessages.map((a, i) => (
                     <div key={i} className="flex gap-2 p-2.5 rounded-lg mb-2" style={{ background: a.type === "high" ? "rgba(254,202,202,0.5)" : "rgba(253,230,138,0.4)", border: `1px solid ${a.type === "high" ? "rgba(239,68,68,0.2)" : "rgba(240,165,0,0.2)"}` }}>
                       <FaExclamationTriangle className="mt-0.5 flex-shrink-0" style={{ color: a.type === "high" ? "#DC2626" : "#D97706", fontSize: "0.75rem" }} />
                       <p className="text-xs leading-snug" style={{ color: a.type === "high" ? "#7F1D1D" : "#78350F" }}>{a.msg}</p>
@@ -592,9 +699,9 @@ export default function LandingPage() {
         <section style={{ background: "var(--light)", padding: "6rem 5%" }}>
           <div className="max-w-5xl mx-auto">
             <div className="reveal text-center mb-12">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>What We Offer</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>{t("landing_page.features.badge", "What We Offer")}</span>
               <h2 className="mt-2 text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)", color: "var(--text)" }}>
-                Built for Real Classrooms
+                {t("landing_page.features.title", "Built for Real Classrooms")}
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
@@ -619,17 +726,13 @@ export default function LandingPage() {
         <section style={{ background: "var(--white)", padding: "6rem 5%" }}>
           <div className="max-w-4xl mx-auto text-center">
             <div className="reveal mb-12">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>Our Impact</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>{t("landing_page.impact.badge", "Our Impact")}</span>
               <h2 className="mt-2 text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)", color: "var(--text)" }}>
-                Measurable Results
+                {t("landing_page.impact.title", "Measurable Results")}
               </h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-10 reveal">
-              {[
-                { target: 30, suffix: "%", label: "Earlier Risk Detection" },
-                { target: 60, suffix: "%", label: "Faster Intervention Response" },
-                { target: 100, suffix: "%", label: "Offline Compatibility" },
-              ].map((m, i) => (
+              {impactMetrics.map((m, i) => (
                 <div key={i} className="horizon-card p-8">
                   <AnimCounter target={m.target} suffix={m.suffix} />
                   <p className="mt-3 text-sm font-medium" style={{ color: "var(--gray)" }}>{m.label}</p>
@@ -643,12 +746,12 @@ export default function LandingPage() {
         <section style={{ background: "var(--light)", padding: "4rem 5%" }}>
           <div className="max-w-4xl mx-auto">
             <div className="reveal text-center mb-10">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>Inclusive Design</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--sky)", letterSpacing: "3px" }}>{t("landing_page.accessibility.badge", "Inclusive Design")}</span>
               <h2 className="mt-2 text-3xl md:text-4xl" style={{ fontFamily: "var(--font-heading)", color: "var(--text)" }}>
-                Built for Real Classrooms
+                {t("landing_page.accessibility.title", "Built for Real Classrooms")}
               </h2>
               <p className="mt-3 text-sm" style={{ color: "var(--gray)", fontWeight: 300 }}>
-                Designed to work everywhere — from urban schools to the most remote rural areas.
+                {t("landing_page.accessibility.subtitle", "Designed to work everywhere — from urban schools to the most remote rural areas.")}
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-5 reveal">
@@ -676,13 +779,16 @@ export default function LandingPage() {
           <div className="relative z-10 max-w-3xl mx-auto text-center reveal">
             <span className="inline-block mb-4 px-4 py-1 rounded-full text-xs font-bold uppercase tracking-widest"
               style={{ background: "rgba(240,165,0,0.2)", border: "1px solid rgba(240,165,0,0.4)", color: "var(--accent)", letterSpacing: "2px" }}>
-              Get Started Today
+              {t("landing_page.cta.badge", "Get Started Today")}
             </span>
             <h2 className="text-3xl md:text-5xl mb-5" style={{ fontFamily: "var(--font-heading)", color: "white" }}>
-              Start Protecting Students Today.
+              {t("landing_page.cta.title", "Start Protecting Students Today.")}
             </h2>
             <p className="mb-10 text-lg" style={{ color: "rgba(255,255,255,0.75)", fontWeight: 300 }}>
-              Join hundreds of schools and NGOs using EduShield to keep students in classrooms where they belong.
+              {t(
+                "landing_page.cta.subtitle",
+                "Join hundreds of schools and NGOs using EduShield to keep students in classrooms where they belong."
+              )}
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <button
@@ -690,14 +796,14 @@ export default function LandingPage() {
                 className="font-semibold rounded-lg transition-all hover:-translate-y-1 active:translate-y-0"
                 style={{ background: "var(--accent)", color: "#1e2c3a", padding: "0.95rem 2.2rem", borderRadius: "8px", fontWeight: 700, boxShadow: "0 4px 24px rgba(240,165,0,0.45)", fontSize: "0.97rem" }}
               >
-                Create School Account
+                {t("landing_page.cta.create_account", "Create School Account")}
               </button>
               <button
                 onClick={() => { setLoginRedirectPath("/dashboard"); setShowLogin(true); }}
                 className="font-semibold rounded-lg transition-all hover:bg-white/10 hover:border-white"
                 style={{ background: "transparent", color: "white", border: "1.5px solid rgba(255,255,255,0.45)", padding: "0.95rem 2.2rem", borderRadius: "8px", fontWeight: 600, fontSize: "0.97rem" }}
               >
-                Book Demo
+                {t("landing_page.cta.book_demo", "Book Demo")}
               </button>
             </div>
           </div>
@@ -705,7 +811,7 @@ export default function LandingPage() {
 
         {/* ══ FOOTER ════════════════════════════════════════════════════════ */}
         <footer className="py-6 text-center text-sm" style={{ background: "var(--text)", color: "rgba(255,255,255,0.5)", borderTop: "1px solid rgba(255,255,255,0.07)", fontSize: "0.83rem" }}>
-          © 2026 EduShield — Built for Teachers, By Teachers
+          {t("landing_page.footer", "© 2026 EduShield — Built for Teachers, By Teachers")}
         </footer>
 
         {/* ══ MODALS (untouched) ════════════════════════════════════════════ */}

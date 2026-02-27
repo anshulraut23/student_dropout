@@ -126,7 +126,9 @@ class ApiService {
           statusText: response.statusText,
           data
         });
-        throw new Error(data.error || data.message || `Request failed with status ${response.status}`);
+        const error = new Error(data.error || data.message || `Request failed with status ${response.status}`);
+        error.response = { data, status: response.status }; // Preserve response data
+        throw error;
       }
 
       return data;
