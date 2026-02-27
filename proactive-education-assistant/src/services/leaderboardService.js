@@ -15,9 +15,11 @@ class LeaderboardService {
         auth: true,
       });
 
+      console.log('✅ Loaded leaderboard from backend:', response.leaderboard?.length || 0, 'teachers');
       return response.leaderboard || [];
     } catch (error) {
-      console.error('Error fetching leaderboard:', error);
+      console.error('❌ Error fetching leaderboard from backend:', error);
+      console.warn('⚠️ Using mock data as fallback - leaderboard may not reflect real data');
       return this.getMockLeaderboard();
     }
   }
@@ -32,9 +34,11 @@ class LeaderboardService {
         }
       );
 
+      console.log('✅ Loaded teacher rank from backend:', response.rank);
       return response;
     } catch (error) {
-      console.error('Error fetching teacher rank:', error);
+      console.error('❌ Error fetching teacher rank:', error);
+      console.warn('⚠️ Returning rank 0 as fallback');
       return { rank: 0, totalTeachers: 0 };
     }
   }

@@ -119,9 +119,22 @@ export const enterBulkMarks = async (req, res) => {
     });
   } catch (error) {
     console.error('❌ Enter bulk marks error:', error);
-    res.status(400).json({
+    console.error('Error details:', { message: error.message, stack: error.stack });
+    
+    // Provide specific error messages
+    let statusCode = 400;
+    let errorMessage = error.message || 'Failed to enter bulk marks';
+    
+    if (error.message.includes('not found')) {
+      statusCode = 404;
+    } else if (error.message.includes('not authorized')) {
+      statusCode = 403;
+    }
+    
+    res.status(statusCode).json({
       success: false,
-      error: error.message || 'Failed to enter bulk marks'
+      error: errorMessage,
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 };

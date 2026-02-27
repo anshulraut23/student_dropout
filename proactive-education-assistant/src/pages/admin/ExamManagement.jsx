@@ -84,30 +84,43 @@ export default function ExamManagement() {
       return;
     }
 
+    if (!formData.totalMarks || !formData.passingMarks || !formData.examDate) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
     try {
       const selectedClass = classes.find(c => c.id === formData.classId);
       const selectedSubject = subjects.find(s => s.id === formData.subjectId);
       const selectedTemplate = templates.find(t => t.id === formData.templateId);
 
       const examData = {
-        name: formData.name || `${selectedSubject.name} - ${selectedTemplate?.name || 'Exam'}`,
+        name: formData.name || `${selectedSubject?.name || ''} - ${selectedTemplate?.name || 'Exam'}`,
         classId: formData.classId,
         subjectId: formData.subjectId,
         type: selectedTemplate?.type || 'unit_test',
-        totalMarks: parseInt(formData.totalMarks),
-        passingMarks: parseInt(formData.passingMarks),
+        totalMarks: parseInt(formData.totalMarks) || 100,
+        passingMarks: parseInt(formData.passingMarks) || 40,
         examDate: formData.examDate,
         status: 'scheduled'
       };
 
-      await apiService.createExam(examData);
-      alert('Exam created successfully!');
-      setShowModal(false);
-      resetForm();
-      loadData();
+      console.log('Submitting exam data:', examData);
+
+      const result = await apiService.createExam(examData);
+      console.log('Create exam result:', result);
+
+      if (result.success) {
+        alert('Exam created successfully!');
+        setShowModal(false);
+        resetForm();
+        loadData();
+      } else {
+        alert('Failed to create exam: ' + (result.error || 'Unknown error'));
+      }
     } catch (error) {
       console.error('Failed to create exam:', error);
-      alert('Failed to create exam: ' + error.message);
+      alert('Failed to create exam: ' + (error.message || error.toString()));
     }
   };
 

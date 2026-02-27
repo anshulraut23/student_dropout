@@ -12,12 +12,28 @@ export default function GamificationPage() {
   const { applyServerStats } = useGame();
 
   useEffect(() => {
-    // Update login streak on page load
-    gamificationService.updateLoginStreak().then((response) => {
-      if (response && response.stats) {
-        applyServerStats(response.stats);
+    // Fetch fresh stats from backend on page load
+    const fetchStats = async () => {
+      try {
+        console.log('📊 Fetching fresh gamification stats...');
+        
+        // Update login streak (this awards +10 XP if first login of the day)
+        const streakResponse = await gamificationService.updateLoginStreak();
+        console.log('✅ Login streak updated:', streakResponse);
+        
+        // Fetch complete stats from backend
+        const statsResponse = await gamificationService.getTeacherStats();
+        console.log('✅ Stats fetched:', statsResponse);
+        
+        if (statsResponse && statsResponse.stats) {
+          applyServerStats(statsResponse.stats);
+        }
+      } catch (error) {
+        console.error('❌ Error fetching gamification data:', error);
       }
-    });
+    };
+
+    fetchStats();
   }, []);
 
   return (

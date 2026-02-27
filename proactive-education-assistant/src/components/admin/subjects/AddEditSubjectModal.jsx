@@ -47,14 +47,33 @@ function AddEditSubjectModal({ subjectData, classes, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.classId) {
-      setError('Subject name and class are required');
+    // Detailed validation
+    if (!formData.name || formData.name.trim() === '') {
+      setError('Subject name is required');
+      return;
+    }
+
+    if (!formData.classId || formData.classId.trim() === '') {
+      setError('Please select a class');
+      return;
+    }
+
+    // Check name length
+    if (formData.name.length < 2) {
+      setError('Subject name must be at least 2 characters long');
+      return;
+    }
+
+    if (formData.name.length > 100) {
+      setError('Subject name cannot exceed 100 characters');
       return;
     }
 
     setSaving(true);
     setError('');
     try {
+      console.log('Submitting subject:', { isEdit, formData });
+      
       let result;
       if (isEdit) {
         result = await apiService.updateSubject(subjectData.id, formData);
@@ -62,13 +81,17 @@ function AddEditSubjectModal({ subjectData, classes, onClose, onSuccess }) {
         result = await apiService.createSubject(formData);
       }
 
+      console.log('Subject submission result:', result);
+
       if (result.success) {
         onSuccess();
       } else {
-        setError(result.error || 'Failed to save subject');
+        setError(result.error || (isEdit ? 'Failed to update subject' : 'Failed to create subject'));
+        console.error('Subject error response:', result);
       }
     } catch (err) {
-      setError(err.message || 'Failed to save subject');
+      console.error('Subject submission error:', err);
+      setError(err.message || (isEdit ? 'Failed to update subject' : 'Failed to create subject'));
     } finally {
       setSaving(false);
     }
