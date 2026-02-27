@@ -494,7 +494,6 @@ function MainLayout() {
     { path: "/interventions-history", label: "Interventions History", icon: FaHandsHelping },
     { path: "/score-history", label: "Score History", icon: FaChartBar },
     { path: "/gamification", label: "Progress", icon: FaTrophy },
-    { path: "/leaderboard", label: "Leaderboard", icon: FaTrophy },
     { path: "/faculty-connect", label: "Faculty Chat", icon: FaComments },
   ];
 

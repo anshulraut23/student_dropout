@@ -158,8 +158,14 @@ async function startServer() {
   try {
     // Initialize PostgreSQL connection if using postgres
     if (dbType === 'postgres') {
-      await connectPostgres();
-      console.log('✅ Database connection initialized');
+      try {
+        await connectPostgres();
+        console.log('✅ Database connection initialized (PostgreSQL)');
+      } catch (pgError) {
+        console.error('⚠️  PostgreSQL connection failed, falling back to SQLite');
+        console.log('💾 Database file: ./storage/education_assistant.db');
+        // Continue with SQLite fallback
+      }
     }
     
     app.listen(PORT, () => {

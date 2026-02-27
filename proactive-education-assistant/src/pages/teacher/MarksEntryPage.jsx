@@ -61,10 +61,11 @@ export default function MarksEntryPage() {
         const current = {};
         
         (marksResponse.marks || []).forEach(mark => {
+          const normalizedStatus = ['submitted', 'verified'].includes(mark.status) ? 'present' : mark.status;
           existing[mark.studentId] = mark;
           current[mark.studentId] = {
             marksObtained: mark.marksObtained,
-            status: mark.status,
+            status: normalizedStatus,
             remarks: mark.remarks || ''
           };
         });

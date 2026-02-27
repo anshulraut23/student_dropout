@@ -2,11 +2,10 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext();
 
-const STORAGE_KEY = 'themeMode';
 const DEFAULT_THEME = 'light';
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME);
+  const [theme] = useState(DEFAULT_THEME);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -23,12 +22,9 @@ export function ThemeProvider({ children }) {
       body.classList.add('light');
     }
 
-    localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
 
-  const toggleTheme = () => {
-    setTheme((previousTheme) => (previousTheme === 'dark' ? 'light' : 'dark'));
-  };
+  const toggleTheme = () => {};
 
   const value = {
     theme,
