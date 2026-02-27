@@ -1,5 +1,6 @@
 // Gamification Page - Complete teacher progress, rewards, and tasks system
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useGame } from '../../context/GamificationContext';
 import TeacherStats from '../../components/gamification/TeacherStats';
 import LevelProgress from '../../components/gamification/LevelProgress';
@@ -9,6 +10,7 @@ import DailyTasks from '../../components/gamification/DailyTasks';
 import gamificationService from '../../services/gamificationService';
 
 export default function GamificationPage() {
+  const { t } = useTranslation();
   const { applyServerStats } = useGame();
 
   useEffect(() => {
@@ -42,10 +44,10 @@ export default function GamificationPage() {
         {/* Header */}
         <div className="text-center md:text-left">
           <h1 className="text-3xl font-bold text-slate-900">
-            🎯 Teacher Progress & Rewards
+            {t("teacher_gamification.title", "🎯 Teacher Progress & Rewards")}
           </h1>
           <p className="text-slate-600 mt-1">
-            Track your impact, earn XP, unlock achievements, and compete on leaderboards
+            {t("teacher_gamification.subtitle", "Track your impact, earn XP, unlock achievements, and compete on leaderboards")}
           </p>
         </div>
 
@@ -72,20 +74,20 @@ export default function GamificationPage() {
         {/* How It Works */}
         <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
           <h3 className="font-semibold text-slate-900 mb-3 flex items-center gap-2">
-            <span>💡</span> How Gamification Works
+            <span>💡</span> {t("teacher_gamification.how_it_works", "How Gamification Works")}
           </h3>
           <div className="grid md:grid-cols-2 gap-4 text-sm">
             <div className="space-y-2">
               <p className="flex items-start gap-2">
                 <span className="text-blue-600 font-bold">1.</span>
                 <span>
-                  <strong>Earn XP</strong> by completing actions like adding attendance, marking assignments, and helping at-risk students
+                  <strong>{t("teacher_gamification.earn_xp", "Earn XP")}</strong> {t("teacher_gamification.earn_xp_desc", "by completing actions like adding attendance, marking assignments, and helping at-risk students")}
                 </span>
               </p>
               <p className="flex items-start gap-2">
                 <span className="text-blue-600 font-bold">2.</span>
                 <span>
-                  <strong>Level Up</strong> as you accumulate XP. Each level unlocks new certificates and recognition
+                  <strong>{t("teacher_gamification.level_up", "Level Up")}</strong> {t("teacher_gamification.level_up_desc", "as you accumulate XP. Each level unlocks new certificates and recognition")}
                 </span>
               </p>
             </div>
@@ -93,13 +95,13 @@ export default function GamificationPage() {
               <p className="flex items-start gap-2">
                 <span className="text-blue-600 font-bold">3.</span>
                 <span>
-                  <strong>Collect Badges</strong> by reaching milestones and maintaining streaks
+                  <strong>{t("teacher_gamification.collect_badges", "Collect Badges")}</strong> {t("teacher_gamification.collect_badges_desc", "by reaching milestones and maintaining streaks")}
                 </span>
               </p>
               <p className="flex items-start gap-2">
                 <span className="text-blue-600 font-bold">4.</span>
                 <span>
-                  <strong>Climb the Leaderboard</strong> to compete with other teachers in your school and district
+                  <strong>{t("teacher_gamification.climb_leaderboard", "Climb the Leaderboard")}</strong> {t("teacher_gamification.climb_leaderboard_desc", "to compete with other teachers in your school and district")}
                 </span>
               </p>
             </div>

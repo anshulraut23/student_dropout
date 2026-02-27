@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
 	FaCheck,
 	FaCheckCircle,
@@ -15,6 +16,7 @@ import {
 import apiService from "../../services/apiService";
 
 export default function FacultyConnect() {
+	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState("");
@@ -206,9 +208,9 @@ export default function FacultyConnect() {
 			<div className="mx-auto max-w-6xl space-y-6">
 				<div className="flex flex-wrap items-center justify-between gap-4">
 					<div>
-						<h1 className="text-2xl font-semibold text-slate-900">Faculty Connect</h1>
+						<h1 className="text-2xl font-semibold text-slate-900">{t("teacher_faculty.title", "Faculty Connect")}</h1>
 						<p className="mt-1 text-sm text-slate-600">
-							Send invitation, accept requests, and start secure one-to-one faculty chat.
+							{t("teacher_faculty.subtitle", "Send invitation, accept requests, and start secure one-to-one faculty chat.")}
 						</p>
 					</div>
 
@@ -216,7 +218,7 @@ export default function FacultyConnect() {
 						onClick={() => navigate("/faculty-chat")}
 						className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
 					>
-						<FaComments /> Open Chat
+						<FaComments /> {t("teacher_faculty.open_chat", "Open Chat")}
 					</button>
 				</div>
 
@@ -229,17 +231,17 @@ export default function FacultyConnect() {
 				<div className="grid gap-4 md:grid-cols-3">
 					<SummaryCard
 						icon={<FaUsers className="text-blue-600" />}
-						label="Faculty in School"
+						label={t("teacher_faculty.faculty_in_school", "Faculty in School")}
 						value={teachers.length}
 					/>
 					<SummaryCard
 						icon={<FaUserClock className="text-amber-600" />}
-						label="Pending Received"
+						label={t("teacher_faculty.pending_received", "Pending Received")}
 						value={incomingInvites.length}
 					/>
 					<SummaryCard
 						icon={<FaUserCheck className="text-emerald-600" />}
-						label="Connected Faculty"
+						label={t("teacher_faculty.connected_faculty", "Connected Faculty")}
 						value={connections.length}
 					/>
 				</div>
@@ -248,7 +250,7 @@ export default function FacultyConnect() {
 					<div className="space-y-4 lg:col-span-2">
 						<div className="rounded-xl border bg-white p-4">
 							<label className="mb-2 block text-sm font-medium text-slate-700">
-								Search faculty
+								{t("teacher_faculty.search_faculty", "Search faculty")}
 							</label>
 							<div className="relative">
 								<FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -256,7 +258,7 @@ export default function FacultyConnect() {
 									type="text"
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
-									placeholder="Search by name, email, subject"
+									placeholder={t("teacher_faculty.search_placeholder", "Search by name, email, subject")}
 									className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none"
 								/>
 							</div>
@@ -265,13 +267,13 @@ export default function FacultyConnect() {
 						<div className="rounded-xl border bg-white">
 							<div className="border-b px-4 py-3">
 								<h2 className="text-base font-semibold text-slate-900">
-									Teachers in {currentTeacher?.schoolName || "School"}
+									{t("teacher_faculty.teachers_in_school", "Teachers in {{schoolName}}", { schoolName: currentTeacher?.schoolName || "School" })}
 								</h2>
 							</div>
 							<div className="divide-y">
 								{filteredTeachers.length === 0 ? (
 									<div className="p-6 text-center text-sm text-slate-500">
-										No faculty matched your search.
+										{t("teacher_faculty.no_faculty_matched", "No faculty matched your search.")}
 									</div>
 								) : (
 									filteredTeachers.map((teacher) => {
@@ -298,22 +300,22 @@ export default function FacultyConnect() {
 													{status.type === "connected" ? (
 														<>
 															<span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-																<FaCheckCircle /> Connected
+																<FaCheckCircle /> {t("teacher_faculty.connected", "Connected")}
 															</span>
 															<button
 																onClick={() => openChat(teacher)}
 																className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-medium text-white hover:bg-blue-700"
 															>
-																<FaComments /> Chat
+																<FaComments /> {t("teacher_faculty.chat", "Chat")}
 															</button>
 														</>
 													) : status.type === "incoming" ? (
 														<span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700">
-															<FaClock /> Invitation Received
+															<FaClock /> {t("teacher_faculty.invitation_received", "Invitation Received")}
 														</span>
 													) : status.type === "outgoing" ? (
 														<span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-700">
-															<FaClock /> Invitation Sent
+															<FaClock /> {t("teacher_faculty.invitation_sent", "Invitation Sent")}
 														</span>
 													) : (
 														<button
@@ -322,7 +324,7 @@ export default function FacultyConnect() {
 															className="inline-flex items-center gap-2 rounded-lg border border-blue-600 px-3 py-2 text-xs font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-60"
 														>
 															<FaPaperPlane />{" "}
-															{isProcessing ? "Sending..." : "Send Invite"}
+															{isProcessing ? t("teacher_faculty.sending", "Sending...") : t("teacher_faculty.send_invite", "Send Invite")}
 														</button>
 													)}
 												</div>
@@ -338,12 +340,12 @@ export default function FacultyConnect() {
 						<div className="rounded-xl border bg-white">
 							<div className="border-b px-4 py-3">
 								<h2 className="text-base font-semibold text-slate-900">
-									Incoming Invitations
+									{t("teacher_faculty.incoming_invitations", "Incoming Invitations")}
 								</h2>
 							</div>
 							<div className="divide-y">
 								{incomingInvites.length === 0 ? (
-									<div className="p-4 text-sm text-slate-500">No pending invitation.</div>
+									<div className="p-4 text-sm text-slate-500">{t("teacher_faculty.no_pending_invitation", "No pending invitation.")}</div>
 								) : (
 									incomingInvites.map((invite) => (
 										<div key={invite.id} className="space-y-3 p-4">
@@ -359,14 +361,14 @@ export default function FacultyConnect() {
 													disabled={actionLoading === `accept-${invite.id}`}
 													className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-emerald-600 px-2 py-2 text-xs font-medium text-white hover:bg-emerald-700 disabled:opacity-60"
 												>
-													<FaCheck /> {actionLoading === `accept-${invite.id}` ? "..." : "Accept"}
+													<FaCheck /> {actionLoading === `accept-${invite.id}` ? "..." : t("teacher_faculty.accept", "Accept")}
 												</button>
 												<button
 													onClick={() => rejectInvite(invite.id)}
 													disabled={actionLoading === `reject-${invite.id}`}
 													className="inline-flex flex-1 items-center justify-center gap-1 rounded-lg bg-rose-600 px-2 py-2 text-xs font-medium text-white hover:bg-rose-700 disabled:opacity-60"
 												>
-													<FaTimes /> {actionLoading === `reject-${invite.id}` ? "..." : "Reject"}
+													<FaTimes /> {actionLoading === `reject-${invite.id}` ? "..." : t("teacher_faculty.reject", "Reject")}
 												</button>
 											</div>
 										</div>
@@ -377,12 +379,12 @@ export default function FacultyConnect() {
 
 						<div className="rounded-xl border bg-white">
 							<div className="border-b px-4 py-3">
-								<h2 className="text-base font-semibold text-slate-900">Sent Invitations</h2>
+								<h2 className="text-base font-semibold text-slate-900">{t("teacher_faculty.sent_invitations", "Sent Invitations")}</h2>
 							</div>
 							<div className="divide-y">
 								{outgoingInvites.length === 0 ? (
 									<div className="p-4 text-sm text-slate-500">
-										You have not sent any invite yet.
+										{t("teacher_faculty.no_sent_invite", "You have not sent any invite yet.")}
 									</div>
 								) : (
 									outgoingInvites.map((invite) => {
@@ -392,7 +394,7 @@ export default function FacultyConnect() {
 												<p className="text-sm font-medium text-slate-900">
 													{target?.name || "Faculty"}
 												</p>
-												<p className="text-xs text-slate-500">Awaiting acceptance</p>
+													<p className="text-xs text-slate-500">{t("teacher_faculty.awaiting_acceptance", "Awaiting acceptance")}</p>
 											</div>
 										);
 									})

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { FaHandsHelping, FaFilter, FaEye, FaSearch, FaSpinner } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import apiService from "../../services/apiService";
 
 export default function InterventionsHistoryPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [interventions, setInterventions] = useState([]);
   const [filteredInterventions, setFilteredInterventions] = useState([]);
@@ -84,10 +86,10 @@ export default function InterventionsHistoryPage() {
     };
     
     const labels = {
-      planned: 'Planned',
-      in_progress: 'In Progress',
-      completed: 'Completed',
-      cancelled: 'Cancelled'
+      planned: t("teacher_interventions.planned", "Planned"),
+      in_progress: t("teacher_interventions.in_progress", "In Progress"),
+      completed: t("teacher_interventions.completed", "Completed"),
+      cancelled: t("teacher_interventions.cancelled", "Cancelled")
     };
 
     return (
@@ -97,29 +99,20 @@ export default function InterventionsHistoryPage() {
     );
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <FaSpinner className="animate-spin text-4xl text-blue-600 mx-auto mb-3" />
-          <p className="text-sm text-gray-600">Loading interventions...</p>
-        </div>
-      </div>
-    );
-  }
+
 
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50" style={{ paddingTop: '1.5rem' }}>
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <h3 className="text-red-800 font-medium mb-2">Error Loading Interventions</h3>
+            <h3 className="text-red-800 font-medium mb-2">{t("teacher_interventions.error_loading", "Error Loading Interventions")}</h3>
             <p className="text-red-700 text-sm">{error}</p>
             <button
               onClick={loadInterventions}
               className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
             >
-              Retry
+              {t("teacher_interventions.retry", "Retry")}
             </button>
           </div>
         </div>
@@ -133,9 +126,9 @@ export default function InterventionsHistoryPage() {
         
         {/* Header */}
         <div className="mb-4 md:mb-6">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">Interventions History</h1>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">{t("teacher_interventions.title", "Interventions History")}</h1>
           <p className="text-xs md:text-sm text-gray-500 mt-1">
-            {filteredInterventions.length} intervention{filteredInterventions.length !== 1 ? 's' : ''} found
+            {t("teacher_interventions.found_count", "{{count}} intervention(s) found", { count: filteredInterventions.length })}
           </p>
         </div>
 
@@ -143,7 +136,7 @@ export default function InterventionsHistoryPage() {
         <div className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 md:p-5 mb-4 md:mb-6 space-y-3 md:space-y-4">
           <div className="flex items-center gap-2">
             <FaFilter className="text-gray-500 text-sm" />
-            <h2 className="text-sm font-medium text-gray-900">Filters</h2>
+            <h2 className="text-sm font-medium text-gray-900">{t("teacher_interventions.filters", "Filters")}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -155,7 +148,7 @@ export default function InterventionsHistoryPage() {
                 name="searchQuery"
                 value={filters.searchQuery}
                 onChange={handleFilterChange}
-                placeholder="Search student, type..."
+                placeholder={t("teacher_interventions.search_placeholder", "Search student, type...")}
                 className="w-full pl-9 md:pl-11 pr-3 md:pr-4 py-2 md:py-2.5 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -168,11 +161,11 @@ export default function InterventionsHistoryPage() {
                 onChange={handleFilterChange}
                 className="w-full px-3 py-2 md:py-2.5 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               >
-                <option value="all">All Statuses</option>
-                <option value="planned">Planned</option>
-                <option value="in_progress">In Progress</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
+                <option value="all">{t("teacher_interventions.all_statuses", "All Statuses")}</option>
+                <option value="planned">{t("teacher_interventions.planned", "Planned")}</option>
+                <option value="in_progress">{t("teacher_interventions.in_progress", "In Progress")}</option>
+                <option value="completed">{t("teacher_interventions.completed", "Completed")}</option>
+                <option value="cancelled">{t("teacher_interventions.cancelled", "Cancelled")}</option>
               </select>
             </div>
           </div>
@@ -182,7 +175,7 @@ export default function InterventionsHistoryPage() {
               onClick={clearFilters}
               className="px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
             >
-              Clear Filters
+              {t("teacher_interventions.clear_filters", "Clear Filters")}
             </button>
           </div>
         </div>
@@ -195,12 +188,12 @@ export default function InterventionsHistoryPage() {
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Student</th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Type</th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Description</th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Date</th>
-                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">Status</th>
-                    <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase">Action</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">{t("teacher_interventions.student", "Student")}</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">{t("teacher_interventions.type", "Type")}</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">{t("teacher_interventions.description", "Description")}</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">{t("teacher_interventions.date", "Date")}</th>
+                    <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase">{t("teacher_interventions.status", "Status")}</th>
+                    <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase">{t("teacher_interventions.action", "Action")}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -229,7 +222,7 @@ export default function InterventionsHistoryPage() {
                           className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
                         >
                           <FaEye className="text-xs" />
-                          View Student
+                          {t("teacher_interventions.view_student", "View Student")}
                         </button>
                       </td>
                     </tr>
@@ -264,7 +257,7 @@ export default function InterventionsHistoryPage() {
                       className="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-blue-600 hover:bg-blue-50 rounded transition-colors"
                     >
                       <FaEye />
-                      View Student
+                      {t("teacher_interventions.view_student", "View Student")}
                     </button>
                   </div>
                 </div>
@@ -273,14 +266,14 @@ export default function InterventionsHistoryPage() {
 
             {/* Pagination Info */}
             <div className="px-4 py-3 bg-gray-50 border-t border-gray-200 text-xs text-gray-600">
-              Showing {filteredInterventions.length} intervention{filteredInterventions.length !== 1 ? 's' : ''}
+              {t("teacher_interventions.showing_count", "Showing {{count}} intervention(s)", { count: filteredInterventions.length })}
             </div>
           </div>
         ) : (
           <div className="bg-white border border-gray-200 rounded-lg p-12 text-center">
             <FaHandsHelping className="mx-auto text-4xl text-gray-300 mb-3" />
-            <p className="text-sm text-gray-500">No interventions found</p>
-            <p className="text-xs text-gray-400 mt-1">Try adjusting your filters or add new interventions</p>
+            <p className="text-sm text-gray-500">{t("teacher_interventions.no_interventions", "No interventions found")}</p>
+            <p className="text-xs text-gray-400 mt-1">{t("teacher_interventions.adjust_filters", "Try adjusting your filters or add new interventions")}</p>
           </div>
         )}
 
