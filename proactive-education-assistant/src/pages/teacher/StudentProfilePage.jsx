@@ -2,8 +2,9 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import apiService from "../../services/apiService";
-import { FaArrowLeft, FaDownload, FaUser, FaCalendarCheck, FaChartBar, FaUserCheck, FaHandsHelping, FaPlus, FaSpinner, FaExclamationTriangle } from "react-icons/fa";
+import { FaArrowLeft, FaDownload, FaUser, FaCalendarCheck, FaChartBar, FaUserCheck, FaHandsHelping, FaPlus, FaExclamationTriangle } from "react-icons/fa";
 import { StudentRiskCard } from "../../components/risk";
+import loadingGif from "../../assets/loading.gif";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -69,7 +70,7 @@ export default function StudentProfilePage() {
 
   useEffect(() => {
     if (student && activeTab !== "overview" && activeTab !== "personal") {
-      if (activeTab === "risk") {
+      if (activeTab === "risk-explanation") {
         loadRiskData();
       } else {
         loadTabData();
@@ -212,8 +213,13 @@ export default function StudentProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-white to-[#f5f8fb]">
         <div className="text-center">
-          <FaSpinner className="animate-spin text-4xl mx-auto mb-3" style={{ color: 'var(--primary-blue)' }} />
-          <p className="text-sm" style={{ color: 'var(--gray)' }}>Loading student...</p>
+          <img 
+            src={loadingGif} 
+            alt="Loading..." 
+            className="w-64 h-64 mb-6 mx-auto"
+          />
+          <p className="text-lg font-semibold" style={{ color: 'var(--text-dark)' }}>Loading student profile...</p>
+          <p className="text-sm mt-2" style={{ color: 'var(--gray)' }}>Please wait while we fetch the data</p>
         </div>
       </div>
     );
@@ -310,7 +316,7 @@ export default function StudentProfilePage() {
                   { key: "scores", label: "Scores", icon: FaChartBar },
                   { key: "behavior", label: "Behavior", icon: FaUserCheck },
                   { key: "interventions", label: "Interventions", icon: FaHandsHelping },
-                  { key: "risk", label: "Risk Analysis", icon: FaExclamationTriangle }
+                  { key: "risk-explanation", label: "Risk Explanation", icon: FaExclamationTriangle }
                 ].map(tab => {
                   const Icon = tab.icon;
                   return (
@@ -391,7 +397,12 @@ export default function StudentProfilePage() {
 
                     {loadingData ? (
                       <div className="text-center py-12">
-                        <FaSpinner className="animate-spin text-3xl mx-auto" style={{ color: 'var(--primary-blue)' }} />
+                        <img 
+                          src={loadingGif} 
+                          alt="Loading..." 
+                          className="w-64 h-64 mb-6 mx-auto"
+                        />
+                        <p className="text-lg font-semibold" style={{ color: 'var(--text-dark)' }}>Loading attendance...</p>
                       </div>
                     ) : attendanceData.length === 0 ? (
                       <div className="text-center py-12" style={{ color: 'var(--gray)' }}>
@@ -443,7 +454,12 @@ export default function StudentProfilePage() {
 
                     {loadingData ? (
                       <div className="text-center py-12">
-                        <FaSpinner className="animate-spin text-3xl mx-auto" style={{ color: 'var(--primary-blue)' }} />
+                        <img 
+                          src={loadingGif} 
+                          alt="Loading..." 
+                          className="w-64 h-64 mb-6 mx-auto"
+                        />
+                        <p className="text-lg font-semibold" style={{ color: 'var(--text-dark)' }}>Loading scores...</p>
                       </div>
                     ) : scoresData.length === 0 ? (
                       <div className="text-center py-12" style={{ color: 'var(--gray)' }}>
@@ -507,7 +523,12 @@ export default function StudentProfilePage() {
 
                     {loadingData ? (
                       <div className="text-center py-12">
-                        <FaSpinner className="animate-spin text-3xl mx-auto" style={{ color: 'var(--primary-blue)' }} />
+                        <img 
+                          src={loadingGif} 
+                          alt="Loading..." 
+                          className="w-64 h-64 mb-6 mx-auto"
+                        />
+                        <p className="text-lg font-semibold" style={{ color: 'var(--text-dark)' }}>Loading behavior...</p>
                       </div>
                     ) : behaviorData.length === 0 ? (
                       <div className="text-center py-12" style={{ color: 'var(--gray)' }}>
@@ -566,7 +587,12 @@ export default function StudentProfilePage() {
 
                     {loadingData ? (
                       <div className="text-center py-12">
-                        <FaSpinner className="animate-spin text-3xl mx-auto" style={{ color: 'var(--primary-blue)' }} />
+                        <img 
+                          src={loadingGif} 
+                          alt="Loading..." 
+                          className="w-64 h-64 mb-6 mx-auto"
+                        />
+                        <p className="text-lg font-semibold" style={{ color: 'var(--text-dark)' }}>Loading interventions...</p>
                       </div>
                     ) : interventionsData.length === 0 ? (
                       <div className="text-center py-12" style={{ color: 'var(--gray)' }}>
@@ -617,34 +643,20 @@ export default function StudentProfilePage() {
                   </div>
                 )}
 
-                {/* Risk Analysis Tab */}
-                {activeTab === "risk" && (
+                {/* Risk Explanation Tab */}
+                {activeTab === "risk-explanation" && (
                   <div className="space-y-4">
                     {loadingRisk ? (
                       <div className="text-center py-12">
-                        <FaSpinner className="animate-spin text-3xl mx-auto" style={{ color: 'var(--primary-blue)' }} />
-                        <p className="text-sm mt-3" style={{ color: 'var(--gray)' }}>Loading risk analysis...</p>
+                        <img 
+                          src={loadingGif} 
+                          alt="Loading..." 
+                          className="w-64 h-64 mb-6 mx-auto"
+                        />
+                        <p className="text-lg font-semibold" style={{ color: 'var(--text-dark)' }}>Loading risk explanation...</p>
                       </div>
-                    ) : riskError ? (
-                      <div className="text-center py-12">
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4" style={{ background: 'rgba(239, 68, 68, 0.1)' }}>
-                          <FaExclamationTriangle style={{ fontSize: '2rem', color: '#ef4444' }} />
-                        </div>
-                        <p className="text-sm" style={{ color: 'var(--gray)' }}>{riskError}</p>
-                        <button
-                          onClick={loadRiskData}
-                          className="mt-4 px-4 py-2 rounded-lg text-sm font-semibold text-white"
-                          style={{ background: 'var(--primary-blue)' }}
-                        >
-                          Retry
-                        </button>
-                      </div>
-                    ) : riskData ? (
-                      <StudentRiskCard data={riskData} />
                     ) : (
-                      <div className="text-center py-12" style={{ color: 'var(--gray)' }}>
-                        No risk data available
-                      </div>
+                      <StudentRiskCard studentId={id} />
                     )}
                   </div>
                 )}

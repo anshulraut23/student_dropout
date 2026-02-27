@@ -26,7 +26,16 @@ async function testBackendResponse() {
     const studentsResponse = await axios.get(`${API_URL}/students`, {
       headers: { Authorization: `Bearer ${token}` }
     });
-    const students = studentsResponse.data;
+    
+    // Handle different response formats
+    let students = studentsResponse.data;
+    if (students.students) {
+      students = students.students; // If wrapped in {students: [...]}
+    }
+    if (!Array.isArray(students)) {
+      students = []; // Fallback to empty array
+    }
+    
     console.log(`   ✅ Found ${students.length} students\n`);
 
     if (students.length === 0) {

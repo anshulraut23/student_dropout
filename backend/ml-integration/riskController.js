@@ -87,6 +87,7 @@ class RiskController {
         student_id: studentId,
         prediction: prediction.data.prediction,
         components: components,
+        features: featureData.features, // Include features for XAI
         feature_importance: prediction.data.feature_importance,
         explanation: prediction.data.explanation,
         recommendations: prediction.data.recommendations,
