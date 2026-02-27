@@ -695,6 +695,8 @@ export default function StudentProfilePage() {
   const [loadingRisk, setLoadingRisk] = useState(false);
   const [riskError, setRiskError] = useState(null);
 
+  const isPresentStatus = (status) => ['present', 'submitted', 'verified'].includes(status);
+
   useEffect(() => {
     loadStudentData();
   }, [id]);
@@ -765,7 +767,9 @@ export default function StudentProfilePage() {
   const loadAttendanceHistory = async () => {
     try {
       const response = await apiService.getStudentAttendance(id);
-      if (response.success) setAttendanceData(response.attendance || []);
+      if (response.success) {
+        setAttendanceData(response.records || response.attendance || []);
+      }
     } catch (error) {
       console.error('Error loading attendance:', error);
       setAttendanceData([]);
@@ -829,7 +833,7 @@ export default function StudentProfilePage() {
 
   const calculateAttendanceStats = () => {
     if (attendanceData.length === 0) return { total: 0, present: 0, absent: 0, percentage: 0 };
-    const present = attendanceData.filter(a => a.status === 'present').length;
+    const present = attendanceData.filter(a => ['present', 'late', 'excused'].includes(a.status)).length;
     const absent = attendanceData.filter(a => a.status === 'absent').length;
     const percentage = ((present / attendanceData.length) * 100).toFixed(1);
     return { total: attendanceData.length, present, absent, percentage };
@@ -837,7 +841,7 @@ export default function StudentProfilePage() {
 
   const calculateScoreStats = () => {
     if (scoresData.length === 0) return { total: 0, avgPercentage: 0, passed: 0, failed: 0 };
-    const validScores = scoresData.filter(s => s.status === 'present' && s.percentage != null);
+    const validScores = scoresData.filter(s => isPresentStatus(s.status) && s.percentage != null);
     if (validScores.length === 0) return { total: 0, avgPercentage: 0, passed: 0, failed: 0 };
     
     const avgPercentage = (validScores.reduce((sum, s) => sum + s.percentage, 0) / validScores.length).toFixed(1);
@@ -1106,10 +1110,10 @@ export default function StudentProfilePage() {
                                 <td className="px-4 py-3" style={{ color: 'var(--text-dark)' }}>{record.examName || 'N/A'}</td>
                                 <td className="px-4 py-3" style={{ color: 'var(--text-dark)' }}>{record.subjectName || 'N/A'}</td>
                                 <td className="px-4 py-3 text-center" style={{ color: 'var(--text-dark)' }}>
-                                  {record.status === 'present' ? `${record.marksObtained}/${record.totalMarks}` : '-'}
+                                  {isPresentStatus(record.status) ? `${record.marksObtained}/${record.totalMarks}` : '-'}
                                 </td>
                                 <td className="px-4 py-3 text-center">
-                                  {record.status === 'present' ? (
+                                  {isPresentStatus(record.status) ? (
                                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
                                       record.percentage >= 75 ? 'bg-green-100 text-green-700' :
                                       record.percentage >= 60 ? 'bg-blue-100 text-blue-700' :

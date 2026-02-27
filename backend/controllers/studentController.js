@@ -1,5 +1,6 @@
 import dataStore from '../storage/dataStore.js';
 import { generateId } from '../utils/helpers.js';
+import { getTeacherAccessibleClassIds, canTeacherAccessClass } from '../utils/teacherAccessControl.js';
 
 // Get students (filtered by class if provided)
 export const getStudents = async (req, res) => {
@@ -32,56 +33,39 @@ export const getStudents = async (req, res) => {
         });
       }
 
-      students = await dataStore.getStudentsByClass(classId);
-    } else {
-      // For teachers: only show students from their assigned classes
+      // If teacher, verify they have access to this class
       if (role === 'teacher') {
-        console.log('Teacher requesting students - filtering by assigned classes');
-        
-        // Get teacher's assigned classes
-        const allClasses = await dataStore.getClassesBySchool(schoolId);
-        const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
-        
-        // Find classes where teacher is incharge or teaches a subject
-        const teacherClassIds = new Set();
-        
-        // Classes where teacher is incharge
-        allClasses.forEach(cls => {
-          if (cls.teacherId === userId) {
-            teacherClassIds.add(cls.id);
-          }
-        });
-        
-        // Classes where teacher teaches a subject
-        allSubjects.forEach(subject => {
-          if (subject.teacherId === userId) {
-            teacherClassIds.add(subject.classId);
-          }
-        });
-        
-        console.log('Teacher assigned to classes:', Array.from(teacherClassIds));
-        
-        if (teacherClassIds.size === 0) {
-          return res.json({
-            success: true,
-            students: []
+        const hasAccess = await canTeacherAccessClass(dataStore, userId, classId, schoolId);
+        if (!hasAccess) {
+          return res.status(403).json({ 
+            success: false, 
+            error: 'You do not have access to students in this class' 
           });
         }
-        
-        // Get students from teacher's classes only
-        const allStudents = await dataStore.getStudents();
-        students = allStudents.filter(s => teacherClassIds.has(s.classId));
-        
+      }
+
+      students = await dataStore.getStudentsByClass(classId);
+    } else {
+      // Get all students - filtered by role
+      console.log('Fetching all students...');
+      const allStudents = await dataStore.getStudents();
+      console.log('Total students in DB:', allStudents.length);
+      
+      const schoolClasses = await dataStore.getClassesBySchool(schoolId);
+      console.log('School classes:', schoolClasses.length);
+      
+      const schoolClassIds = new Set(schoolClasses.map(c => c.id));
+      
+      // Filter by school
+      students = allStudents.filter(s => schoolClassIds.has(s.classId));
+      console.log('Filtered students for school:', students.length);
+
+      // If teacher, further filter by accessible classes
+      if (role === 'teacher') {
+        const teacherAccessibleClassIds = await getTeacherAccessibleClassIds(dataStore, userId, schoolId);
+        console.log('Teacher accessible class IDs:', Array.from(teacherAccessibleClassIds));
+        students = students.filter(s => teacherAccessibleClassIds.has(s.classId));
         console.log('Filtered students for teacher:', students.length);
-      } else {
-        // For admins: show all students in school
-        console.log('Admin requesting students - showing all school students');
-        const allStudents = await dataStore.getStudents();
-        const schoolClasses = await dataStore.getClassesBySchool(schoolId);
-        const schoolClassIds = new Set(schoolClasses.map(c => c.id));
-        
-        students = allStudents.filter(s => schoolClassIds.has(s.classId));
-        console.log('Filtered students for admin:', students.length);
       }
     }
 
@@ -117,7 +101,7 @@ export const getStudents = async (req, res) => {
 export const getStudentById = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const { schoolId } = req.user;
+    const { schoolId, role, userId } = req.user;
 
     const student = await dataStore.getStudentById(studentId);
 
@@ -135,6 +119,17 @@ export const getStudentById = async (req, res) => {
         success: false, 
         error: 'Access denied' 
       });
+    }
+
+    // If teacher, verify they have access to this student's class
+    if (role === 'teacher') {
+      const hasAccess = await canTeacherAccessClass(dataStore, userId, student.classId, schoolId);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          success: false, 
+          error: 'You do not have access to this student' 
+        });
+      }
     }
 
     // Enrich with class information
@@ -202,13 +197,8 @@ export const createStudent = async (req, res) => {
 
     // If teacher, verify they are authorized for this class
     if (role === 'teacher') {
-      const allClasses = await dataStore.getClassesBySchool(schoolId);
-      const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
-      
-      const isIncharge = allClasses.some(cls => cls.id === classId && cls.teacherId === userId);
-      const teachesInClass = allSubjects.some(sub => sub.classId === classId && sub.teacherId === userId);
-      
-      if (!isIncharge && !teachesInClass) {
+      const hasAccess = await canTeacherAccessClass(dataStore, userId, classId, schoolId);
+      if (!hasAccess) {
         return res.status(403).json({ 
           success: false, 
           error: 'You are not authorized to add students to this class' 
@@ -313,13 +303,8 @@ export const createStudentsBulk = async (req, res) => {
 
     // If teacher, verify they are authorized for this class
     if (role === 'teacher') {
-      const allClasses = await dataStore.getClassesBySchool(schoolId);
-      const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
-      
-      const isIncharge = allClasses.some(cls => cls.id === classId && cls.teacherId === userId);
-      const teachesInClass = allSubjects.some(sub => sub.classId === classId && sub.teacherId === userId);
-      
-      if (!isIncharge && !teachesInClass) {
+      const hasAccess = await canTeacherAccessClass(dataStore, userId, classId, schoolId);
+      if (!hasAccess) {
         return res.status(403).json({ 
           success: false, 
           error: 'You are not authorized to add students to this class' 
@@ -436,13 +421,8 @@ export const updateStudent = async (req, res) => {
 
     // If teacher, verify they are authorized for this class
     if (role === 'teacher') {
-      const allClasses = await dataStore.getClassesBySchool(schoolId);
-      const allSubjects = await dataStore.getSubjectsBySchool(schoolId);
-      
-      const isIncharge = allClasses.some(cls => cls.id === student.classId && cls.teacherId === userId);
-      const teachesInClass = allSubjects.some(sub => sub.classId === student.classId && sub.teacherId === userId);
-      
-      if (!isIncharge && !teachesInClass) {
+      const hasAccess = await canTeacherAccessClass(dataStore, userId, student.classId, schoolId);
+      if (!hasAccess) {
         return res.status(403).json({ 
           success: false, 
           error: 'You are not authorized to update this student' 
@@ -479,7 +459,7 @@ export const updateStudent = async (req, res) => {
 export const deleteStudent = async (req, res) => {
   try {
     const { studentId } = req.params;
-    const { schoolId } = req.user;
+    const { schoolId, role, userId } = req.user;
 
     const student = await dataStore.getStudentById(studentId);
 
@@ -497,6 +477,17 @@ export const deleteStudent = async (req, res) => {
         success: false, 
         error: 'Access denied' 
       });
+    }
+
+    // If teacher, verify they are authorized for this class
+    if (role === 'teacher') {
+      const hasAccess = await canTeacherAccessClass(dataStore, userId, student.classId, schoolId);
+      if (!hasAccess) {
+        return res.status(403).json({ 
+          success: false, 
+          error: 'You are not authorized to delete this student' 
+        });
+      }
     }
 
     // For now, we'll just mark as inactive instead of deleting

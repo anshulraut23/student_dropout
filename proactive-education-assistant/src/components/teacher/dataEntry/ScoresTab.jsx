@@ -488,8 +488,8 @@
 
 
 
-import { useState, useEffect } from "react";
-import { FaSpinner, FaCheck, FaEdit, FaCheckCircle, FaExclamationTriangle } from "react-icons/fa";
+import { useState, useEffect, useRef } from "react";
+import { FaSpinner, FaCheck, FaEdit, FaCheckCircle, FaExclamationTriangle, FaDownload, FaUpload, FaFileExcel } from "react-icons/fa";
 import apiService from "../../../services/apiService";
 import { useGameification } from "../../../hooks/useGameification";
 
@@ -570,6 +570,7 @@ const HORIZON_STYLES = `
 
 export default function ScoresTab() {
   const { awardMarksXP } = useGameification();
+  const fileInputRef = useRef(null);
   
   const [exams, setExams] = useState([]);
   const [selectedExam, setSelectedExam] = useState(null);
@@ -742,7 +743,7 @@ export default function ScoresTab() {
         .map(([studentId, score]) => ({
           studentId,
           marksObtained: parseFloat(score.obtainedMarks),
-          status: 'present',
+          status: 'submitted',
           remarks: score.remarks || ""
         }));
 
@@ -776,15 +777,159 @@ export default function ScoresTab() {
       }
     } catch (error) {
       console.error('Score submission error:', error);
-      setMessage({ type: "error", text: "Failed to save marks: " + error.message });
+      
+      // Provide more specific error messages
+      let errorText = "Failed to save marks";
+      
+      if (error.message.includes('Cannot connect')) {
+        errorText = "Cannot connect to server. Please ensure backend is running on port 5000.";
+      } else if (error.message.includes('404')) {
+        errorText = "API endpoint not found. Please check backend server.";
+      } else if (error.message.includes('Insufficient data')) {
+        errorText = "Cannot save marks - student data insufficient for ML prediction. This is expected for new students.";
+      } else if (error.message) {
+        errorText = `Failed to save marks: ${error.message}`;
+      }
+      
+      setMessage({ 
+        type: "error", 
+        text: errorText
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  // Download CSV Template
+  const downloadTemplate = () => {
+    if (!selectedExam || students.length === 0) {
+      setMessage({ type: "error", text: "Please select an exam with students first" });
+      return;
+    }
+
+    const csvContent = [
+      ['Enrollment_No', 'Student_Name', 'Marks_Obtained', 'Remarks'].join(','),
+      ...students.map(student => [
+        student.enrollmentNo,
+        `"${student.name}"`,
+        '',
+        ''
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `${selectedExam.name.replace(/[^a-z0-9]/gi, '_')}_marks_template.csv`;
+    link.click();
+    
+    setMessage({ type: "success", text: `✓ Template downloaded! Max marks: ${selectedExam.totalMarks}` });
+    setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+  };
+
+  // Upload CSV File
+  const handleCSVUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      setMessage({ type: "error", text: "Please upload a CSV file" });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result;
+        parseCSV(text);
+      } catch (error) {
+        console.error('CSV parse error:', error);
+        setMessage({ type: "error", text: "Failed to parse CSV file: " + error.message });
+      }
+    };
+    reader.readAsText(file);
+    
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // Parse CSV Content
+  const parseCSV = (text) => {
+    const lines = text.split('\n').filter(line => line.trim());
+    if (lines.length < 2) {
+      setMessage({ type: "error", text: "CSV file is empty or invalid" });
+      return;
+    }
+
+    // Skip header row
+    const dataLines = lines.slice(1);
+    const newScores = { ...scores };
+    let imported = 0;
+    let errors = [];
+
+    dataLines.forEach((line, index) => {
+      // Simple CSV parsing (handles quoted fields)
+      const values = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g)?.map(v => v.trim().replace(/^"|"$/g, '')) || [];
+      
+      if (values.length < 3) return;
+
+      const [enrollmentNo, , marksStr, remarks] = values;
+      
+      // Find student by enrollment number
+      const student = students.find(s => s.enrollmentNo === enrollmentNo);
+      
+      if (!student) {
+        errors.push(`Row ${index + 2}: Student ${enrollmentNo} not found`);
+        return;
+      }
+
+      const marks = parseFloat(marksStr);
+      
+      if (marksStr && (isNaN(marks) || marks < 0 || marks > selectedExam.totalMarks)) {
+        errors.push(`Row ${index + 2}: Invalid marks ${marksStr} (must be 0-${selectedExam.totalMarks})`);
+        return;
+      }
+
+      if (marksStr) {
+        newScores[student.id] = {
+          obtainedMarks: marksStr,
+          remarks: remarks || ""
+        };
+        imported++;
+      }
+    });
+
+    setScores(newScores);
+    
+    if (imported > 0) {
+      setMessage({ 
+        type: "success", 
+        text: `✓ Imported marks for ${imported} student${imported !== 1 ? 's' : ''}!${errors.length > 0 ? ` ${errors.length} error(s) - check console` : ''}` 
+      });
+      if (errors.length > 0) {
+        console.error('CSV import errors:', errors);
+      }
+    } else {
+      setMessage({ type: "error", text: "No valid marks found in CSV. " + (errors.length > 0 ? errors[0] : '') });
+    }
+
+    setTimeout(() => setMessage({ type: "", text: "" }), 5000);
+  };
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: HORIZON_STYLES }} />
+      
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv"
+        onChange={handleCSVUpload}
+        style={{ display: 'none' }}
+      />
 
       {/* Message Alert */}
       {message.text && (
@@ -844,6 +989,48 @@ export default function ScoresTab() {
             <div>
               <span style={{ color: 'var(--gray)' }}>Passing Marks:</span>
               <p className="font-semibold mt-1" style={{ color: 'var(--text-dark)' }}>{selectedExam.passingMarks || 'N/A'}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Upload Section */}
+      {selectedExam && students.length > 0 && !isMarksEntered && (
+        <div className="mb-6 p-4 rounded-lg border" style={{ background: 'rgba(240, 165, 0, 0.04)', borderColor: 'rgba(240, 165, 0, 0.2)' }}>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <FaFileExcel style={{ color: 'var(--accent-gold)', fontSize: '1.5rem' }} className="mt-1" />
+              <div>
+                <h3 className="text-sm font-semibold" style={{ color: 'var(--text-dark)' }}>Bulk Upload via CSV</h3>
+                <p className="text-xs mt-1" style={{ color: 'var(--gray)' }}>
+                  Download the template, fill in marks, and upload to save time
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={downloadTemplate}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold border-2 rounded-lg transition-all"
+                style={{ 
+                  borderColor: 'var(--accent-gold)', 
+                  color: 'var(--accent-gold)',
+                  background: 'transparent'
+                }}
+              >
+                <FaDownload />
+                Download Template
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg transition-all"
+                style={{ 
+                  background: 'var(--accent-gold)',
+                  color: 'white'
+                }}
+              >
+                <FaUpload />
+                Upload CSV
+              </button>
             </div>
           </div>
         </div>

@@ -84,13 +84,7 @@ export function GamificationProvider({ children }) {
     xpHistory: [],
   };
 
-  const [gamificationData, setGamificationData] = useState(() => {
-    const stored = localStorage.getItem("gamificationData");
-    if (stored) {
-      return { ...defaultState, ...JSON.parse(stored) };
-    }
-    return defaultState;
-  });
+  const [gamificationData, setGamificationData] = useState(defaultState);
 
   const normalizeStats = (stats) => ({
     ...defaultState,
@@ -120,14 +114,19 @@ export function GamificationProvider({ children }) {
       }
 
       try {
+        console.log('📊 Loading gamification stats from backend...');
         const response = await gamificationService.getTeacherStats();
         if (isMounted && response && response.stats) {
+          console.log('✅ Loaded stats from backend:', response.stats);
           applyServerStats(response.stats);
+        } else {
+          console.log('⚠️ No stats returned from backend, using defaults');
         }
       } catch (error) {
         console.error('❌ Error fetching gamification stats:', error);
-        console.log('Error details:', error.message);
-        // Don't throw error, just log it - user might not be authenticated
+        console.log('Using default stats instead');
+        // Use default state instead of any cached data
+        setGamificationData(defaultState);
       }
     };
 
@@ -138,10 +137,8 @@ export function GamificationProvider({ children }) {
     };
   }, []);
 
-  // Save to localStorage whenever gamificationData changes
-  useEffect(() => {
-    localStorage.setItem("gamificationData", JSON.stringify(gamificationData));
-  }, [gamificationData]);
+  // Remove localStorage persistence - rely only on backend database
+  // This ensures fresh, accurate data on every page load
 
   const addXP = (amount, actionType = "general") => {
     setGamificationData((prev) => {
@@ -213,6 +210,12 @@ export function GamificationProvider({ children }) {
     }));
   };
 
+  const clearAllData = () => {
+    console.log('🔄 Clearing gamification data...');
+    setGamificationData(defaultState);
+    localStorage.removeItem('gamificationData');
+  };
+
   const getLevelFromXP = (totalXP) => {
     for (let i = LEVELS.length - 1; i >= 0; i--) {
       if (totalXP >= LEVELS[i].minXP) {
@@ -261,6 +264,7 @@ export function GamificationProvider({ children }) {
     awardBadge,
     updateMetric,
     resetDailyTasks,
+    clearAllData,
     applyServerStats,
     getLevelFromXP,
     getCurrentLevelData,

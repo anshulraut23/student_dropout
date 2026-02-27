@@ -221,16 +221,14 @@
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUserCircle, FaBell, FaWifi, FaSignOutAlt, FaMoon, FaSun } from "react-icons/fa";
+import { FaUserCircle, FaBell, FaWifi, FaSignOutAlt, FaTrophy } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
 import LanguageSelector from "../LanguageSelector";
 import logoImage from "../../assets/logo.png";
-import { useTheme } from "../../context/ThemeContext";
 
 function Header() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { theme, toggleTheme } = useTheme();
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -308,9 +306,9 @@ function Header() {
 
         {/* Right - Icons and Actions */}
         <div className="flex items-center gap-3">
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
+          {/* Leaderboard */}
+          <Link
+            to="/leaderboard"
             className="flex items-center gap-2 px-3 py-2 rounded-lg transition-all"
             style={{
               backgroundColor: "rgba(26, 111, 181, 0.05)",
@@ -323,16 +321,16 @@ function Header() {
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = "rgba(26, 111, 181, 0.05)";
             }}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            title="Leaderboard"
           >
-            {theme === 'dark' ? <FaSun className="text-sm" /> : <FaMoon className="text-sm" />}
-            <span 
+            <FaTrophy className="text-sm" />
+            <span
               className="text-xs font-medium"
               style={{ fontFamily: "'DM Sans', sans-serif" }}
             >
-              {theme === 'dark' ? 'Light' : 'Dark'}
+              Leaderboard
             </span>
-          </button>
+          </Link>
 
           {/* Online/Offline Status */}
           <div 

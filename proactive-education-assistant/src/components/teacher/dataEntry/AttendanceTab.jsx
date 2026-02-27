@@ -939,6 +939,74 @@ export default function AttendanceTab() {
   const [existingAttendance, setExistingAttendance] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  const normalizeAttendanceStatus = (value) => {
+    if (!value) {
+      return "present";
+    }
+
+    const normalized = String(value).trim().toLowerCase();
+    if (normalized === "p" || normalized === "present") {
+      return "present";
+    }
+    if (normalized === "a" || normalized === "absent") {
+      return "absent";
+    }
+    if (normalized === "l" || normalized === "late") {
+      return "late";
+    }
+    if (normalized === "e" || normalized === "excused" || normalized === "excuse") {
+      return "excused";
+    }
+
+    return normalized;
+  };
+
+  const toIsoDate = (value) => {
+    if (!value) {
+      return null;
+    }
+
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().split('T')[0];
+    }
+
+    const normalized = String(value).trim();
+    if (!normalized) {
+      return null;
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(normalized)) {
+      return normalized;
+    }
+
+    const parsed = new Date(normalized);
+    if (Number.isNaN(parsed.getTime())) {
+      return null;
+    }
+
+    return parsed.toISOString().split('T')[0];
+  };
+
+  const isDateInAllowedRange = (dateString) => {
+    if (!dateString) {
+      return false;
+    }
+
+    const attendanceDate = new Date(dateString + 'T00:00:00');
+    if (Number.isNaN(attendanceDate.getTime())) {
+      return false;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    return attendanceDate < tomorrow && attendanceDate >= thirtyDaysAgo;
+  };
+
   useEffect(() => {
     loadClasses();
   }, []);
@@ -1266,6 +1334,11 @@ export default function AttendanceTab() {
       return;
     }
 
+    if (!selectedClass) {
+      setMessage({ type: "error", text: "Please select a class" });
+      return;
+    }
+
     if ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
       setMessage({ type: "error", text: "Please select a subject" });
       return;
@@ -1275,44 +1348,107 @@ export default function AttendanceTab() {
     setMessage({ type: "", text: "" });
 
     try {
-      const attendanceArray = parsedData.map(row => {
-        const student = students.find(s => 
-          s.enrollmentNo === row['Enrollment No'] || s.name === row['Student Name']
+      const groupedAttendance = new Map();
+      let skippedRows = 0;
+      let invalidDateRows = 0;
+      let invalidStatusRows = 0;
+      const validStatuses = new Set(['present', 'absent', 'late', 'excused']);
+
+      parsedData.forEach(row => {
+        const enrollmentValue = row['Enrollment No'] ?? row['Enrollment'] ?? row['EnrollmentNo'] ?? row['Enrollment No.'];
+        const nameValue = row['Student Name'] ?? row['Name'];
+        const student = students.find(s =>
+          (enrollmentValue && String(s.enrollmentNo) === String(enrollmentValue).trim()) ||
+          (nameValue && s.name === String(nameValue).trim())
         );
-        
-        return {
-          studentId: student?.id,
-          status: (row.Status || 'Present').toLowerCase()
+
+        if (!student) {
+          skippedRows += 1;
+          return;
+        }
+
+        const rowDateValue = row['Date'] ?? row['date'];
+        const parsedDate = toIsoDate(rowDateValue) || toIsoDate(selectedDate);
+
+        if (!parsedDate || !isDateInAllowedRange(parsedDate)) {
+          invalidDateRows += 1;
+          return;
+        }
+
+        const status = normalizeAttendanceStatus(row.Status || row.status || 'Present');
+        if (!validStatuses.has(status)) {
+          invalidStatusRows += 1;
+          return;
+        }
+
+        if (!groupedAttendance.has(parsedDate)) {
+          groupedAttendance.set(parsedDate, []);
+        }
+
+        groupedAttendance.get(parsedDate).push({
+          studentId: student.id,
+          status
+        });
+      });
+
+      if (groupedAttendance.size === 0) {
+        setMessage({ type: "error", text: "No valid attendance records found in the file" });
+        setLoading(false);
+        return;
+      }
+
+      let totalMarked = 0;
+      let totalFailed = 0;
+
+      for (const [dateKey, attendanceArray] of groupedAttendance.entries()) {
+        const bulkData = {
+          classId: selectedClass,
+          subjectId: (attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? selectedSubject : null,
+          date: dateKey,
+          attendance: attendanceArray
         };
-      }).filter(record => record.studentId);
 
-      const bulkData = {
-        classId: selectedClass,
-        subjectId: (attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? selectedSubject : null,
-        date: selectedDate,
-        attendance: attendanceArray
-      };
+        const result = await apiService.markBulkAttendance(bulkData);
+        if (result.success) {
+          totalMarked += result.marked || 0;
+          totalFailed += result.failed || 0;
+        } else {
+          totalFailed += attendanceArray.length;
+        }
+      }
 
-      const result = await apiService.markBulkAttendance(bulkData);
-      
-      if (result.success) {
-        // Award XP for bulk attendance upload (+20 XP)
+      if (totalMarked > 0) {
         try {
           await awardAttendanceXP();
           console.log('✅ XP awarded for bulk attendance!');
         } catch (xpError) {
           console.error('Failed to award XP:', xpError);
         }
-        
-        setMessage({ 
-          type: "success", 
-          text: `✓ Uploaded! ${result.marked} students marked, ${result.failed} failed. +20 XP earned!` 
-        });
-        setBulkFile(null);
-        setParsedData([]);
-        document.getElementById('bulk-file-input').value = '';
-      } else {
-        setMessage({ type: "error", text: result.error || "Failed to upload attendance" });
+      }
+
+      const warnings = [];
+      if (skippedRows > 0) {
+        warnings.push(`${skippedRows} unmatched students`);
+      }
+      if (invalidDateRows > 0) {
+        warnings.push(`${invalidDateRows} invalid dates`);
+      }
+      if (invalidStatusRows > 0) {
+        warnings.push(`${invalidStatusRows} invalid statuses`);
+      }
+
+      const warningText = warnings.length > 0 ? ` (${warnings.join(', ')})` : '';
+
+      setMessage({
+        type: totalFailed > 0 || warnings.length > 0 ? "warning" : "success",
+        text: `✓ Uploaded! ${totalMarked} students marked, ${totalFailed} failed.${warningText}${totalMarked > 0 ? ' +20 XP earned!' : ''}`
+      });
+
+      setBulkFile(null);
+      setParsedData([]);
+      const bulkInput = document.getElementById('bulk-file-input');
+      if (bulkInput) {
+        bulkInput.value = '';
       }
     } catch (error) {
       console.error('Bulk upload error:', error);

@@ -7,7 +7,8 @@ import {
   FaChartBar,
   FaGraduationCap,
   FaTimes,
-  FaFileAlt
+  FaFileAlt,
+  FaClipboardList
 } from 'react-icons/fa';
 
 /* ── Sidebar-scoped styles ─────────────────────────────────────────────── */
@@ -295,6 +296,7 @@ function AdminSidebar({ onClose }) {
     { path: '/admin/classes',        label: 'Classes',        icon: FaChalkboard },
     { path: '/admin/subjects',       label: 'Subjects',       icon: FaBook       },
     { path: '/admin/exam-templates', label: 'Exam Templates', icon: FaFileAlt    },
+    { path: '/admin/exams',          label: 'Exams',          icon: FaClipboardList },
     { path: '/admin/analytics',      label: 'Analytics',      icon: FaChartBar   },
   ];
 

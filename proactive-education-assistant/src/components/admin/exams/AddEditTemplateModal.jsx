@@ -70,8 +70,8 @@ export default function AddEditTemplateModal({ template, onClose }) {
         await apiService.updateExamTemplate(template.id, templateData);
         alert('Template updated successfully');
       } else {
-        const response = await apiService.createExamTemplate(templateData);
-        alert(`Template created successfully!\n\n${response.generatedExamsCount} exams were automatically generated for all subjects.`);
+        await apiService.createExamTemplate(templateData);
+        alert('Template created successfully!\n\nUse Exam Periods to generate exams for specific subjects.');
       }
 
       onClose(true);
@@ -83,10 +83,9 @@ export default function AddEditTemplateModal({ template, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
+    <div className="bg-white rounded-lg shadow-xl w-full">
+      {/* Header */}
+      <div className="flex justify-between items-center p-6 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-900">
             {isEdit ? 'Edit Template' : 'Create New Template'}
           </h2>
@@ -273,7 +272,6 @@ export default function AddEditTemplateModal({ template, onClose }) {
             </button>
           </div>
         </form>
-      </div>
     </div>
   );
 }
