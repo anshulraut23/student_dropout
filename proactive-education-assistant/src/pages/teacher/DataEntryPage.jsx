@@ -82,6 +82,7 @@
 // }
 
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FaCalendarCheck, FaBook, FaUserCheck, FaHandsHelping } from "react-icons/fa";
 import AttendanceTab from "../../components/teacher/dataEntry/AttendanceTab";
 import ScoresTab from "../../components/teacher/dataEntry/ScoresTab";
@@ -90,12 +91,13 @@ import InterventionsTab from "../../components/teacher/dataEntry/InterventionsTa
 
 export default function DataEntryPage() {
   const [activeTab, setActiveTab] = useState("attendance");
+  const { t } = useTranslation();
 
   const tabs = [
-    { id: "attendance", label: "Attendance", icon: FaCalendarCheck, shortLabel: "Attend" },
-    { id: "scores", label: "Scores", icon: FaBook, shortLabel: "Scores" },
-    { id: "behaviour", label: "Behaviour", icon: FaUserCheck, shortLabel: "Behavior" },
-    { id: "interventions", label: "Interventions", icon: FaHandsHelping, shortLabel: "Interv" }
+    { id: "attendance", label: t("teacher_data_entry.attendance", "Attendance"), icon: FaCalendarCheck, shortLabel: t("teacher_data_entry.attend_short", "Attend") },
+    { id: "scores", label: t("teacher_data_entry.scores", "Scores"), icon: FaBook, shortLabel: t("teacher_data_entry.scores", "Scores") },
+    { id: "behaviour", label: t("teacher_data_entry.behaviour", "Behaviour"), icon: FaUserCheck, shortLabel: t("teacher_data_entry.behavior_short", "Behavior") },
+    { id: "interventions", label: t("teacher_data_entry.interventions", "Interventions"), icon: FaHandsHelping, shortLabel: t("teacher_data_entry.interv_short", "Interv") }
   ];
 
   return (
@@ -104,9 +106,9 @@ export default function DataEntryPage() {
         
         {/* Header */}
         <div className="mb-4 md:mb-6">
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">Data Entry</h1>
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">{t("nav.dataEntry", "Data Entry")}</h1>
           <p className="text-xs md:text-sm text-gray-500 mt-1">
-            Record attendance, scores, behavior, and interventions
+            {t("teacher_data_entry.subtitle", "Record attendance, scores, behavior, and interventions")}
           </p>
         </div>
 
