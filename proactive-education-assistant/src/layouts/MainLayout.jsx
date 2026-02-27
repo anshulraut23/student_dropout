@@ -501,16 +501,28 @@ function MainLayout() {
 
   const handleSidebarNavigation = (path) => {
     closeSidebar();
-    setIsNavLoading(true);
+    
+    // Skip loading overlay for Students page (it has its own loading)
+    const skipLoadingPaths = ['/teacher/students', '/students'];
+    const shouldShowLoading = !skipLoadingPaths.includes(path);
+    
+    if (shouldShowLoading) {
+      setIsNavLoading(true);
+    }
 
     if (navigationTimerRef.current) {
       clearTimeout(navigationTimerRef.current);
     }
 
-    navigationTimerRef.current = setTimeout(() => {
-      setIsNavLoading(false);
+    if (shouldShowLoading) {
+      navigationTimerRef.current = setTimeout(() => {
+        setIsNavLoading(false);
+        navigate(path);
+      }, 2000);
+    } else {
+      // Navigate immediately for Students page
       navigate(path);
-    }, 2000);
+    }
   };
 
   useEffect(() => {
@@ -518,6 +530,7 @@ function MainLayout() {
       if (navigationTimerRef.current) {
         clearTimeout(navigationTimerRef.current);
       }
+
     };
   }, []);
 

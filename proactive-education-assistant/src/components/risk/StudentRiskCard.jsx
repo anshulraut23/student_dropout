@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AlertTriangle, TrendingUp, CheckCircle, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import apiService from '../../services/apiService';
+import ExplainableAI from './ExplainableAI';
+import PlainLanguageSummary from './PlainLanguageSummary';
 
 /**
  * Student Risk Card Component
@@ -16,6 +18,8 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
   const [insufficientData, setInsufficientData] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showFeatureImportance, setShowFeatureImportance] = useState(false);
+  const [attendanceData, setAttendanceData] = useState(null);
+  const [marksData, setMarksData] = useState(null);
 
   useEffect(() => {
     // If data is provided, use it directly
@@ -25,7 +29,7 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
         setInsufficientData({
           message: 'Insufficient data for prediction',
           requirements: {
-            attendance: 14,
+            attendance: 3, // HACKATHON: Changed from 14
             exams: 1
           }
         });
@@ -60,16 +64,29 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
     } catch (err) {
       // Check if it's an insufficient data error (400 status)
       if (err.message?.includes('Insufficient data') || err.message?.includes('data_tier')) {
-        // Parse the error to get data requirements
+        // Extract days and exams from error response
+        let daysMarked = 0;
+        let examsCompleted = 0;
+        
+        if (err.response?.data?.missing) {
+          daysMarked = err.response.data.missing.current_days || 0;
+          examsCompleted = err.response.data.missing.current_exams || 0;
+        }
+        
         setInsufficientData({
           message: err.message || 'Insufficient data for prediction',
+          daysMarked,
+          examsCompleted,
           requirements: {
-            attendance: 14, // minimum days
-            exams: 1 // minimum exams
+            attendance: 3,
+            exams: 1
           }
         });
         setRiskData(null);
         setError(null);
+        
+        // Load attendance and marks data to show details
+        loadAttendanceAndMarks();
       } else {
         setError(err.message || 'Failed to load risk data');
         setInsufficientData(null);
@@ -77,6 +94,20 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAttendanceAndMarks = async () => {
+    try {
+      // Load attendance data
+      const attendance = await apiService.getStudentAttendance(studentId);
+      setAttendanceData(attendance);
+      
+      // Load marks data
+      const marks = await apiService.getStudentMarks(studentId);
+      setMarksData(marks);
+    } catch (error) {
+      console.error('Failed to load attendance/marks:', error);
     }
   };
 
@@ -91,71 +122,211 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
     );
   }
 
-  // Insufficient Data State - Friendly Empty State
+  // Insufficient Data State - Show attendance and exam data
   if (insufficientData) {
+    const daysMarked = insufficientData.daysMarked || 0;
+    const examsCompleted = insufficientData.examsCompleted || 0;
+    const daysNeeded = Math.max(0, 3 - daysMarked);
+    const examsNeeded = Math.max(0, 1 - examsCompleted);
+    
+    // Check which requirements are met
+    const hasEnoughAttendance = daysMarked >= 3;
+    const hasEnoughExams = examsCompleted >= 1;
+    
     return (
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         {/* Header */}
-        <div className="p-6 bg-gray-50 border-b border-gray-200">
+        <div className="p-6 bg-yellow-50 border-b border-yellow-200">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-2xl">
-              📊
-            </div>
+            <Info className="w-8 h-8 text-yellow-600" />
             <div>
-              <h3 className="text-lg font-bold text-gray-800">Building Prediction Data</h3>
-              <p className="text-sm text-gray-600">More information needed for accurate analysis</p>
+              <h3 className="text-lg font-bold text-yellow-900">Insufficient Data for Prediction</h3>
+              <p className="text-sm text-yellow-800 mt-1">
+                Both attendance and exam data are required for risk predictions.
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="p-6 space-y-4">
-          {/* Requirements */}
-          <div className="space-y-3">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl">📅</div>
-                <div>
-                  <p className="font-medium text-gray-800">Attendance Records</p>
-                  <p className="text-sm text-gray-600">
-                    Requires at least <strong>{insufficientData.requirements.attendance} days</strong> of marked attendance
-                  </p>
-                </div>
+        {/* Body - Requirements Status */}
+        <div className="p-6 space-y-6">
+          {/* Attendance Requirement */}
+          <div className={`border-2 rounded-lg p-4 ${
+            hasEnoughAttendance 
+              ? 'border-green-300 bg-green-50' 
+              : 'border-orange-300 bg-orange-50'
+          }`}>
+            <div className="flex items-start gap-3">
+              <div className="text-3xl">
+                {hasEnoughAttendance ? '✅' : '📅'}
               </div>
-            </div>
-
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl">📝</div>
-                <div>
-                  <p className="font-medium text-gray-800">Exam Scores</p>
-                  <p className="text-sm text-gray-600">
-                    Requires at least <strong>1 finalized exam</strong> score (submitted or verified)
+              <div className="flex-1">
+                <h4 className={`font-semibold mb-2 ${
+                  hasEnoughAttendance ? 'text-green-900' : 'text-orange-900'
+                }`}>
+                  Attendance Requirement
+                </h4>
+                {hasEnoughAttendance ? (
+                  <p className="text-sm text-green-800">
+                    ✓ You have marked attendance for <strong>{daysMarked} days</strong> (Requirement: 3 days)
                   </p>
-                </div>
+                ) : (
+                  <div className="text-sm text-orange-800">
+                    <p className="mb-1">
+                      ✗ You have marked attendance for <strong>{daysMarked} day{daysMarked !== 1 ? 's' : ''}</strong>
+                    </p>
+                    <p className="font-semibold">
+                      Please mark <strong>{daysNeeded} more day{daysNeeded !== 1 ? 's' : ''}</strong> of attendance (Need 3 days total)
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Call to Action */}
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          {/* Exam Requirement */}
+          <div className={`border-2 rounded-lg p-4 ${
+            hasEnoughExams 
+              ? 'border-green-300 bg-green-50' 
+              : 'border-orange-300 bg-orange-50'
+          }`}>
             <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+              <div className="text-3xl">
+                {hasEnoughExams ? '✅' : '📝'}
+              </div>
+              <div className="flex-1">
+                <h4 className={`font-semibold mb-2 ${
+                  hasEnoughExams ? 'text-green-900' : 'text-orange-900'
+                }`}>
+                  Exam Requirement
+                </h4>
+                {hasEnoughExams ? (
+                  <p className="text-sm text-green-800">
+                    ✓ You have entered <strong>{examsCompleted} exam{examsCompleted !== 1 ? 's' : ''}</strong> (Requirement: 1 exam)
+                  </p>
+                ) : (
+                  <div className="text-sm text-orange-800">
+                    <p className="mb-1">
+                      ✗ You have entered <strong>{examsCompleted} exam{examsCompleted !== 1 ? 's' : ''}</strong>
+                    </p>
+                    <p className="font-semibold">
+                      Please enter <strong>{examsNeeded} exam score{examsNeeded !== 1 ? 's' : ''}</strong> (Need 1 exam total)
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Attendance Data Details */}
+          {attendanceData && attendanceData.records && attendanceData.records.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <span>📊</span> Attendance Records ({daysMarked} days)
+              </h4>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="max-h-48 overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        <th className="text-left px-4 py-2 text-xs font-semibold text-gray-600">Date</th>
+                        <th className="text-center px-4 py-2 text-xs font-semibold text-gray-600">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {attendanceData.records.slice(0, 10).map((record, idx) => (
+                        <tr key={idx} className="border-t border-gray-100">
+                          <td className="px-4 py-2 text-gray-700">
+                            {new Date(record.date).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
+                              record.status === 'present' 
+                                ? 'bg-green-100 text-green-800' 
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {record.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Marks Data Details */}
+          {marksData && marksData.marks && marksData.marks.length > 0 && (
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <span>📊</span> Exam Records ({examsCompleted} exams)
+              </h4>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="max-h-48 overflow-y-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        <th className="text-left px-4 py-2 text-xs font-semibold text-gray-600">Exam</th>
+                        <th className="text-center px-4 py-2 text-xs font-semibold text-gray-600">Marks</th>
+                        <th className="text-center px-4 py-2 text-xs font-semibold text-gray-600">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {marksData.marks.slice(0, 10).map((mark, idx) => {
+                        const percentage = mark.totalMarks > 0 
+                          ? Math.round((mark.marksObtained / mark.totalMarks) * 100)
+                          : 0;
+                        return (
+                          <tr key={idx} className="border-t border-gray-100">
+                            <td className="px-4 py-2 text-gray-700">{mark.examName || 'Exam'}</td>
+                            <td className="px-4 py-2 text-center text-gray-700">
+                              {mark.marksObtained}/{mark.totalMarks}
+                            </td>
+                            <td className="px-4 py-2 text-center">
+                              <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
+                                percentage >= 75 
+                                  ? 'bg-green-100 text-green-800'
+                                  : percentage >= 50
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'
+                              }`}>
+                                {percentage}%
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Summary */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-medium text-green-800 mb-1">What to do next</p>
-                <p className="text-sm text-green-700">
-                  Please continue marking daily attendance and logging exam scores. 
-                  The AI will <strong>automatically unlock predictions</strong> when enough data is gathered.
+                <p className="font-medium text-blue-900 mb-2">Summary</p>
+                <p className="text-sm text-blue-800">
+                  {hasEnoughAttendance && hasEnoughExams && (
+                    "Both requirements are met! Predictions should be available."
+                  )}
+                  {hasEnoughAttendance && !hasEnoughExams && (
+                    `Attendance requirement met ✓ | Still need ${examsNeeded} exam score${examsNeeded !== 1 ? 's' : ''}`
+                  )}
+                  {!hasEnoughAttendance && hasEnoughExams && (
+                    `Exam requirement met ✓ | Still need ${daysNeeded} day${daysNeeded !== 1 ? 's' : ''} of attendance`
+                  )}
+                  {!hasEnoughAttendance && !hasEnoughExams && (
+                    `Need ${daysNeeded} more day${daysNeeded !== 1 ? 's' : ''} of attendance AND ${examsNeeded} exam score${examsNeeded !== 1 ? 's' : ''}`
+                  )}
                 </p>
               </div>
             </div>
-          </div>
-
-          {/* Progress Indicator */}
-          <div className="text-center pt-4 border-t border-gray-200">
-            <p className="text-sm text-gray-500">
-              Predictions will be available once minimum data requirements are met
-            </p>
           </div>
         </div>
       </div>
@@ -175,7 +346,7 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
 
   if (!riskData) return null;
 
-  const { prediction, components, explanation, recommendations, priority_actions, feature_importance } = riskData;
+  const { prediction, components, explanation, recommendations, priority_actions, feature_importance, features } = riskData;
   
   // Safety check - if prediction is missing, treat as insufficient data
   if (!prediction || !prediction.risk_level) {
@@ -216,6 +387,13 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
 
       {/* Body */}
       <div className="p-6 space-y-6">
+        {/* Plain Language Summary - First and Most Prominent */}
+        <PlainLanguageSummary
+          features={features}
+          prediction={prediction}
+          riskLevel={riskLevel}
+        />
+
         {/* AI Explanation Section */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
@@ -262,40 +440,14 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
           </div>
         </div>
 
-        {/* Feature Importance */}
+        {/* Explainable AI Section */}
         {feature_importance && Object.keys(feature_importance).length > 0 && (
-          <div>
-            <button
-              onClick={() => setShowFeatureImportance(!showFeatureImportance)}
-              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
-            >
-              {showFeatureImportance ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              Model Feature Importance
-            </button>
-            {showFeatureImportance && (
-              <div className="mt-3 space-y-2">
-                {Object.entries(feature_importance)
-                  .sort(([, a], [, b]) => b - a)
-                  .slice(0, 5)
-                  .map(([feature, importance], idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-gray-600 w-32 truncate">
-                        {feature.replace(/_/g, ' ').replaceAll('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                      </span>
-                      <div className="flex-1 bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
-                          style={{ width: `${(importance * 100)}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-xs font-medium text-gray-600 w-12 text-right">
-                        {(importance * 100).toFixed(1)}%
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </div>
+          <ExplainableAI
+            featureImportance={feature_importance}
+            features={features}
+            riskScore={prediction.risk_score}
+            riskLevel={riskLevel}
+          />
         )}
 
         {/* Priority Actions */}

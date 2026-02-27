@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaSpinner, FaSearch, FaEye, FaFilter, FaUserGraduate } from "react-icons/fa";
 import apiService from "../../services/apiService";
+import loadingGif from "../../assets/loading.gif";
 
 export default function StudentListPage() {
   const navigate = useNavigate();
@@ -114,13 +115,15 @@ export default function StudentListPage() {
 
   const getRiskBadge = (level) => {
     const styles = {
-      high: 'bg-red-100 text-red-800 border-red-200',
+      critical: 'bg-red-100 text-red-800 border-red-200',
+      high: 'bg-orange-100 text-orange-800 border-orange-200',
       medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       low: 'bg-green-100 text-green-800 border-green-200',
       gathering: 'bg-gray-100 text-gray-600 border-gray-200'
     };
     
     const labels = {
+      critical: t("teacher_dashboard.critical_risk", "Critical Risk"),
       high: t("dashboard.high_risk", "High Risk"),
       medium: t("dashboard.medium_risk", "Medium Risk"),
       low: t("dashboard.low_risk", "Low Risk"),
@@ -175,6 +178,40 @@ export default function StudentListPage() {
   })();
 
 
+
+  if (loading || loadingRisk) {
+    return (
+      <div className="pt-24 md:pt-20 px-4 md:px-6 pb-8 min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col items-center justify-center py-20">
+            {/* Loading GIF - Bigger Size */}
+            <img 
+              src={loadingGif} 
+              alt="Loading..." 
+              className="w-64 h-64 mb-6"
+            />
+            
+            {/* Loading Messages */}
+            <div className="text-center space-y-2">
+              {loading && (
+                <p className="text-gray-700 text-lg font-semibold">
+                  {t("teacher_students.loading_students", "Loading Students...")}
+                </p>
+              )}
+              {!loading && loadingRisk && (
+                <p className="text-gray-700 text-lg font-semibold">
+                  {t("teacher_students.loading_risk", "Loading Risk Predictions...")}
+                </p>
+              )}
+              <p className="text-gray-500 text-sm">
+                {t("teacher_students.please_wait", "Please wait while we fetch the data")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -255,6 +292,7 @@ export default function StudentListPage() {
                 className="w-full px-3 py-2 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white transition-all"
               >
                 <option value="all">{t("teacher_students.all_risk_levels", "All Risk Levels")}</option>
+                <option value="critical">{t("teacher_dashboard.critical_risk", "Critical Risk")}</option>
                 <option value="high">{t("dashboard.high_risk", "High Risk")}</option>
                 <option value="medium">{t("dashboard.medium_risk", "Medium Risk")}</option>
                 <option value="low">{t("dashboard.low_risk", "Low Risk")}</option>

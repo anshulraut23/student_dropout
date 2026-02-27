@@ -98,7 +98,7 @@ const ClassRiskTable = ({ classId }) => {
       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
         <AlertTriangle className="w-12 h-12 text-yellow-600 mx-auto mb-3" />
         <p className="text-yellow-800">
-          No risk predictions available. Students need at least 14 days of attendance and 1 completed exam.
+          No risk predictions available. Students need at least 3 days of attendance and 1 completed exam.
         </p>
       </div>
     );
