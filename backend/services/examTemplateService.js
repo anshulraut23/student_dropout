@@ -35,6 +35,7 @@ export async function createTemplate(templateData, userId) {
     totalMarks: parseInt(templateData.totalMarks),
     passingMarks: parseInt(templateData.passingMarks),
     weightage: parseFloat(templateData.weightage),
+    orderSequence: parseInt(templateData.orderSequence) || 1,
     isActive: templateData.isActive !== undefined ? templateData.isActive : true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
@@ -42,13 +43,14 @@ export async function createTemplate(templateData, userId) {
 
   await dataStore.addExamTemplate(template);
 
-  // Auto-generate exams for all subjects in all classes
-  const generatedExams = await autoGenerateExamsForTemplate(template, userId);
+  // Note: Exams are not auto-generated anymore to avoid confusion
+  // Admins should create exam periods or exams manually for specific subjects
+  console.log('✅ Template created. Use Exam Periods to generate exams for this template.');
 
   return {
     template,
-    generatedExamsCount: generatedExams.length,
-    generatedExams
+    generatedExamsCount: 0,
+    generatedExams: []
   };
 }
 

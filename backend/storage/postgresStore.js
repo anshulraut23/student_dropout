@@ -656,17 +656,48 @@ class PostgresStore {
   // Exam Templates (stub methods - implement as needed)
   async addExamTemplate(template) {
     const query = `
-      INSERT INTO exam_templates (id, name, description, type, school_id, subjects, is_active, created_by, created_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      INSERT INTO exam_templates (
+        id, name, description, type, school_id, subjects, 
+        total_marks, passing_marks, weightage, order_sequence,
+        is_active, created_by, created_at, updated_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
       RETURNING *
     `;
     const values = [
-      template.id, template.name, template.description || null, template.type,
-      template.schoolId, JSON.stringify(template.subjects), template.isActive,
-      template.createdBy || null, template.createdAt
+      template.id, 
+      template.name, 
+      template.description || null, 
+      template.type,
+      template.schoolId, 
+      JSON.stringify(template.subjects || []), 
+      template.totalMarks || 100,
+      template.passingMarks || 40,
+      template.weightage || 0.1,
+      template.orderSequence || 1,
+      template.isActive !== undefined ? template.isActive : true,
+      template.createdBy || null, 
+      template.createdAt,
+      template.updatedAt || template.createdAt
     ];
     const result = await this.query(query, values);
-    return result.rows[0];
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      type: row.type,
+      schoolId: row.school_id,
+      subjects: row.subjects,
+      totalMarks: parseInt(row.total_marks),
+      passingMarks: parseInt(row.passing_marks),
+      weightage: parseFloat(row.weightage),
+      orderSequence: parseInt(row.order_sequence),
+      isActive: row.is_active,
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
   }
 
   async getExamTemplates(schoolId, filters = {}) {
@@ -686,13 +717,24 @@ class PostgresStore {
       paramIndex++;
     }
 
+    query += ' ORDER BY order_sequence ASC, created_at DESC';
+
     const result = await this.query(query, values);
     return result.rows.map(row => ({
-      ...row,
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      type: row.type,
       schoolId: row.school_id,
+      subjects: row.subjects,
+      totalMarks: row.total_marks ? parseInt(row.total_marks) : 100,
+      passingMarks: row.passing_marks ? parseInt(row.passing_marks) : 40,
+      weightage: row.weightage ? parseFloat(row.weightage) : 0.1,
+      orderSequence: row.order_sequence ? parseInt(row.order_sequence) : 1,
       isActive: row.is_active,
       createdBy: row.created_by,
-      createdAt: row.created_at
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
     }));
   }
 
@@ -701,11 +743,20 @@ class PostgresStore {
     if (!result.rows[0]) return null;
     const row = result.rows[0];
     return {
-      ...row,
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      type: row.type,
       schoolId: row.school_id,
+      subjects: row.subjects,
+      totalMarks: row.total_marks ? parseInt(row.total_marks) : 100,
+      passingMarks: row.passing_marks ? parseInt(row.passing_marks) : 40,
+      weightage: row.weightage ? parseFloat(row.weightage) : 0.1,
+      orderSequence: row.order_sequence ? parseInt(row.order_sequence) : 1,
       isActive: row.is_active,
       createdBy: row.created_by,
-      createdAt: row.created_at
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
     };
   }
 
@@ -721,6 +772,7 @@ class PostgresStore {
       totalMarks: 'total_marks',
       passingMarks: 'passing_marks',
       weightage: 'weightage',
+      orderSequence: 'order_sequence',
       isActive: 'is_active',
       updatedAt: 'updated_at'
     };
@@ -737,7 +789,23 @@ class PostgresStore {
 
     const query = `UPDATE exam_templates SET ${fields.join(', ')} WHERE id = $1 RETURNING *`;
     const result = await this.query(query, values);
-    return result.rows[0];
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      name: row.name,
+      description: row.description,
+      type: row.type,
+      schoolId: row.school_id,
+      subjects: row.subjects,
+      totalMarks: row.total_marks ? parseInt(row.total_marks) : 100,
+      passingMarks: row.passing_marks ? parseInt(row.passing_marks) : 40,
+      weightage: row.weightage ? parseFloat(row.weightage) : 0.1,
+      orderSequence: row.order_sequence ? parseInt(row.order_sequence) : 1,
+      isActive: row.is_active,
+      createdBy: row.created_by,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
   }
 
   async deleteExamTemplate(id) {
@@ -1011,25 +1079,33 @@ class PostgresStore {
 
   async addMarks(marks) {
     const query = `
-      INSERT INTO marks (id, exam_id, student_id, marks_obtained, percentage, grade, grade_point, status, remarks, entered_by, entered_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+      INSERT INTO marks (id, exam_id, student_id, class_id, marks_obtained, percentage, grade, status, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
       RETURNING *
     `;
     const values = [
-      marks.id, marks.examId, marks.studentId, marks.marksObtained || null,
-      marks.percentage || null, marks.grade || null, marks.gradePoint || null,
-      marks.status, marks.remarks || null, marks.enteredBy || null, marks.enteredAt
+      marks.id,
+      marks.examId,
+      marks.studentId,
+      marks.classId,
+      marks.marksObtained || null,
+      marks.percentage || null,
+      marks.grade || null,
+      marks.status || 'submitted',
+      marks.createdAt || new Date().toISOString()
     ];
     const result = await this.query(query, values);
     const row = result.rows[0];
     return {
-      ...row,
+      id: row.id,
       examId: row.exam_id,
       studentId: row.student_id,
+      classId: row.class_id,
       marksObtained: row.marks_obtained,
-      gradePoint: row.grade_point,
-      enteredBy: row.entered_by,
-      enteredAt: row.entered_at
+      percentage: row.percentage,
+      grade: row.grade,
+      status: row.status,
+      createdAt: row.created_at
     };
   }
 

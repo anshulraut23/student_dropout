@@ -189,20 +189,20 @@ export default function FacultyConnect() {
 		navigate(`/faculty-chat?facultyId=${teacher.userId || teacher.id}`);
 	}
 
-	if (loading) {
-		return (
-			<div className="min-h-screen bg-slate-100 p-6">
-				<div className="mx-auto max-w-6xl">
-					<div className="rounded-xl border bg-white p-8 text-center text-slate-600">
-						Loading faculty list...
-					</div>
-				</div>
-			</div>
-		);
-	}
+	// if (loading) {
+	// 	return (
+	// 		<div className="min-h-screen bg-slate-100 p-6">
+	// 			<div className="mx-auto max-w-6xl">
+	// 				<div className="rounded-xl border bg-white p-8 text-center text-slate-600">
+	// 					Loading faculty list...
+	// 				</div>
+	// 			</div>
+	// 		</div>
+	// 	);
+	// }
 
 	return (
-		<div className="min-h-screen bg-slate-100 p-6">
+		<div className="min-h-screen bg-slate-100 p-6" style={{ paddingTop: '5rem' }}>
 			<div className="mx-auto max-w-6xl space-y-6">
 				<div className="flex flex-wrap items-center justify-between gap-4">
 					<div>

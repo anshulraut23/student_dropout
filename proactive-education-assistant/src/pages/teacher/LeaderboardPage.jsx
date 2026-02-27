@@ -49,7 +49,7 @@ export default function LeaderboardPage() {
   const teacherPosition = getTeacherPosition();
 
   return (
-    <div className="px-4 py-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen">
+    <div className="px-4 py-6 bg-gradient-to-br from-slate-50 to-slate-100 min-h-screen" style={{ paddingTop: '5rem' }}>
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center md:text-left">

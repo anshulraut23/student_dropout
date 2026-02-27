@@ -9,16 +9,18 @@ import { calculatePercentage, calculateGrade, getDefaultGradeConfig } from '../u
  * Enter marks for a single student
  */
 export const enterMarks = async (marksData, userId) => {
-  // Validate marks data
-  const validation = validateMarksData(marksData);
-  if (!validation.valid) {
-    throw new Error(validation.error);
-  }
-
-  // Get exam details
+  // Get exam details first (needed for validation)
   const exam = await dataStore.getExamById(marksData.examId);
   if (!exam) {
     throw new Error('Exam not found');
+  }
+
+  // Validate marks data
+  const validation = validateMarksData(marksData, exam);
+  if (!validation.valid) {
+    console.error('❌ Marks validation failed:', validation.error);
+    console.error('   Data:', marksData);
+    throw new Error(validation.error);
   }
 
   // Verify student exists and belongs to the exam's class
@@ -45,7 +47,10 @@ export const enterMarks = async (marksData, userId) => {
   let grade = null;
   let gradePoint = null;
 
-  if (marksData.status === 'present') {
+  const scoredStatuses = ['submitted', 'verified', 'present'];
+  const unscoredStatuses = ['pending', 'absent', 'exempted'];
+
+  if (scoredStatuses.includes(marksData.status)) {
     percentage = calculatePercentage(marksData.marksObtained, exam.totalMarks);
     const gradeResult = calculateGrade(percentage, gradeConfig);
     if (gradeResult) {
@@ -60,18 +65,12 @@ export const enterMarks = async (marksData, userId) => {
     id: marksId,
     examId: marksData.examId,
     studentId: marksData.studentId,
-    marksObtained: marksData.status === 'present' ? marksData.marksObtained : 0,
+    classId: exam.classId, // Add classId from exam
+    marksObtained: scoredStatuses.includes(marksData.status) ? marksData.marksObtained : 0,
     grade,
-    gradePoint,
     percentage,
-    status: marksData.status || 'present',
-    remarks: marksData.remarks || null,
-    enteredBy: userId,
-    enteredAt: new Date().toISOString(),
-    updatedBy: null,
-    updatedAt: null,
-    verifiedBy: null,
-    verifiedAt: null
+    status: marksData.status || 'submitted',
+    createdAt: new Date().toISOString()
   };
 
   await dataStore.addMarks(marks);
@@ -117,7 +116,8 @@ export const enterBulkMarks = async (bulkData, userId) => {
         let grade = null;
         let gradePoint = null;
 
-        if (record.status === 'present') {
+        const scoredStatuses = ['submitted', 'verified', 'present'];
+        if (scoredStatuses.includes(record.status)) {
           percentage = calculatePercentage(record.marksObtained, exam.totalMarks);
           const gradeResult = calculateGrade(percentage, gradeConfig);
           if (gradeResult) {
@@ -127,11 +127,11 @@ export const enterBulkMarks = async (bulkData, userId) => {
         }
 
         const updates = {
-          marksObtained: record.status === 'present' ? record.marksObtained : 0,
+          marksObtained: scoredStatuses.includes(record.status) ? record.marksObtained : 0,
           grade,
           gradePoint,
           percentage,
-          status: record.status || 'present',
+          status: record.status || 'submitted',
           remarks: record.remarks || null,
           updatedBy: userId,
           updatedAt: new Date().toISOString()
@@ -146,7 +146,7 @@ export const enterBulkMarks = async (bulkData, userId) => {
           examId,
           studentId: record.studentId,
           marksObtained: record.marksObtained,
-          status: record.status || 'present',
+          status: record.status || 'submitted',
           remarks: record.remarks || null
         }, userId);
 
@@ -155,10 +155,14 @@ export const enterBulkMarks = async (bulkData, userId) => {
       }
 
     } catch (error) {
+      console.error(`❌ Failed to enter marks for student ${record.studentId}:`);
+      console.error('   Error:', error);
+      console.error('   Message:', error.message);
+      console.error('   Stack:', error.stack);
       results.failed++;
       results.errors.push({
         studentId: record.studentId,
-        error: error.message
+        error: error.message || error.toString()
       });
     }
   }
@@ -200,14 +204,14 @@ export const updateMarks = async (marksId, updates, userId) => {
     const newMarks = updates.marksObtained !== undefined ? updates.marksObtained : marks.marksObtained;
     const newStatus = updates.status || marks.status;
 
-    if (newStatus === 'present') {
+    if (newStatus === 'submitted' || newStatus === 'verified' || newStatus === 'present') {
       updates.percentage = calculatePercentage(newMarks, exam.totalMarks);
       const gradeResult = calculateGrade(updates.percentage, gradeConfig);
       if (gradeResult) {
         updates.grade = gradeResult.grade;
         updates.gradePoint = gradeResult.gradePoint;
       }
-    } else {
+    } else if (newStatus === 'pending' || newStatus === 'absent' || newStatus === 'exempted') {
       updates.marksObtained = 0;
       updates.percentage = 0;
       updates.grade = null;
@@ -302,15 +306,15 @@ export const getStudentPerformance = async (studentId, filters = {}) => {
   }
 
   // Calculate summary
-  const presentMarks = marks.filter(m => m.status === 'present');
-  const totalPercentage = presentMarks.reduce((sum, m) => sum + m.percentage, 0);
-  const totalGradePoints = presentMarks.reduce((sum, m) => sum + (m.gradePoint || 0), 0);
+  const submittedMarks = marks.filter(m => m.status === 'submitted' || m.status === 'verified' || m.status === 'present');
+  const totalPercentage = submittedMarks.reduce((sum, m) => sum + m.percentage, 0);
+  const totalGradePoints = submittedMarks.reduce((sum, m) => sum + (m.gradePoint || 0), 0);
 
   const summary = {
     totalExams: marks.length,
-    examsAppeared: presentMarks.length,
-    averagePercentage: presentMarks.length > 0 ? parseFloat((totalPercentage / presentMarks.length).toFixed(2)) : 0,
-    averageGradePoint: presentMarks.length > 0 ? parseFloat((totalGradePoints / presentMarks.length).toFixed(2)) : 0
+    examsAppeared: submittedMarks.length,
+    averagePercentage: submittedMarks.length > 0 ? parseFloat((totalPercentage / submittedMarks.length).toFixed(2)) : 0,
+    averageGradePoint: submittedMarks.length > 0 ? parseFloat((totalGradePoints / submittedMarks.length).toFixed(2)) : 0
   };
 
   // Assign overall grade based on average percentage

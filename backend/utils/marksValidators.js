@@ -34,7 +34,7 @@ export const validateMarksObtained = (marksObtained, totalMarks) => {
  * Validate marks status
  */
 export const validateMarksStatus = (status) => {
-  const validStatuses = ['present', 'absent', 'exempted'];
+  const validStatuses = ['pending', 'submitted', 'verified', 'present', 'absent', 'exempted'];
   
   if (!validStatuses.includes(status)) {
     return {
@@ -70,10 +70,10 @@ export const validateMarksData = (data, exam) => {
     }
   }
   
-  // Validate marks only if status is 'present'
-  if (data.status === 'present') {
+  // Validate marks obtained (required for submitted/verified status)
+  if (data.status === 'submitted' || data.status === 'verified' || data.status === 'present') {
     if (data.marksObtained === undefined || data.marksObtained === null) {
-      errors.push('Marks obtained is required for present students');
+      errors.push('Marks obtained is required for submitted/verified status');
     } else if (exam) {
       const marksValidation = validateMarksObtained(data.marksObtained, exam.totalMarks);
       if (!marksValidation.valid) {
@@ -82,14 +82,9 @@ export const validateMarksData = (data, exam) => {
     }
   }
   
-  // Cannot enter marks for absent/exempted students
-  if ((data.status === 'absent' || data.status === 'exempted') && data.marksObtained > 0) {
-    errors.push('Cannot enter marks for absent or exempted students');
-  }
-  
   return {
     valid: errors.length === 0,
-    errors
+    error: errors.length > 0 ? errors.join('; ') : null
   };
 };
 

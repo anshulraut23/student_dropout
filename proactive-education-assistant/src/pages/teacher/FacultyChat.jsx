@@ -239,20 +239,20 @@ export default function FacultyChat() {
 		}
 	};
 
-	if (loading) {
-		return (
-			<div className="min-h-screen bg-slate-100 p-6">
-				<div className="mx-auto max-w-6xl">
-					<div className="rounded-xl border bg-white p-8 text-center text-slate-600">
-						Loading faculty chat...
-					</div>
-				</div>
-			</div>
-		);
-	}
+	// if (loading) {
+	// 	return (
+	// 		<div className="min-h-screen bg-slate-100 p-6">
+	// 			<div className="mx-auto max-w-6xl">
+	// 				<div className="rounded-xl border bg-white p-8 text-center text-slate-600">
+	// 					Loading faculty chat...
+	// 				</div>
+	// 			</div>
+	// 		</div>
+	// 	);
+	// }
 
 	return (
-		<div className="min-h-screen bg-slate-100 p-6">
+		<div className="min-h-screen bg-slate-100 p-6" style={{ paddingTop: '5rem' }}>
 			<div className="mx-auto max-w-6xl space-y-5">
 				<div className="flex items-center justify-between">
 					<div>

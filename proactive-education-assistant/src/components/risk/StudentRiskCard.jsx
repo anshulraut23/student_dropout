@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, TrendingUp, CheckCircle, Info } from 'lucide-react';
+import { AlertTriangle, TrendingUp, CheckCircle, Info, ChevronDown, ChevronUp } from 'lucide-react';
 import apiService from '../../services/apiService';
 
 /**
@@ -15,6 +15,7 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
   const [error, setError] = useState(null);
   const [insufficientData, setInsufficientData] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
+  const [showFeatureImportance, setShowFeatureImportance] = useState(false);
 
   useEffect(() => {
     // If data is provided, use it directly
@@ -98,45 +99,34 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
         <div className="p-6 bg-gray-50 border-b border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-2xl">
-              ⏳
+              📊
             </div>
             <div>
-              <h3 className="text-xl font-bold text-gray-800">
-                Prediction Not Available Yet
-              </h3>
-              <p className="text-gray-600 text-sm mt-1">
-                Gathering sufficient data for AI analysis
-              </p>
+              <h3 className="text-lg font-bold text-gray-800">Building Prediction Data</h3>
+              <p className="text-sm text-gray-600">More information needed for accurate analysis</p>
             </div>
           </div>
         </div>
 
         {/* Body */}
-        <div className="p-6 space-y-6">
-          {/* Explanation */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-blue-800 text-sm">
-              <strong>Why can't I see a prediction?</strong><br />
-              This student does not have enough historical data for the AI to make a reliable dropout risk prediction.
-            </p>
-          </div>
-
-          {/* Requirements Checklist */}
-          <div>
-            <h4 className="font-semibold text-gray-800 mb-3">Data Requirements</h4>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                <span className="text-red-500 text-xl flex-shrink-0">❌</span>
+        <div className="p-6 space-y-4">
+          {/* Requirements */}
+          <div className="space-y-3">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">📅</div>
                 <div>
                   <p className="font-medium text-gray-800">Attendance Records</p>
                   <p className="text-sm text-gray-600">
-                    Requires at least <strong>14 days</strong> of marked attendance
+                    Requires at least <strong>{insufficientData.requirements.attendance} days</strong> of marked attendance
                   </p>
                 </div>
               </div>
-              
-              <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                <span className="text-red-500 text-xl flex-shrink-0">❌</span>
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">📝</div>
                 <div>
                   <p className="font-medium text-gray-800">Exam Scores</p>
                   <p className="text-sm text-gray-600">
@@ -185,7 +175,7 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
 
   if (!riskData) return null;
 
-  const { prediction, components, explanation, recommendations, priority_actions } = riskData;
+  const { prediction, components, explanation, recommendations, priority_actions, feature_importance } = riskData;
   
   // Safety check - if prediction is missing, treat as insufficient data
   if (!prediction || !prediction.risk_level) {
@@ -226,10 +216,28 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
 
       {/* Body */}
       <div className="p-6 space-y-6">
-        {/* AI Explanation */}
-        <div>
-          <h4 className="font-semibold text-gray-800 mb-2">Analysis</h4>
-          <p className="text-gray-600">{explanation}</p>
+        {/* AI Explanation Section */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <div className="text-2xl mt-1">🤖</div>
+            <div className="flex-1">
+              <h4 className="font-semibold text-blue-900 mb-2">AI Analysis</h4>
+              <div className="text-blue-900 text-sm leading-relaxed">
+                {Array.isArray(explanation) ? (
+                  <ul className="space-y-2">
+                    {explanation.map((item, idx) => (
+                      <li key={idx} className="flex gap-2">
+                        <span>•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p>{explanation}</p>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Component Scores */}
@@ -253,6 +261,42 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
             />
           </div>
         </div>
+
+        {/* Feature Importance */}
+        {feature_importance && Object.keys(feature_importance).length > 0 && (
+          <div>
+            <button
+              onClick={() => setShowFeatureImportance(!showFeatureImportance)}
+              className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900"
+            >
+              {showFeatureImportance ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              Model Feature Importance
+            </button>
+            {showFeatureImportance && (
+              <div className="mt-3 space-y-2">
+                {Object.entries(feature_importance)
+                  .sort(([, a], [, b]) => b - a)
+                  .slice(0, 5)
+                  .map(([feature, importance], idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-gray-600 w-32 truncate">
+                        {feature.replace(/_/g, ' ').replaceAll('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                      </span>
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 h-2 rounded-full"
+                          style={{ width: `${(importance * 100)}%` }}
+                        ></div>
+                      </div>
+                      <span className="text-xs font-medium text-gray-600 w-12 text-right">
+                        {(importance * 100).toFixed(1)}%
+                      </span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Priority Actions */}
         {priority_actions && priority_actions.length > 0 && (
