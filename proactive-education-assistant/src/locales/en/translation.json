@@ -606,5 +606,117 @@
     "sent_invitations": "Sent Invitations",
     "no_sent_invite": "No pending sent invitations",
     "awaiting_acceptance": "Awaiting Acceptance"
+  },
+  "landing_page": {
+    "brand_initials": "ES",
+    "brand_name": "EduShield",
+    "nav": {
+      "sign_in": "Sign In",
+      "get_started": "Get Started"
+    },
+    "hero": {
+      "badge": "EXPLAINABLE AI RISK ENGINE",
+      "title_prefix": "Predict Dropouts",
+      "title_highlight": "Before",
+      "title_suffix": "They Happen.",
+      "subtitle": "AI-powered early warning system for schools, NGOs, and rural education programs.",
+      "start_free": "Start Free",
+      "highlights": {
+        "realtime": "Real-time Risk Prediction",
+        "offline": "Offline-First for Rural Areas",
+        "interventions": "Actionable Intervention Insights"
+      }
+    },
+    "problem": {
+      "badge": "The Challenge",
+      "title": "The Problem Schools Face"
+    },
+    "problems": {
+      "missed_signals_title": "Dropout signals are missed",
+      "missed_signals_desc": "Teachers can't manually track 40+ students daily. Early warning signs go unnoticed until it's too late.",
+      "scattered_data_title": "Data scattered in registers & sheets",
+      "scattered_data_desc": "Attendance, marks, and behavior data live in separate places with no unified view or trend analysis.",
+      "no_intervention_title": "No early intervention system",
+      "no_intervention_desc": "Without actionable alerts, well-meaning teachers have no structured process to intervene before a student drops out."
+    },
+    "solution": {
+      "badge": "The Solution",
+      "title": "How EduShield Works",
+      "subtitle": "A simple, three-step pipeline — from raw classroom data to timely teacher action."
+    },
+    "steps": {
+      "collect_data_title": "Collect Data",
+      "collect_data_desc": "Attendance, marks, and behavior inputs — even offline via mobile.",
+      "ai_trends_title": "AI Analyzes Trends",
+      "ai_trends_desc": "Our explainable AI engine scores each student's dropout risk in real time.",
+      "act_early_title": "Teachers Act Early",
+      "act_early_desc": "Receive targeted intervention recommendations before it's too late."
+    },
+    "preview": {
+      "badge": "Live Preview",
+      "title": "See Risk Intelligence in Action",
+      "dashboard_header": "EduShield Dashboard — Class 9B",
+      "risk_overview": "Risk Overview",
+      "risk_high": "High",
+      "risk_medium": "Medium",
+      "risk_low": "Low",
+      "attendance_trend": "Attendance Trend",
+      "active_alerts": "Active Alerts",
+      "alert_1": "Aarav missed 8 of last 10 classes",
+      "alert_2": "Rahul's math score dropped 22pts",
+      "alert_3": "Dev showing disengagement pattern",
+      "students": {
+        "aarav": "Aarav Shah",
+        "priya": "Priya Nair",
+        "rahul": "Rahul Verma",
+        "sana": "Sana Sheikh",
+        "dev": "Dev Patil"
+      },
+      "weeks": {
+        "w1": "W1",
+        "w2": "W2",
+        "w3": "W3",
+        "w4": "W4",
+        "w5": "W5",
+        "w6": "W6",
+        "w7": "W7"
+      }
+    },
+    "features": {
+      "badge": "What We Offer",
+      "title": "Built for Real Classrooms",
+      "risk_analytics_title": "Risk Analytics",
+      "risk_analytics_desc": "Instant visual risk scoring for every student",
+      "class_management_title": "Class Management",
+      "class_management_desc": "Organize classes, subjects, and student data",
+      "smart_insights_title": "Smart Insights",
+      "smart_insights_desc": "AI-style alerts for attendance drops and score dips",
+      "offline_first_title": "Offline First",
+      "offline_first_desc": "Works without internet, syncs when online"
+    },
+    "impact": {
+      "badge": "Our Impact",
+      "title": "Measurable Results",
+      "earlier_detection": "Earlier Risk Detection",
+      "faster_response": "Faster Intervention Response",
+      "offline_compatibility": "Offline Compatibility"
+    },
+    "accessibility": {
+      "badge": "Inclusive Design",
+      "title": "Built for Real Classrooms",
+      "subtitle": "Designed to work everywhere — from urban schools to the most remote rural areas.",
+      "offline_first": "Offline First",
+      "multilingual": "Multilingual",
+      "accessible": "Accessible",
+      "low_data_mode": "Low Data Mode"
+    },
+    "cta": {
+      "badge": "Get Started Today",
+      "title": "Start Protecting Students Today.",
+      "subtitle": "Join hundreds of schools and NGOs using EduShield to keep students in classrooms where they belong.",
+      "create_account": "Create School Account",
+      "book_demo": "Book Demo"
+    },
+    "footer": "© 2026 EduShield — Built for Teachers, By Teachers"
   }
 }
