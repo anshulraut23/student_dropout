@@ -2,8 +2,9 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import apiService from "../../services/apiService";
-import { FaArrowLeft, FaDownload, FaUser, FaCalendarCheck, FaChartBar, FaUserCheck, FaHandsHelping, FaPlus, FaExclamationTriangle } from "react-icons/fa";
+import { FaArrowLeft, FaDownload, FaUser, FaCalendarCheck, FaChartBar, FaUserCheck, FaHandsHelping, FaPlus, FaExclamationTriangle, FaBolt } from "react-icons/fa";
 import { StudentRiskCard } from "../../components/risk";
+import { StudentActionsTab } from "../../components/interventions";
 import loadingGif from "../../assets/loading.gif";
 
 const HORIZON_STYLES = `
@@ -69,7 +70,7 @@ export default function StudentProfilePage() {
   }, [student]);
 
   useEffect(() => {
-    if (student && activeTab !== "overview" && activeTab !== "personal") {
+    if (student && activeTab !== "overview" && activeTab !== "personal" && activeTab !== "actions") {
       if (activeTab === "risk-explanation") {
         loadRiskData();
       } else {
@@ -316,7 +317,8 @@ export default function StudentProfilePage() {
                   { key: "scores", label: "Scores", icon: FaChartBar },
                   { key: "behavior", label: "Behavior", icon: FaUserCheck },
                   { key: "interventions", label: "Interventions", icon: FaHandsHelping },
-                  { key: "risk-explanation", label: "Risk Explanation", icon: FaExclamationTriangle }
+                  { key: "risk-explanation", label: "Risk Explanation", icon: FaExclamationTriangle },
+                  { key: "actions", label: "Actions", icon: FaBolt }
                 ].map(tab => {
                   const Icon = tab.icon;
                   return (
@@ -659,6 +661,15 @@ export default function StudentProfilePage() {
                       <StudentRiskCard studentId={id} />
                     )}
                   </div>
+                )}
+
+                {/* Actions Tab - NEW */}
+                {activeTab === "actions" && (
+                  <StudentActionsTab
+                    student={student}
+                    riskData={riskData}
+                    features={riskData?.features}
+                  />
                 )}
               </div>
             </div>
