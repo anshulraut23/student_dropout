@@ -163,24 +163,25 @@ class FeatureExtractor {
   
   /**
    * Calculate data tier based on completeness
+   * HACKATHON MODE: Reduced thresholds for quick demo
    * Tier 0: Insufficient data (block prediction)
-   * Tier 1: Low confidence (14-30 days, 1-2 exams)
-   * Tier 2: Medium confidence (30-60 days, 3-5 exams)
-   * Tier 3: High confidence (60+ days, 5+ exams)
+   * Tier 1: Low confidence (3-7 days, 1-2 exams)
+   * Tier 2: Medium confidence (8-14 days, 3-4 exams)
+   * Tier 3: High confidence (15+ days, 5+ exams)
    */
   _calculateDataTier(daysTracked, examsCompleted) {
-    // Tier 0: Insufficient data
-    if (daysTracked < 14 || examsCompleted < 1) {
+    // Tier 0: Insufficient data (HACKATHON: 3 days minimum)
+    if (daysTracked < 3 || examsCompleted < 1) {
       return 0;
     }
     
     // Tier 3: High confidence
-    if (daysTracked >= 60 && examsCompleted >= 5) {
+    if (daysTracked >= 15 && examsCompleted >= 5) {
       return 3;
     }
     
     // Tier 2: Medium confidence
-    if (daysTracked >= 30 && examsCompleted >= 3) {
+    if (daysTracked >= 8 && examsCompleted >= 3) {
       return 2;
     }
     
@@ -190,10 +191,10 @@ class FeatureExtractor {
   
   _getDataTierLabel(tier) {
     const labels = {
-      0: 'Insufficient Data',
-      1: 'Low Confidence',
-      2: 'Medium Confidence',
-      3: 'High Confidence'
+      0: 'Insufficient Data (Need 3+ days)',
+      1: 'Low Confidence (3-7 days)',
+      2: 'Medium Confidence (8-14 days)',
+      3: 'High Confidence (15+ days)'
     };
     return labels[tier] || 'Unknown';
   }

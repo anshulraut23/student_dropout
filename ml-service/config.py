@@ -13,10 +13,10 @@ class Config:
     MEDIUM_RISK_THRESHOLD = 0.6
     HIGH_RISK_THRESHOLD = 0.8
     
-    # Data tier thresholds
-    TIER_0_MIN_DAYS = 14
+    # Data tier thresholds (HACKATHON MODE: Reduced for quick demo)
+    TIER_0_MIN_DAYS = 3   # Minimum for any prediction
     TIER_0_MIN_EXAMS = 1
-    TIER_1_MIN_DAYS = 30
+    TIER_1_MIN_DAYS = 8   # Low confidence
     TIER_1_MIN_EXAMS = 3
-    TIER_2_MIN_DAYS = 60
+    TIER_2_MIN_DAYS = 15  # Medium confidence
     TIER_2_MIN_EXAMS = 5

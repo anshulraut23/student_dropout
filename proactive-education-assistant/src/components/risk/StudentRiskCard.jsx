@@ -25,7 +25,7 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
         setInsufficientData({
           message: 'Insufficient data for prediction',
           requirements: {
-            attendance: 14,
+            attendance: 3, // HACKATHON: Changed from 14
             exams: 1
           }
         });
@@ -60,13 +60,24 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
     } catch (err) {
       // Check if it's an insufficient data error (400 status)
       if (err.message?.includes('Insufficient data') || err.message?.includes('data_tier')) {
-        // Parse the error to get data requirements
+        // Try to parse missing data from error response
+        let missingData = null;
+        try {
+          // If error has response data with missing info
+          if (err.response?.data?.missing) {
+            missingData = err.response.data.missing;
+          }
+        } catch (e) {
+          // Ignore parsing errors
+        }
+        
         setInsufficientData({
           message: err.message || 'Insufficient data for prediction',
           requirements: {
-            attendance: 14, // minimum days
+            attendance: 3, // HACKATHON: minimum days (changed from 14)
             exams: 1 // minimum exams
-          }
+          },
+          missing: missingData
         });
         setRiskData(null);
         setError(null);
@@ -91,8 +102,14 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
     );
   }
 
-  // Insufficient Data State - Friendly Empty State
+  // Insufficient Data State - Friendly Empty State with Smart Messages
   if (insufficientData) {
+    const missing = insufficientData.missing;
+    const currentDays = missing?.current_days || 0;
+    const currentExams = missing?.current_exams || 0;
+    const daysNeeded = missing?.days_needed || (insufficientData.requirements.attendance - currentDays);
+    const examsNeeded = missing?.exams_needed || (insufficientData.requirements.exams - currentExams);
+    
     return (
       <div className="bg-white rounded-lg shadow-md overflow-hidden">
         {/* Header */}
@@ -110,31 +127,57 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
 
         {/* Body */}
         <div className="p-6 space-y-4">
-          {/* Requirements */}
+          {/* Current Progress */}
+          {missing && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="flex items-start gap-3">
+                <div className="text-2xl">📈</div>
+                <div className="flex-1">
+                  <p className="font-medium text-blue-900 mb-2">Current Progress</p>
+                  <div className="space-y-1 text-sm text-blue-800">
+                    <p>✓ Attendance: <strong>{currentDays} day{currentDays !== 1 ? 's' : ''}</strong> recorded</p>
+                    <p>✓ Exams: <strong>{currentExams} exam{currentExams !== 1 ? 's' : ''}</strong> completed</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* What's Missing - Smart Messages */}
           <div className="space-y-3">
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl">📅</div>
-                <div>
-                  <p className="font-medium text-gray-800">Attendance Records</p>
-                  <p className="text-sm text-gray-600">
-                    Requires at least <strong>{insufficientData.requirements.attendance} days</strong> of marked attendance
-                  </p>
+            {daysNeeded > 0 && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">📅</div>
+                  <div>
+                    <p className="font-medium text-orange-900">Attendance Needed</p>
+                    <p className="text-sm text-orange-800 mt-1">
+                      Please add <strong>{daysNeeded} more day{daysNeeded !== 1 ? 's' : ''} of attendance</strong> to unlock predictions
+                    </p>
+                    <p className="text-xs text-orange-700 mt-1">
+                      (Need {insufficientData.requirements.attendance} days total, currently have {currentDays})
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="text-2xl">📝</div>
-                <div>
-                  <p className="font-medium text-gray-800">Exam Scores</p>
-                  <p className="text-sm text-gray-600">
-                    Requires at least <strong>1 finalized exam</strong> score (submitted or verified)
-                  </p>
+            {examsNeeded > 0 && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-2xl">📝</div>
+                  <div>
+                    <p className="font-medium text-orange-900">Exam Score Needed</p>
+                    <p className="text-sm text-orange-800 mt-1">
+                      Please add <strong>{examsNeeded} exam score{examsNeeded !== 1 ? 's' : ''}</strong> to unlock predictions
+                    </p>
+                    <p className="text-xs text-orange-700 mt-1">
+                      (Need {insufficientData.requirements.exams} exam total, currently have {currentExams})
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Call to Action */}
@@ -142,11 +185,16 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
             <div className="flex items-start gap-3">
               <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="font-medium text-green-800 mb-1">What to do next</p>
-                <p className="text-sm text-green-700">
-                  Please continue marking daily attendance and logging exam scores. 
-                  The AI will <strong>automatically unlock predictions</strong> when enough data is gathered.
-                </p>
+                <p className="font-medium text-green-800 mb-1">Next Steps</p>
+                <ul className="text-sm text-green-700 space-y-1">
+                  {daysNeeded > 0 && (
+                    <li>• Mark attendance for {daysNeeded} more day{daysNeeded !== 1 ? 's' : ''}</li>
+                  )}
+                  {examsNeeded > 0 && (
+                    <li>• Enter {examsNeeded} exam score{examsNeeded !== 1 ? 's' : ''}</li>
+                  )}
+                  <li>• Predictions will <strong>automatically appear</strong> when requirements are met</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -154,7 +202,10 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
           {/* Progress Indicator */}
           <div className="text-center pt-4 border-t border-gray-200">
             <p className="text-sm text-gray-500">
-              Predictions will be available once minimum data requirements are met
+              {daysNeeded === 0 && examsNeeded === 0 
+                ? 'Processing... Predictions should appear shortly'
+                : `${daysNeeded > 0 ? daysNeeded + ' day' + (daysNeeded !== 1 ? 's' : '') : ''} ${daysNeeded > 0 && examsNeeded > 0 ? 'and ' : ''} ${examsNeeded > 0 ? examsNeeded + ' exam' + (examsNeeded !== 1 ? 's' : '') : ''} away from predictions`
+              }
             </p>
           </div>
         </div>

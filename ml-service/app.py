@@ -99,7 +99,7 @@ def predict_risk():
         if data_tier == 0:
             return jsonify({
                 'error': 'Insufficient data for prediction',
-                'message': 'Student needs at least 14 days of attendance and 1 completed exam',
+                'message': 'Student needs at least 3 days of attendance and 1 completed exam',
                 'data_tier': 0,
                 'confidence': 'insufficient'
             }), 400

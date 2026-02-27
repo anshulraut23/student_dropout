@@ -1023,7 +1023,7 @@ export default function DashboardPage() {
       
       // Check for specific error messages
       if (err.message?.includes('not enough') || err.message?.includes('insufficient') || err.message?.includes('Insufficient training data')) {
-        setRetrainMessage('⚠️ Need more historical student data to train a new model. Please ensure you have at least 50 students with 14+ days attendance and 1+ exam.');
+        setRetrainMessage('⚠️ Need more historical student data to train a new model. Please ensure you have at least 50 students with 3+ days attendance and 1+ exam.');
       } else if (err.message?.includes('No students found') || err.message?.includes('No active students')) {
         setRetrainMessage('⚠️ No students found in your school. Please add students first before retraining the AI model.');
       } else if (err.message?.includes('Service Unavailable') || err.message?.includes('503')) {
@@ -1385,7 +1385,7 @@ export default function DashboardPage() {
                     The AI system needs more student data to generate dropout risk predictions. Please ensure students have:
                   </p>
                   <ul style={{ color: "#6b7280", fontSize: "0.875rem", marginTop: "0", marginBottom: "0.75rem", paddingLeft: "1.25rem", fontFamily: "var(--font-body)" }}>
-                    <li style={{ marginBottom: "0.25rem" }}>At least <strong>14 days</strong> of marked attendance</li>
+                    <li style={{ marginBottom: "0.25rem" }}>At least <strong>3 days</strong> of marked attendance</li>
                     <li>At least <strong>1 completed exam</strong> with scores</li>
                   </ul>
                   <p style={{ color: "#6b7280", margin: 0, fontSize: "0.875rem", fontFamily: "var(--font-body)" }}>

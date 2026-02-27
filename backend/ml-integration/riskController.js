@@ -37,11 +37,22 @@ class RiskController {
       
       // Step 2: Check data tier (block if insufficient)
       if (featureData.features.data_tier === 0) {
+        const daysTracked = featureData.features.days_tracked || 0;
+        const examsCompleted = featureData.features.exams_completed || 0;
+        const daysNeeded = Math.max(0, 3 - daysTracked);
+        const examsNeeded = Math.max(0, 1 - examsCompleted);
+        
         return res.status(400).json({
           error: 'Insufficient data for prediction',
-          message: 'Student needs at least 14 days of attendance and 1 completed exam',
+          message: 'Student needs at least 3 days of attendance and 1 completed exam',
           data_tier: 0,
-          features: featureData.features
+          features: featureData.features,
+          missing: {
+            days_needed: daysNeeded,
+            exams_needed: examsNeeded,
+            current_days: daysTracked,
+            current_exams: examsCompleted
+          }
         });
       }
       
@@ -323,7 +334,7 @@ class RiskController {
         return res.status(400).json({
           success: false,
           error: 'Insufficient training data',
-          message: `Need at least 50 students with sufficient data to retrain the model. Currently have ${validFeatures.length} students with 14+ days attendance and 1+ exam. Please add more student data.`
+          message: `Need at least 50 students with sufficient data to retrain the model. Currently have ${validFeatures.length} students with 3+ days attendance and 1+ exam. Please add more student data.`
         });
       }
       
