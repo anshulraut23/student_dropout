@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { AlertTriangle, TrendingUp, CheckCircle, Info, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertTriangle, TrendingUp, CheckCircle, Info } from 'lucide-react';
 import apiService from '../../services/apiService';
 import ExplainableAI from './ExplainableAI';
 import PlainLanguageSummary from './PlainLanguageSummary';
+import DataQualityAnalysis from './DataQualityAnalysis';
+import ExplainableAIInsights from './ExplainableAIInsights';
 
 /**
  * Student Risk Card Component
@@ -17,9 +19,9 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
   const [error, setError] = useState(null);
   const [insufficientData, setInsufficientData] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [showFeatureImportance, setShowFeatureImportance] = useState(false);
   const [attendanceData, setAttendanceData] = useState(null);
   const [marksData, setMarksData] = useState(null);
+  const [dataQualityScore, setDataQualityScore] = useState(null);
 
   useEffect(() => {
     // If data is provided, use it directly
@@ -56,6 +58,9 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
       setError(null);
       setInsufficientData(null);
       setRiskData(null);
+      
+      // Load attendance data first for quality analysis
+      await loadAttendanceAndMarks();
       
       const response = await apiService.getStudentRiskPrediction(studentId);
       setRiskData(response);
@@ -418,28 +423,6 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
           </div>
         </div>
 
-        {/* Component Scores */}
-        <div>
-          <h4 className="font-semibold text-gray-800 mb-3">Risk Breakdown</h4>
-          <div className="space-y-2">
-            <RiskBar
-              label="Attendance Risk"
-              value={components.attendance_risk}
-              color="blue"
-            />
-            <RiskBar
-              label="Academic Risk"
-              value={components.academic_risk}
-              color="purple"
-            />
-            <RiskBar
-              label="Behavior Risk"
-              value={components.behavior_risk}
-              color="orange"
-            />
-          </div>
-        </div>
-
         {/* Explainable AI Section */}
         {feature_importance && Object.keys(feature_importance).length > 0 && (
           <ExplainableAI
@@ -449,6 +432,19 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
             riskLevel={riskLevel}
           />
         )}
+
+        {/* Data Quality Analysis */}
+        <DataQualityAnalysis 
+          features={features}
+          attendanceData={attendanceData}
+        />
+
+        {/* Explainable AI Insights */}
+        <ExplainableAIInsights
+          features={features}
+          prediction={prediction}
+          dataQualityScore={dataQualityScore}
+        />
 
         {/* Priority Actions */}
         {priority_actions && priority_actions.length > 0 && (
@@ -464,30 +460,6 @@ const StudentRiskCard = ({ studentId, data: providedData }) => {
                 </li>
               ))}
             </ul>
-          </div>
-        )}
-
-        {/* Recommendations */}
-        {recommendations && recommendations.length > 0 && (
-          <div>
-            <button
-              onClick={() => setShowDetails(!showDetails)}
-              className="text-blue-600 hover:text-blue-800 font-medium text-sm flex items-center gap-1"
-            >
-              {showDetails ? 'Hide' : 'Show'} All Recommendations
-              <span className="text-xs">({recommendations.length})</span>
-            </button>
-            
-            {showDetails && (
-              <ul className="mt-3 space-y-2">
-                {recommendations.map((rec, idx) => (
-                  <li key={idx} className="text-gray-700 text-sm flex items-start gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                    <span>{rec}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
         )}
       </div>

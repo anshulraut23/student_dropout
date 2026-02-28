@@ -914,6 +914,79 @@ class ApiService {
       auth: true,
     });
   }
+
+  // AI Assistant endpoints
+  async queryAIAssistant(query, confirmAction = null, confirmData = null) {
+    const body = { query };
+    if (confirmAction) body.confirmAction = confirmAction;
+    if (confirmData) body.confirmData = confirmData;
+    
+    return this.request('/ai-assistant/query', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      auth: true,
+    });
+  }
+
+  async queryGeneralAssistant(query) {
+    return this.request('/ai-assistant/general', {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+      auth: true,
+    });
+  }
+
+  async getAISuggestions() {
+    return this.request('/ai-assistant/suggestions', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  // Dropout Tracking endpoints
+  async updateDropoutStatus(data) {
+    return this.request('/dropout/update-status', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      auth: true,
+    });
+  }
+
+  async getDropoutStatistics() {
+    return this.request('/dropout/statistics', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getStudentDropoutHistory(studentId) {
+    return this.request(`/dropout/history/${studentId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getTrainingData() {
+    return this.request('/dropout/training-data', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async saveModelPerformance(data) {
+    return this.request('/dropout/model-performance', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      auth: true,
+    });
+  }
+
+  async getModelPerformance() {
+    return this.request('/dropout/model-performance', {
+      method: 'GET',
+      auth: true,
+    });
+  }
 }
 
 export default new ApiService();

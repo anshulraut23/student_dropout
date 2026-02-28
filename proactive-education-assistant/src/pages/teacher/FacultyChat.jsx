@@ -6,6 +6,7 @@ import {
 	FaFilePdf,
 	FaPaperclip,
 	FaPaperPlane,
+	FaRobot,
 	FaUserFriends,
 } from "react-icons/fa";
 import apiService from "../../services/apiService";
@@ -39,6 +40,10 @@ export default function FacultyChat() {
 	const [text, setText] = useState("");
 	const [sending, setSending] = useState(false);
 	const [attachmentDraft, setAttachmentDraft] = useState(null);
+	const [aiMode, setAiMode] = useState(false);
+	const [aiSuggestions, setAiSuggestions] = useState([]);
+	const [aiLoading, setAiLoading] = useState(false);
+	const [pendingConfirmation, setPendingConfirmation] = useState(null);
 
 	const fileInputRef = useRef(null);
 	const bottomRef = useRef(null);
@@ -70,6 +75,16 @@ export default function FacultyChat() {
 				const connectionsResult = await apiService.getAcceptedConnections();
 				if (connectionsResult?.success) {
 					setConnections(connectionsResult.connections || []);
+				}
+
+				// Load AI suggestions
+				try {
+					const suggestionsResult = await apiService.getAISuggestions();
+					if (suggestionsResult?.success) {
+						setAiSuggestions(suggestionsResult.suggestions || []);
+					}
+				} catch (err) {
+					console.error('Failed to load AI suggestions:', err);
 				}
 
 				// Check if a specific faculty was passed in URL
@@ -144,9 +159,10 @@ export default function FacultyChat() {
 
 	// Get conversation ID for selected faculty
 	const currentConversationId = useMemo(() => {
+		if (aiMode) return 'ai-assistant';
 		if (!currentTeacher || !selectedFaculty) return null;
 		return getConversationId(currentTeacher.id, selectedFaculty.id);
-	}, [currentTeacher, selectedFaculty]);
+	}, [currentTeacher, selectedFaculty, aiMode]);
 
 	// Get messages for current conversation
 	const currentMessages = useMemo(() => {
@@ -186,8 +202,17 @@ export default function FacultyChat() {
 	};
 
 	const sendMessage = async () => {
-		if (!currentTeacher || !selectedFaculty || !currentConversationId) return;
+		if (!currentTeacher) return;
 		if (!text.trim() && !attachmentDraft) return;
+
+		// Handle AI mode
+		if (aiMode) {
+			await handleAIQuery();
+			return;
+		}
+
+		// Regular message sending
+		if (!selectedFaculty || !currentConversationId) return;
 
 		setSending(true);
 		try {
@@ -239,6 +264,88 @@ export default function FacultyChat() {
 		}
 	};
 
+	const handleAIQuery = async () => {
+		if (!text.trim()) return;
+
+		setAiLoading(true);
+		setSending(true);
+		setError("");
+
+		try {
+			// Prepare request body
+			const requestBody = {
+				query: text.trim()
+			};
+			
+			// If there's a pending confirmation, include it
+			if (pendingConfirmation) {
+				requestBody.confirmAction = pendingConfirmation.confirmAction;
+				requestBody.confirmData = pendingConfirmation.confirmData;
+			}
+			
+			const result = await apiService.queryAIAssistant(requestBody.query, requestBody.confirmAction, requestBody.confirmData);
+
+			if (result?.success) {
+				// Create a temporary AI conversation ID
+				const aiConversationId = 'ai-assistant';
+				
+				// Add user query to messages
+				const userMessage = {
+					id: `user-${Date.now()}`,
+					conversationId: aiConversationId,
+					senderId: currentTeacher.id,
+					receiverId: 'ai',
+					text: text.trim(),
+					createdAt: new Date().toISOString(),
+				};
+
+				// Add AI response to messages
+				const aiMessage = {
+					id: `ai-${Date.now()}`,
+					conversationId: aiConversationId,
+					senderId: 'ai',
+					receiverId: currentTeacher.id,
+					text: result.response,
+					isAI: true,
+					data: result.data,
+					type: result.type,
+					needsConfirmation: result.needsConfirmation,
+					confirmAction: result.confirmAction,
+					confirmData: result.confirmData,
+					createdAt: new Date().toISOString(),
+				};
+
+				setMessagesStore((prev) => ({
+					...prev,
+					[aiConversationId]: [...(prev[aiConversationId] || []), userMessage, aiMessage],
+				}));
+
+				setText("");
+				
+				// Set pending confirmation if needed
+				if (result.needsConfirmation) {
+					setPendingConfirmation({
+						confirmAction: result.confirmAction,
+						confirmData: result.confirmData
+					});
+				} else {
+					setPendingConfirmation(null);
+				}
+				
+				// Auto-scroll to bottom
+				setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+			} else {
+				setError(result?.error || "Failed to process AI query");
+			}
+		} catch (err) {
+			console.error("AI query error:", err);
+			setError(err.message || "Unable to process AI query");
+		} finally {
+			setAiLoading(false);
+			setSending(false);
+		}
+	};
+
 	// if (loading) {
 	// 	return (
 	// 		<div className="min-h-screen bg-slate-100 p-6">
@@ -278,10 +385,29 @@ export default function FacultyChat() {
 				<div className="grid min-h-[620px] gap-4 lg:grid-cols-[280px_1fr]">
 					<aside className="rounded-xl border bg-white">
 						<div className="border-b px-4 py-3">
-							<h2 className="text-sm font-semibold text-slate-900">Connected Faculty</h2>
+							<h2 className="text-sm font-semibold text-slate-900">Connections</h2>
 						</div>
 
 						<div className="divide-y">
+							{/* AI Assistant Option */}
+							<button
+								onClick={() => {
+									setAiMode(true);
+									setSelectedFacultyId('');
+								}}
+								className={`w-full px-4 py-3 text-left transition flex items-center gap-3 ${
+									aiMode ? "bg-blue-50 border-l-4 border-blue-600" : "hover:bg-slate-50"
+								}`}
+							>
+								<div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+									<FaRobot className="text-white" />
+								</div>
+								<div>
+									<p className="font-medium text-slate-900">AI Assistant</p>
+									<p className="text-xs text-slate-500">Ask about student data</p>
+								</div>
+							</button>
+
 							{connectedFaculty.length === 0 ? (
 								<div className="p-4 text-sm text-slate-500">
 									<div className="mb-2 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-500">
@@ -299,9 +425,12 @@ export default function FacultyChat() {
 								connectedFaculty.map((faculty) => (
 									<button
 										key={faculty.id}
-										onClick={() => setSelectedFacultyId(faculty.id)}
+										onClick={() => {
+											setSelectedFacultyId(faculty.id);
+											setAiMode(false);
+										}}
 										className={`w-full px-4 py-3 text-left transition ${
-											selectedFacultyId === faculty.id ? "bg-blue-50" : "hover:bg-slate-50"
+											selectedFacultyId === faculty.id && !aiMode ? "bg-blue-50" : "hover:bg-slate-50"
 										}`}
 									>
 										<p className="font-medium text-slate-900">{faculty.name}</p>
@@ -313,7 +442,251 @@ export default function FacultyChat() {
 					</aside>
 
 					<section className="flex flex-col rounded-xl border bg-white">
-						{selectedFaculty ? (
+						{aiMode ? (
+							<>
+								<div className="border-b px-5 py-3 bg-gradient-to-r from-blue-50 to-purple-50">
+									<div className="flex items-center gap-3">
+										<div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-600">
+											<FaRobot className="text-white" />
+										</div>
+										<div>
+											<h3 className="font-semibold text-slate-900">AI Assistant</h3>
+											<p className="text-xs text-slate-500">Ask me about your students</p>
+										</div>
+									</div>
+								</div>
+
+								<div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 p-4">
+									{(!messagesStore['ai-assistant'] || messagesStore['ai-assistant'].length === 0) ? (
+										<div className="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center">
+											<div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-purple-100">
+												<FaRobot className="text-3xl text-blue-600" />
+											</div>
+											<h4 className="mb-2 text-lg font-semibold text-slate-900">Welcome to AI Assistant</h4>
+											<p className="mb-4 text-sm text-slate-600">
+												Ask me about your students' performance, attendance, behavior, and more!
+											</p>
+											<div className="space-y-2">
+												<p className="text-xs font-medium text-slate-700">Try asking:</p>
+												{aiSuggestions.slice(0, 3).map((suggestion, idx) => (
+													<button
+														key={idx}
+														onClick={() => setText(suggestion)}
+														className="block w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 hover:border-blue-300 transition"
+													>
+														"{suggestion}"
+													</button>
+												))}
+											</div>
+										</div>
+									) : (
+										messagesStore['ai-assistant'].map((message) => {
+											const isUser = message.senderId === currentTeacher?.id;
+											return (
+												<div
+													key={message.id}
+													className={`flex ${isUser ? "justify-end" : "justify-start"}`}
+												>
+													<div
+														className={`max-w-[85%] rounded-xl px-4 py-3 ${
+															isUser
+																? "bg-blue-600 text-white"
+																: "border bg-white text-slate-900"
+														}`}
+													>
+														{message.isAI ? (
+															<div className="space-y-2">
+																{/* Parse and format the markdown-style response */}
+																{message.text.split('\n').map((line, idx) => {
+																	// Headers with **text**
+																	if (line.match(/^\*\*(.+?)\*\*$/)) {
+																		const text = line.replace(/\*\*/g, '');
+																		return (
+																			<h3 key={idx} className="text-lg font-bold text-slate-800 mt-4 mb-2">
+																				{text}
+																			</h3>
+																		);
+																	}
+																	// Bold inline text **text:**
+																	if (line.match(/^\*\*(.+?):\*\*/) || line.match(/^\*\*(.+?)\*\*/)) {
+																		const text = line.replace(/\*\*/g, '');
+																		return (
+																			<p key={idx} className="font-semibold text-slate-800 mt-3 mb-1">
+																				{text}
+																			</p>
+																		);
+																	}
+																	// Table rows (detect by | separators)
+																	if (line.includes('|') && line.trim().startsWith('|')) {
+																		const cells = line.split('|').filter(cell => cell.trim() !== '');
+																		const isHeaderSeparator = cells.every(cell => cell.trim().match(/^[-:]+$/));
+																		
+																		if (isHeaderSeparator) {
+																			return null; // Skip separator rows
+																		}
+																		
+																		// Check if this is a header row (first table row)
+																		const isHeader = cells.some(cell => 
+																			cell.trim().match(/^(Field|Metric|Type|Factor|#|Student Name|Class)/i)
+																		);
+																		
+																		return (
+																			<div key={idx} className="flex border-b border-slate-200 py-1">
+																				{cells.map((cell, cellIdx) => (
+																					<div 
+																						key={cellIdx} 
+																						className={`flex-1 px-2 text-sm ${
+																							isHeader 
+																								? 'font-bold text-slate-900 bg-slate-100' 
+																								: 'text-slate-700'
+																						} ${cellIdx === 0 ? 'min-w-[40px]' : ''}`}
+																					>
+																						{cell.trim()}
+																					</div>
+																				))}
+																			</div>
+																		);
+																	}
+																	// List items starting with •
+																	if (line.trim().startsWith('•')) {
+																		return (
+																			<div key={idx} className="flex gap-2 ml-2 my-1">
+																				<span className="text-blue-500 font-bold mt-0.5">•</span>
+																				<span className="text-slate-700 flex-1">{line.trim().substring(1).trim()}</span>
+																			</div>
+																		);
+																	}
+																	// Numbered list items
+																	if (line.match(/^\d+\.\s/)) {
+																		const parts = line.split('**');
+																		return (
+																			<div key={idx} className="ml-2 mb-2">
+																				<div className="flex gap-2">
+																					<span className="font-semibold text-blue-600">{line.match(/^\d+\./)[0]}</span>
+																					<span className="font-semibold text-slate-800">
+																						{parts[1] || line.substring(line.indexOf('.') + 1).trim()}
+																					</span>
+																				</div>
+																			</div>
+																		);
+																	}
+																	// Sub-items with indentation (Roll, Attendance, etc.)
+																	if (line.trim().startsWith('   •')) {
+																		return (
+																			<div key={idx} className="flex gap-2 ml-8 text-sm my-1">
+																				<span className="text-slate-400 mt-0.5">•</span>
+																				<span className="text-slate-600 flex-1">{line.trim().substring(1).trim()}</span>
+																			</div>
+																		);
+																	}
+																	// Empty lines
+																	if (line.trim() === '') {
+																		return <div key={idx} className="h-2"></div>;
+																	}
+																	// Regular text
+																	return (
+																		<p key={idx} className="text-slate-700 leading-relaxed">
+																			{line}
+																		</p>
+																	);
+																})}
+																
+																{/* Show confirmation buttons if needed */}
+																{message.needsConfirmation && (
+																	<div className="mt-4 flex gap-2 border-t pt-3">
+																		<button
+																			onClick={() => {
+																				setText('yes');
+																				handleAIQuery();
+																			}}
+																			className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+																		>
+																			Yes, proceed
+																		</button>
+																		<button
+																			onClick={() => {
+																				setText('no');
+																				handleAIQuery();
+																			}}
+																			className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition"
+																		>
+																			No, cancel
+																		</button>
+																	</div>
+																)}
+															</div>
+														) : (
+															<p className="whitespace-pre-wrap text-sm">{message.text}</p>
+														)}
+
+														<p
+															className={`mt-2 text-[10px] ${
+																isUser ? "text-blue-100" : "text-slate-500"
+															}`}
+														>
+															{fmtTime(message.createdAt)}
+														</p>
+													</div>
+												</div>
+											);
+										})
+									)}
+									{aiLoading && (
+										<div className="flex justify-start">
+											<div className="rounded-xl border bg-white px-4 py-3">
+												<div className="flex items-center gap-2">
+													<div className="flex gap-1">
+														<div className="h-2 w-2 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: '0ms' }}></div>
+														<div className="h-2 w-2 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: '150ms' }}></div>
+														<div className="h-2 w-2 animate-bounce rounded-full bg-blue-500" style={{ animationDelay: '300ms' }}></div>
+													</div>
+													<span className="text-xs text-slate-500">AI is thinking...</span>
+												</div>
+											</div>
+										</div>
+									)}
+									<div ref={bottomRef} />
+								</div>
+
+								<div className="border-t p-3">
+									<div className="mb-2 flex flex-wrap gap-2">
+										{aiSuggestions.map((suggestion, idx) => (
+											<button
+												key={idx}
+												onClick={() => setText(suggestion)}
+												className="rounded-full border border-slate-300 bg-white px-3 py-1 text-xs text-slate-700 hover:bg-slate-50 hover:border-blue-300 transition"
+											>
+												{suggestion}
+											</button>
+										))}
+									</div>
+
+									<div className="flex gap-2">
+										<input
+											type="text"
+											value={text}
+											onChange={(e) => setText(e.target.value)}
+											placeholder="Ask about a student... (e.g., 'Report of John Doe 8A')"
+											className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+											onKeyDown={(e) => {
+												if (e.key === "Enter") {
+													e.preventDefault();
+													sendMessage();
+												}
+											}}
+										/>
+
+										<button
+											onClick={sendMessage}
+											disabled={sending || !text.trim()}
+											className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+										>
+											<FaPaperPlane /> Ask
+										</button>
+									</div>
+								</div>
+							</>
+						) : selectedFaculty ? (
 							<>
 								<div className="border-b px-5 py-3">
 									<h3 className="font-semibold text-slate-900">{selectedFaculty.name}</h3>
@@ -440,7 +813,13 @@ export default function FacultyChat() {
 							</>
 						) : (
 							<div className="flex h-full items-center justify-center p-6 text-center text-slate-500">
-								Select a connected faculty member to start chatting.
+								<div>
+									<div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
+										<FaUserFriends className="text-2xl" />
+									</div>
+									<p className="mb-2 font-medium">No conversation selected</p>
+									<p className="text-sm">Select a faculty member or use AI Assistant to get started</p>
+								</div>
 							</div>
 						)}
 					</section>
