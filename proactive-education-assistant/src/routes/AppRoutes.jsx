@@ -23,8 +23,14 @@ import MyClassesPage from "../pages/teacher/MyClassesPage";
 import LoginPage from "../pages/teacher/LoginPage";
 import FacultyConnect from "../pages/teacher/FacultyConnect";
 import FacultyChat from "../pages/teacher/FacultyChat";
+import AIAssistantPage from "../pages/teacher/AIAssistantPage";
+import SuperAdminDashboard from "../pages/super-admin/SuperAdminDashboard";
+import SuperAdminSchoolsPage from "../pages/super-admin/SuperAdminSchoolsPage";
+import SuperAdminSchoolDetailPage from "../pages/super-admin/SuperAdminSchoolDetailPage";
+import SuperAdminProfile from "../pages/super-admin/SuperAdminProfile";
 
 import MainLayout from "../layouts/MainLayout";
+import SuperAdminLayout from "../layouts/SuperAdminLayout";
 
 // Admin
 import { AdminProvider } from "../context/AdminContext";
@@ -37,6 +43,8 @@ import ExamTemplateManagement from "../pages/admin/ExamTemplateManagement";
 import ExamManagement from "../pages/admin/ExamManagement";
 import Analytics from "../pages/admin/Analytics";
 import AdminProfile from "../pages/admin/AdminProfile";
+import DropoutManagementPage from "../pages/admin/DropoutManagementPage";
+import ModelPerformancePage from "../pages/admin/ModelPerformancePage";
 
 export default function AppRoutes() {
   const readAuthState = () => {
@@ -105,6 +113,33 @@ export default function AppRoutes() {
         } 
       />
 
+      <Route 
+        path="/super-admin/login" 
+        element={
+          isLoggedIn && userRole === "super_admin" 
+            ? <Navigate to="/super-admin/dashboard" replace /> 
+            : <LoginPage />
+        } 
+      />
+
+      {/* Super Admin Routes */}
+      {isLoggedIn && userRole === "super_admin" ? (
+        <Route path="/super-admin" element={<SuperAdminLayout />}>
+          <Route index element={<Navigate to="/super-admin/dashboard" replace />} />
+          <Route path="dashboard" element={<SuperAdminDashboard />} />
+          <Route path="schools" element={<SuperAdminSchoolsPage />} />
+          <Route path="schools/:schoolId" element={<SuperAdminSchoolDetailPage />} />
+          <Route path="profile" element={<SuperAdminProfile />} />
+        </Route>
+      ) : (
+        <>
+          <Route path="/super-admin/dashboard" element={<Navigate to="/super-admin/login" replace />} />
+          <Route path="/super-admin/schools" element={<Navigate to="/super-admin/login" replace />} />
+          <Route path="/super-admin/schools/:schoolId" element={<Navigate to="/super-admin/login" replace />} />
+          <Route path="/super-admin/profile" element={<Navigate to="/super-admin/login" replace />} />
+        </>
+      )}
+
       {/* Admin Routes */}
       {isLoggedIn && userRole === "admin" ? (
         <Route 
@@ -123,6 +158,8 @@ export default function AppRoutes() {
           <Route path="exam-templates" element={<ExamTemplateManagement />} />
           <Route path="exams" element={<ExamManagement />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="dropout-management" element={<DropoutManagementPage />} />
+          <Route path="model-performance" element={<ModelPerformancePage />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
       ) : (
@@ -148,6 +185,7 @@ export default function AppRoutes() {
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/faculty-connect" element={<FacultyConnect />} />
             <Route path="/faculty-chat" element={<FacultyChat />} />
+            <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/about" element={<AboutPage />} />
           </Route>
@@ -169,6 +207,7 @@ export default function AppRoutes() {
           <Route path="/leaderboard" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/faculty-connect" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/faculty-chat" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/ai-assistant" element={<Navigate to="/teacher/login" replace />} />
           <Route path="/profile" element={<Navigate to="/teacher/login" replace />} />
         </>
       )}

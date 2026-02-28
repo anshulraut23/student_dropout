@@ -580,7 +580,80 @@
     "collect_badges": "बैज संग्रहित करें",
     "collect_badges_desc": "विशिष्ट लक्ष्य और मील के पत्थर प्राप्त करके विशेष बैज अर्जित करें",
     "climb_leaderboard": "लीडरबोर्ड पर चढ़ें",
-    "climb_leaderboard_desc": "सहकर्मियों के साथ प्रतिस्पर्धा करें और अपने स्कूल के लीडरबोर्ड के शीर्ष पर चढ़ें"
+    "climb_leaderboard_desc": "सहकर्मियों के साथ प्रतिस्पर्धा करें और अपने स्कूल के लीडरबोर्ड के शीर्ष पर चढ़ें",
+    "stats": {
+      "total_xp": "कुल XP",
+      "achievements": "उपलब्धियां",
+      "day_streak": "दिनों की स्ट्रीक",
+      "students_helped": "सहायता किए छात्र"
+    },
+    "levels": {
+      "newcomer": "नवागंतुक",
+      "helper": "सहायक",
+      "student_champion": "छात्र चैम्पियन",
+      "mentor": "मार्गदर्शक",
+      "master_educator": "मास्टर शिक्षक"
+    },
+    "level": {
+      "current_level": "वर्तमान स्तर",
+      "level_label": "स्तर",
+      "progress_to_next": "अगले स्तर तक प्रगति",
+      "xp_remaining": "{{count}} XP शेष",
+      "level_roadmap": "स्तर रोडमैप",
+      "current": "वर्तमान",
+      "unlocked": "अनलॉक"
+    },
+    "daily_tasks": {
+      "title": "आज के बोनस कार्य",
+      "xp_earned": "+{{xp}} XP अर्जित",
+      "earn_xp": "+{{xp}} XP अर्जित करें",
+      "daily_progress": "दैनिक प्रगति",
+      "completed_count": "{{done}} / {{total}} पूर्ण",
+      "all_tasks_completed": "सभी कार्य पूरे! बहुत बढ़िया!",
+      "this_week": "इस सप्ताह",
+      "total_xp_earned": "कुल अर्जित XP",
+      "tasks_completed": "पूर्ण कार्य",
+      "students_updated": "अपडेट किए छात्र",
+      "next_milestone": "अगला माइलस्टोन",
+      "day_streak_goal": "30 दिन की स्ट्रीक",
+      "days_to_go": "{{count}} दिन बाकी",
+      "add_attendance_record": "उपस्थिति रिकॉर्ड जोड़ें",
+      "add_student_marks": "छात्र अंक जोड़ें",
+      "add_behaviour_note": "व्यवहार नोट जोड़ें",
+      "complete_intervention": "हस्तक्षेप पूरा करें",
+      "daily_login": "दैनिक लॉगिन"
+    },
+    "badges": {
+      "title_unlocked": "अनलॉक उपलब्धियां",
+      "no_badges": "अभी तक कोई बैज नहीं मिला। अपना पहला बैज अनलॉक करने के लिए जारी रखें!",
+      "earned_on": "अर्जित",
+      "available_to_unlock": "अनलॉक के लिए उपलब्ध",
+      "recently": "हाल ही में",
+      "first_10_students_title": "पहले 10 छात्र",
+      "first_10_students_desc": "अपने पहले 10 छात्र जोड़े",
+      "seven_day_streak_title": "7 दिन की स्ट्रीक",
+      "seven_day_streak_desc": "लगातार 7 दिन लॉगिन किया",
+      "hundred_records_title": "100 उपस्थिति रिकॉर्ड",
+      "hundred_records_desc": "100 उपस्थिति रिकॉर्ड ट्रैक किए",
+      "risk_saver_title": "छात्र सहयोगी",
+      "risk_saver_desc": "5 उच्च-जोखिम छात्रों की मदद की",
+      "consistency_star_title": "निरंतरता स्टार",
+      "consistency_star_desc": "एक सप्ताह तक सभी दैनिक कार्य पूरे किए"
+    },
+    "certificates": {
+      "title_rewards": "प्रमाणपत्र और पुरस्कार",
+      "unlock_first": "लेवल 2 पर पहुंचकर अपना पहला प्रमाणपत्र अनलॉक करें!",
+      "keep_earning": "स्तर बढ़ाने के लिए XP अर्जित करते रहें",
+      "unlocked_at_level": "लेवल {{level}} पर अनलॉक",
+      "download": "डाउनलोड",
+      "download_failed": "प्रमाणपत्र डाउनलोड नहीं हो सका। कृपया पुनः प्रयास करें।",
+      "next_certificate": "अगला प्रमाणपत्र",
+      "unlock_at_level": "लेवल {{level}} पर अनलॉक होगा",
+      "cert_emerging_educator": "उभरते शिक्षक",
+      "cert_student_champion": "छात्र चैम्पियन",
+      "cert_certified_mentor": "प्रमाणित मार्गदर्शक",
+      "cert_master_educator": "मास्टर शिक्षक"
+    }
   },
   "teacher_faculty": {
     "title": "फैकल्टी कनेक्ट",

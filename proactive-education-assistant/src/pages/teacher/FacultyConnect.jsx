@@ -7,7 +7,6 @@ import {
 	FaClock,
 	FaComments,
 	FaPaperPlane,
-	FaSearch,
 	FaTimes,
 	FaUserCheck,
 	FaUserClock,
@@ -252,14 +251,13 @@ export default function FacultyConnect() {
 							<label className="mb-2 block text-sm font-medium text-slate-700">
 								{t("teacher_faculty.search_faculty", "Search faculty")}
 							</label>
-							<div className="relative">
-								<FaSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+							<div>
 								<input
 									type="text"
 									value={search}
 									onChange={(e) => setSearch(e.target.value)}
 									placeholder={t("teacher_faculty.search_placeholder", "Search by name, email, subject")}
-									className="w-full rounded-lg border border-slate-300 py-2 pl-9 pr-3 text-sm focus:border-blue-500 focus:outline-none"
+									className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
 								/>
 							</div>
 						</div>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Admin Auth</title>
+</head>
+<body>
+    <h1>Admin Authentication Check</h1>
+    <div id="result"></div>
+    
+    <script>
+        const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+        const role = localStorage.getItem('role') || sessionStorage.getItem('role');
+        
+        const resultDiv = document.getElementById('result');
+        
+        if (!token) {
+            resultDiv.innerHTML = '<p style="color: red;">❌ No token found - You are not logged in</p>';
+        } else if (role !== 'admin') {
+            resultDiv.innerHTML = `
+                <p style="color: orange;">⚠️ You are logged in but not as admin</p>
+                <p>Current role: <strong>${role}</strong></p>
+                <p>Token: ${token.substring(0, 20)}...</p>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <p style="color: green;">✅ You are logged in as admin</p>
+                <p>Role: <strong>${role}</strong></p>
+                <p>Token: ${token.substring(0, 20)}...</p>
+                <p><a href="http://localhost:5173/admin/dropout-management">Try accessing Dropout Management</a></p>
+            `;
+        }
+        
+        // Also check what's in storage
+        console.log('localStorage:', {
+            token: localStorage.getItem('token'),
+            role: localStorage.getItem('role'),
+            userId: localStorage.getItem('userId'),
+            schoolId: localStorage.getItem('schoolId')
+        });
+        
+        console.log('sessionStorage:', {
+            token: sessionStorage.getItem('token'),
+            role: sessionStorage.getItem('role'),
+            userId: sessionStorage.getItem('userId'),
+            schoolId: sessionStorage.getItem('schoolId')
+        });
+    </script>
+</body>
+</html>

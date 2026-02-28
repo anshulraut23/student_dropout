@@ -8,7 +8,9 @@ import {
   FaGraduationCap,
   FaTimes,
   FaFileAlt,
-  FaClipboardList
+  FaClipboardList,
+  FaUserGraduate,
+  FaBrain
 } from 'react-icons/fa';
 
 /* ── Sidebar-scoped styles ─────────────────────────────────────────────── */
@@ -298,6 +300,8 @@ function AdminSidebar({ onClose }) {
     { path: '/admin/exam-templates', label: 'Exam Templates', icon: FaFileAlt    },
     { path: '/admin/exams',          label: 'Exams',          icon: FaClipboardList },
     { path: '/admin/analytics',      label: 'Analytics',      icon: FaChartBar   },
+    { path: '/admin/dropout-management', label: 'Dropout Tracking', icon: FaUserGraduate },
+    { path: '/admin/model-performance', label: 'ML Performance', icon: FaBrain },
   ];
 
   const isActive = (path) => location.pathname === path;
@@ -356,8 +360,29 @@ function AdminSidebar({ onClose }) {
           <div className="hs-divider" />
           <div className="hs-section-label">Academic</div>
 
-          {/* Second group: Subjects, Exam Templates, Analytics */}
-          {menuItems.slice(3).map((item) => {
+          {/* Second group: Subjects, Exam Templates, Exams, Analytics */}
+          {menuItems.slice(3, 7).map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={handleNavClick}
+                className={`hs-nav-item${active ? ' hs-active' : ''}`}
+                style={{ color: '#ffffff', textDecoration: 'none' }}
+              >
+                <span className="hs-nav-icon"><Icon style={{ color: '#ffffff' }} /></span>
+                <span style={{ color: '#ffffff' }}>{item.label}</span>
+              </Link>
+            );
+          })}
+
+          <div className="hs-divider" />
+          <div className="hs-section-label">ML & Predictions</div>
+
+          {/* Third group: Dropout Tracking, ML Performance */}
+          {menuItems.slice(7).map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
             return (

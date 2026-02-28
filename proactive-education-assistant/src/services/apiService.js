@@ -126,6 +126,32 @@ class ApiService {
           statusText: response.statusText,
           data
         });
+
+        const errorText = (data?.error || data?.message || '').toLowerCase();
+        const isSchoolDeactivatedError = response.status === 403 && errorText.includes('deactivated');
+
+        if (isSchoolDeactivatedError) {
+          const activeRole = localStorage.getItem('role') || sessionStorage.getItem('role');
+          const redirectPath = activeRole === 'admin' ? '/admin/login' : '/teacher/login';
+
+          localStorage.removeItem('token');
+          localStorage.removeItem('role');
+          localStorage.removeItem('school_id');
+          localStorage.removeItem('school_name');
+
+          sessionStorage.removeItem('token');
+          sessionStorage.removeItem('role');
+          sessionStorage.removeItem('school_id');
+          sessionStorage.removeItem('school_name');
+
+          sessionStorage.setItem('forcedLogoutMessage', data.error || data.message || 'Your school is currently deactivated. Contact the super admin.');
+          window.dispatchEvent(new Event('localStorageUpdate'));
+
+          if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+            window.location.assign(redirectPath);
+          }
+        }
+
         const error = new Error(data.error || data.message || `Request failed with status ${response.status}`);
         error.response = { data, status: response.status }; // Preserve response data
         throw error;
@@ -183,6 +209,78 @@ class ApiService {
   async getSchoolById(schoolId) {
     return this.request(`/schools/${schoolId}`, {
       method: 'GET',
+    });
+  }
+
+  // Super Admin endpoints
+  async getPlatformStats() {
+    return this.request('/super-admin/platform-stats', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getAllSchoolsSummary() {
+    return this.request('/super-admin/schools', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getAllSchoolAdmins() {
+    return this.request('/super-admin/admins', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getPendingAdminRequests() {
+    return this.request('/super-admin/admin-requests/pending', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async approveAdminRequest(adminId) {
+    return this.request(`/super-admin/admin-requests/${adminId}/approve`, {
+      method: 'POST',
+      auth: true,
+    });
+  }
+
+  async rejectAdminRequest(adminId) {
+    return this.request(`/super-admin/admin-requests/${adminId}/reject`, {
+      method: 'POST',
+      auth: true,
+    });
+  }
+
+  async updateSchoolStatus(schoolId, isActive) {
+    return this.request(`/super-admin/schools/${schoolId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isActive }),
+      auth: true,
+    });
+  }
+
+  async getSchoolSummary(schoolId) {
+    return this.request(`/super-admin/schools/${schoolId}/summary`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getSchoolUpdates(schoolId) {
+    return this.request(`/super-admin/schools/${schoolId}/updates`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getSchoolHighRiskStudents(schoolId) {
+    return this.request(`/super-admin/schools/${schoolId}/high-risk-students`, {
+      method: 'GET',
+      auth: true,
     });
   }
 
@@ -919,6 +1017,79 @@ class ApiService {
   async retrainMLModel() {
     return this.request('/ml/retrain', {
       method: 'POST',
+      auth: true,
+    });
+  }
+
+  // AI Assistant endpoints
+  async queryAIAssistant(query, confirmAction = null, confirmData = null) {
+    const body = { query };
+    if (confirmAction) body.confirmAction = confirmAction;
+    if (confirmData) body.confirmData = confirmData;
+    
+    return this.request('/ai-assistant/query', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      auth: true,
+    });
+  }
+
+  async queryGeneralAssistant(query) {
+    return this.request('/ai-assistant/general', {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+      auth: true,
+    });
+  }
+
+  async getAISuggestions() {
+    return this.request('/ai-assistant/suggestions', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  // Dropout Tracking endpoints
+  async updateDropoutStatus(data) {
+    return this.request('/dropout/update-status', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      auth: true,
+    });
+  }
+
+  async getDropoutStatistics() {
+    return this.request('/dropout/statistics', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getStudentDropoutHistory(studentId) {
+    return this.request(`/dropout/history/${studentId}`, {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async getTrainingData() {
+    return this.request('/dropout/training-data', {
+      method: 'GET',
+      auth: true,
+    });
+  }
+
+  async saveModelPerformance(data) {
+    return this.request('/dropout/model-performance', {
+      method: 'POST',
+      body: JSON.stringify(data),
+      auth: true,
+    });
+  }
+
+  async getModelPerformance() {
+    return this.request('/dropout/model-performance', {
+      method: 'GET',
       auth: true,
     });
   }

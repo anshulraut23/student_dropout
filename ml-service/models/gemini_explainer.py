@@ -10,7 +10,7 @@ class GeminiExplainer:
     
     def __init__(self, api_key: str):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
     
     def generate_explanation(self, student_data: Dict, risk_result: Dict) -> Dict:
         """

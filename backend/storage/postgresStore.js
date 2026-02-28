@@ -2021,6 +2021,59 @@ class PostgresStore {
       createdAt: row.created_at
     }));
   }
+
+  // ==================== AI ASSISTANT HELPER METHODS ====================
+
+  /**
+   * Get student attendance records with date filtering
+   */
+  async getStudentAttendance(studentId, startDate = null, endDate = null) {
+    const filters = { studentId };
+    if (startDate) filters.startDate = startDate;
+    if (endDate) filters.endDate = endDate;
+    return this.getAttendanceByStudent(studentId, filters);
+  }
+
+  /**
+   * Get behaviors for a specific student
+   */
+  async getBehaviorsByStudent(studentId) {
+    return this.getBehaviors({ studentId });
+  }
+
+  /**
+   * Get interventions for a specific student
+   */
+  async getInterventionsByStudent(studentId) {
+    return this.getInterventions({ studentId });
+  }
+
+  /**
+   * Get risk prediction for a student
+   */
+  async getRiskPrediction(studentId) {
+    const result = await this.query(
+      'SELECT * FROM risk_predictions WHERE student_id = $1 ORDER BY created_at DESC LIMIT 1',
+      [studentId]
+    );
+    
+    if (!result.rows[0]) return null;
+    
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      studentId: row.student_id,
+      schoolId: row.school_id,
+      riskScore: parseFloat(row.risk_score),
+      riskLevel: row.risk_level,
+      confidence: row.confidence,
+      dataTier: row.data_tier,
+      componentScores: row.component_scores,
+      recommendations: row.recommendations,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
+  }
 }
 
 export default new PostgresStore();

@@ -250,15 +250,14 @@ export default function InterventionsHistoryPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
             {/* Search */}
-            <div className="relative">
-              <FaSearch className="absolute left-3 md:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs md:text-sm" />
+            <div>
               <input
                 type="text"
                 name="searchQuery"
                 value={filters.searchQuery}
                 onChange={handleFilterChange}
                 placeholder={t("teacher_interventions.search_placeholder", "Search student, type...")}
-                className="w-full pl-9 md:pl-11 pr-3 md:pr-4 py-2 md:py-2.5 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 md:px-4 py-2 md:py-2.5 text-xs md:text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
