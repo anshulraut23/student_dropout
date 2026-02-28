@@ -29,6 +29,7 @@
     "nanoid": "^5.1.6",
     "node-fetch": "^3.3.2",
     "pg": "^8.11.3",
+    "resend": "^6.9.3",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {

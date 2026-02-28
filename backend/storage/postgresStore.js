@@ -474,6 +474,10 @@ class PostgresStore {
       fatherName: row.father_name,
       motherName: row.mother_name,
       contactNumber: row.contact_number,
+      parentName: row.parent_name,
+      parentPhone: row.parent_phone,
+      parentEmail: row.parent_email,
+      riskLevel: row.risk_level,
       createdAt: row.created_at
     };
   }
@@ -490,6 +494,10 @@ class PostgresStore {
       fatherName: row.father_name,
       motherName: row.mother_name,
       contactNumber: row.contact_number,
+      parentName: row.parent_name,
+      parentPhone: row.parent_phone,
+      parentEmail: row.parent_email,
+      riskLevel: row.risk_level,
       createdAt: row.created_at
     }));
   }
@@ -1418,6 +1426,8 @@ class PostgresStore {
       studentId: row.student_id,
       initiatedBy: row.initiated_by,
       interventionType: row.intervention_type,
+      riskLevel: row.risk_level,
+      triggerDate: row.trigger_date,
       actionPlan: row.action_plan,
       expectedOutcome: row.expected_outcome,
       startDate: row.start_date,
@@ -1472,6 +1482,8 @@ class PostgresStore {
       studentId: row.student_id,
       initiatedBy: row.initiated_by,
       interventionType: row.intervention_type,
+      riskLevel: row.risk_level,
+      triggerDate: row.trigger_date,
       actionPlan: row.action_plan,
       expectedOutcome: row.expected_outcome,
       startDate: row.start_date,
@@ -1491,6 +1503,8 @@ class PostgresStore {
       studentId: row.student_id,
       initiatedBy: row.initiated_by,
       interventionType: row.intervention_type,
+      riskLevel: row.risk_level,
+      triggerDate: row.trigger_date,
       actionPlan: row.action_plan,
       expectedOutcome: row.expected_outcome,
       startDate: row.start_date,
@@ -1511,6 +1525,8 @@ class PostgresStore {
       priority: 'priority',
       title: 'title',
       description: 'description',
+      riskLevel: 'risk_level',
+      triggerDate: 'trigger_date',
       actionPlan: 'action_plan',
       expectedOutcome: 'expected_outcome',
       startDate: 'start_date',
@@ -1540,6 +1556,8 @@ class PostgresStore {
       studentId: row.student_id,
       initiatedBy: row.initiated_by,
       interventionType: row.intervention_type,
+      riskLevel: row.risk_level,
+      triggerDate: row.trigger_date,
       actionPlan: row.action_plan,
       expectedOutcome: row.expected_outcome,
       startDate: row.start_date,
@@ -1553,6 +1571,47 @@ class PostgresStore {
   async deleteIntervention(id) {
     await this.query('DELETE FROM interventions WHERE id = $1', [id]);
     return true;
+  }
+
+  async addInterventionMessage(message) {
+    const query = `
+      INSERT INTO intervention_messages (id, intervention_id, type, recipient, subject, body, sent_date, delivery_status)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      RETURNING *
+    `;
+    const values = [
+      message.id,
+      message.interventionId,
+      message.type,
+      message.recipient,
+      message.subject,
+      message.body,
+      message.sentDate || null,
+      message.deliveryStatus || 'pending'
+    ];
+
+    const result = await this.query(query, values);
+    const row = result.rows[0];
+    return {
+      ...row,
+      interventionId: row.intervention_id,
+      sentDate: row.sent_date,
+      deliveryStatus: row.delivery_status
+    };
+  }
+
+  async getInterventionMessages(interventionId) {
+    const result = await this.query(
+      'SELECT * FROM intervention_messages WHERE intervention_id = $1 ORDER BY sent_date DESC NULLS LAST',
+      [interventionId]
+    );
+
+    return result.rows.map(row => ({
+      ...row,
+      interventionId: row.intervention_id,
+      sentDate: row.sent_date,
+      deliveryStatus: row.delivery_status
+    }));
   }
 
   // Gamification

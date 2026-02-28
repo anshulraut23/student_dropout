@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FaHandsHelping, FaFilter, FaEye, FaSearch, FaSpinner } from "react-icons/fa";
+import { FaHandsHelping, FaFilter, FaEye, FaSearch, FaSpinner, FaEnvelope } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import apiService from "../../services/apiService";
@@ -11,6 +11,15 @@ export default function InterventionsHistoryPage() {
   const [filteredInterventions, setFilteredInterventions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailFormData, setEmailFormData] = useState({
+    recipientEmail: '',
+    subject: 'Student Intervention Alert',
+    message: '',
+    sendToParentAndStudent: false,
+    selectedStudentId: null
+  });
   
   const [filters, setFilters] = useState({
     status: "all",
@@ -77,12 +86,112 @@ export default function InterventionsHistoryPage() {
     });
   };
 
+  const openEmailModal = (studentId) => {
+    setEmailFormData(prev => ({
+      ...prev,
+      selectedStudentId: studentId,
+      recipientEmail: '',
+      message: ''
+    }));
+    // Fetch student details to get parent/student email
+    fetchStudentEmail(studentId);
+    setShowEmailModal(true);
+  };
+
+  const fetchStudentEmail = async (studentId) => {
+    try {
+      const response = await fetch(`/api/students/${studentId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        const student = data.student;
+        const parentEmail = student.parentEmail || student.parent_email || '';
+        const studentEmail = student.email || '';
+        
+        // Auto-populate with parent email if available
+        if (parentEmail) {
+          setEmailFormData(prev => ({
+            ...prev,
+            recipientEmail: parentEmail
+          }));
+        } else if (studentEmail) {
+          setEmailFormData(prev => ({
+            ...prev,
+            recipientEmail: studentEmail
+          }));
+        }
+      }
+    } catch (err) {
+      console.warn('Could not fetch student email:', err);
+    }
+  };
+
+  const closeEmailModal = () => {
+    setShowEmailModal(false);
+    setSendingEmail(false);
+  };
+
+  const handleEmailFormChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setEmailFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
+
+  const sendInterventionEmail = async () => {
+    if (!emailFormData.selectedStudentId) {
+      setError('No student selected');
+      return;
+    }
+
+    if (!emailFormData.recipientEmail && !emailFormData.sendToParentAndStudent) {
+      setError('Please enter a recipient email or check "Send to both parent and student"');
+      return;
+    }
+
+    setSendingEmail(true);
+    setError('');
+
+    try {
+      const result = await apiService.triggerInterventionEmail(emailFormData.selectedStudentId, {
+        interventionType: 'manual_alert',
+        riskLevel: 'high',
+        recipientEmail: emailFormData.recipientEmail || undefined,
+        subject: emailFormData.subject,
+        message: emailFormData.message,
+        sendToParentAndStudent: emailFormData.sendToParentAndStudent
+      });
+
+      if (!result.success) {
+        throw new Error(result.error || 'Email send failed');
+      }
+
+      // Show success message
+      alert(t("teacher_interventions.email_sent_success", "✅ Intervention email(s) sent successfully!"));
+      closeEmailModal();
+      loadInterventions(); // Refresh list
+    } catch (err) {
+      console.error('Error sending intervention email:', err);
+      setError(err.message || 'Failed to send intervention email. Please try again.');
+      alert('❌ Error: ' + (err.message || 'Failed to send email'));
+    } finally {
+      setSendingEmail(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const styles = {
       planned: 'bg-blue-100 text-blue-800 border-blue-200',
       in_progress: 'bg-yellow-100 text-yellow-800 border-yellow-200',
       completed: 'bg-green-100 text-green-800 border-green-200',
-      cancelled: 'bg-gray-100 text-gray-800 border-gray-200'
+      cancelled: 'bg-gray-100 text-gray-800 border-gray-200',
+      sent: 'bg-green-100 text-green-800 border-green-200',
+      failed: 'bg-red-100 text-red-800 border-red-200'
     };
     
     const labels = {
@@ -217,13 +326,23 @@ export default function InterventionsHistoryPage() {
                         {getStatusBadge(intervention.status)}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => navigate(`/students/${intervention.studentId}`)}
-                          className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
-                        >
-                          <FaEye className="text-xs" />
-                          {t("teacher_interventions.view_student", "View Student")}
-                        </button>
+                        <div className="flex items-center gap-2 justify-end">
+                          <button
+                            onClick={() => openEmailModal(intervention.studentId)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-green-600 hover:text-green-700 hover:bg-green-50 rounded transition-colors"
+                            title="Send intervention email"
+                          >
+                            <FaEnvelope className="text-xs" />
+                            {t("teacher_interventions.send_email", "Send Email")}
+                          </button>
+                          <button
+                            onClick={() => navigate(`/students/${intervention.studentId}`)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                          >
+                            <FaEye className="text-xs" />
+                            {t("teacher_interventions.view_student", "View Student")}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -274,6 +393,121 @@ export default function InterventionsHistoryPage() {
             <FaHandsHelping className="mx-auto text-4xl text-gray-300 mb-3" />
             <p className="text-sm text-gray-500">{t("teacher_interventions.no_interventions", "No interventions found")}</p>
             <p className="text-xs text-gray-400 mt-1">{t("teacher_interventions.adjust_filters", "Try adjusting your filters or add new interventions")}</p>
+          </div>
+        )}
+
+        {/* Email Intervention Modal */}
+        {showEmailModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <FaEnvelope className="text-green-600" />
+                {t("teacher_interventions.send_intervention_email", "Send Intervention Email")}
+              </h3>
+
+              {error && (
+                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 text-sm rounded">
+                  {error}
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Recipient Email */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    📧 {t("teacher_interventions.recipient_email", "Recipient Email")}
+                  </label>
+                  <input
+                    type="email"
+                    name="recipientEmail"
+                    value={emailFormData.recipientEmail}
+                    onChange={handleEmailFormChange}
+                    placeholder="parent@example.com"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    💡 Email auto-filled from student record (parent email if available)
+                  </p>
+                </div>
+
+                {/* Send Options */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <p className="text-xs font-semibold text-blue-900 mb-2">🎯 Send To:</p>
+                  
+                  <label className="flex items-center gap-2 mb-2">
+                    <input
+                      type="radio"
+                      name="sendOption"
+                      value="parent"
+                      checked={!emailFormData.sendToParentAndStudent}
+                      onChange={() => setEmailFormData(prev => ({ ...prev, sendToParentAndStudent: false }))}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-xs text-blue-900">👨‍👩‍👧 Parent Email Only</span>
+                  </label>
+
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="sendOption"
+                      value="both"
+                      checked={emailFormData.sendToParentAndStudent}
+                      onChange={() => setEmailFormData(prev => ({ ...prev, sendToParentAndStudent: true }))}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-xs text-blue-900">👨‍👩‍👧‍👦 Both Parent & Student</span>
+                  </label>
+                </div>
+
+                {/* Subject */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t("teacher_interventions.subject", "Subject")}
+                  </label>
+                  <input
+                    type="text"
+                    name="subject"
+                    value={emailFormData.subject}
+                    onChange={handleEmailFormChange}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                {/* Message */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t("teacher_interventions.message", "Message")}
+                  </label>
+                  <textarea
+                    name="message"
+                    value={emailFormData.message}
+                    onChange={handleEmailFormChange}
+                    placeholder="Add a custom message or leave empty for default message"
+                    rows="4"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  />
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <button
+                    onClick={closeEmailModal}
+                    disabled={sendingEmail}
+                    className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    {t("common.cancel", "Cancel")}
+                  </button>
+                  <button
+                    onClick={sendInterventionEmail}
+                    disabled={sendingEmail}
+                    className="flex-1 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {sendingEmail && <FaSpinner className="animate-spin" />}
+                    {t("teacher_interventions.send", "Send")}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 

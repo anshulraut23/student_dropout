@@ -802,6 +802,14 @@ class ApiService {
     });
   }
 
+  async triggerInterventionEmail(studentId, emailData) {
+    return this.request(`/interventions/trigger/${studentId}`, {
+      method: 'POST',
+      body: JSON.stringify(emailData),
+      auth: true,
+    });
+  }
+
   // Profile endpoints
   async getProfile() {
     return this.request('/profile', {

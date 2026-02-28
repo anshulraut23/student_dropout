@@ -408,6 +408,7 @@ export default function InterventionsTab() {
     channel: "Phone Call",
     contactTarget: "Parent",
     message: "",
+    emailAddress: "",
     followUpDate: "",
     status: "Pending",
   });
@@ -488,7 +489,7 @@ export default function InterventionsTab() {
     setCommunicationForm({
       classId: "", studentId: "", interventionType: "Parent Communication",
       channel: "Phone Call", contactTarget: "Parent", message: "",
-      followUpDate: "", status: "Pending",
+      emailAddress: "", followUpDate: "", status: "Pending",
     });
     setEditingId(null);
     setShowCommunicationForm(false);
@@ -514,9 +515,14 @@ export default function InterventionsTab() {
       setMessage({ type: "error", text: "Please provide a message" });
       return;
     }
+    if (communicationForm.channel === "Email" && !communicationForm.emailAddress) {
+      setMessage({ type: "error", text: "Please enter the recipient email address" });
+      return;
+    }
     setLoading(true);
     setMessage({ type: "", text: "" });
     try {
+      // Create intervention record
       const data = {
         studentId: communicationForm.studentId,
         interventionType: communicationForm.interventionType,
@@ -528,12 +534,47 @@ export default function InterventionsTab() {
         status: communicationForm.status.toLowerCase(),
         priority: "medium",
       };
+      
       const result = editingId
         ? await apiService.updateIntervention(editingId, data)
         : await apiService.createIntervention(data);
+      
       if (result.success) {
-        setMessage({ type: "success", text: editingId ? "✓ Communication updated!" : "✓ Communication logged!" });
-        setTimeout(() => { resetCommunicationForm(); loadInterventions(); setMessage({ type: "", text: "" }); }, 1500);
+        // If channel is Email, actually send email
+        if (communicationForm.channel === "Email") {
+          try {
+            const emailResult = await apiService.triggerInterventionEmail(communicationForm.studentId, {
+              interventionType: communicationForm.interventionType,
+              riskLevel: 'medium',
+              recipientEmail: communicationForm.emailAddress || undefined,
+              subject: `${communicationForm.interventionType} - ${communicationForm.contactTarget}`,
+              message: communicationForm.message,
+              sendToParentAndStudent: false
+            });
+
+            if (emailResult.success) {
+              setMessage({ 
+                type: "success", 
+                text: editingId ? "✓ Communication updated & email sent to " + communicationForm.emailAddress + "!" : "✓ Communication logged & email sent to " + communicationForm.emailAddress + "!" 
+              });
+            } else {
+              setMessage({ 
+                type: "success", 
+                text: editingId ? "✓ Communication updated! (Email delivery pending)" : "✓ Communication logged! (Email delivery pending)" 
+              });
+            }
+          } catch (emailError) {
+            console.error('Email send error:', emailError);
+            setMessage({ 
+              type: "success", 
+              text: editingId ? "✓ Communication updated! (Email failed)" : "✓ Communication logged! (Email failed)" 
+            });
+          }
+        } else {
+          setMessage({ type: "success", text: editingId ? "✓ Communication updated!" : "✓ Communication logged!" });
+        }
+        
+        setTimeout(() => { resetCommunicationForm(); loadInterventions(); setMessage({ type: "", text: "" }); }, 2000);
       } else {
         setMessage({ type: "error", text: result.error || "Failed to save" });
       }
@@ -737,26 +778,45 @@ export default function InterventionsTab() {
               </div>
 
               {(communicationForm.channel === "SMS" || communicationForm.channel === "Email") && (
-                <div className="form-group" style={{ marginBottom: "1rem" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
-                    <label className="form-label" style={{ marginBottom: 0 }}>Message <span className="form-required">*</span></label>
-                    <button type="button" onClick={generateAutoMessage} className="horizon-btn-small inline-flex items-center gap-1">
-                      <FaMagic /> Auto Generate
-                    </button>
-                  </div>
-                  <textarea
-                    name="message"
-                    value={communicationForm.message}
-                    onChange={handleCommunicationChange}
-                    rows="4"
-                    placeholder="Type your message here or click 'Auto Generate' for a template..."
-                    className="horizon-input px-4 py-3 text-sm"
-                    style={{ resize: "none" }}
-                  />
-                  {communicationForm.message && (
-                    <div className="message-preview"><strong>Preview:</strong><br />{communicationForm.message}</div>
+                <>
+                  {communicationForm.channel === "Email" && (
+                    <div className="form-group" style={{ marginBottom: "1rem" }}>
+                      <label className="form-label">📧 Email Address <span className="form-required">*</span></label>
+                      <input
+                        type="email"
+                        name="emailAddress"
+                        placeholder="e.g., parent@gmail.com"
+                        defaultValue={communicationForm.emailAddress || ""}
+                        onChange={(e) => setCommunicationForm(p => ({ ...p, emailAddress: e.target.value }))}
+                        className="horizon-input px-4 py-2.5 text-sm"
+                        required
+                      />
+                      <p style={{ fontSize: "0.75rem", color: "var(--gray)", marginTop: "0.3rem" }}>
+                        💡 Enter the email address where you want to send this {communicationForm.contactTarget === "Parent" ? "parent" : "student"} communication
+                      </p>
+                    </div>
                   )}
-                </div>
+                  <div className="form-group" style={{ marginBottom: "1rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
+                      <label className="form-label" style={{ marginBottom: 0 }}>Message <span className="form-required">*</span></label>
+                      <button type="button" onClick={generateAutoMessage} className="horizon-btn-small inline-flex items-center gap-1">
+                        <FaMagic /> Auto Generate
+                      </button>
+                    </div>
+                    <textarea
+                      name="message"
+                      value={communicationForm.message}
+                      onChange={handleCommunicationChange}
+                      rows="4"
+                      placeholder="Type your message here or click 'Auto Generate' for a template..."
+                      className="horizon-input px-4 py-3 text-sm"
+                      style={{ resize: "none" }}
+                    />
+                    {communicationForm.message && (
+                      <div className="message-preview"><strong>Preview:</strong><br />{communicationForm.message}</div>
+                    )}
+                  </div>
+                </>
               )}
 
               <div className="form-grid" style={{ marginBottom: "1rem" }}>

@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect } from "react";
-import { FaCalendarAlt, FaFilter, FaDownload, FaEye, FaSearch, FaCheckCircle, FaExclamationTriangle, FaSpinner } from "react-icons/fa";
+import { FaCalendarAlt, FaFilter, FaDownload, FaEye, FaSearch, FaCheckCircle, FaExclamationTriangle, FaSpinner, FaEdit, FaSave, FaTimes } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import { useTranslation } from "react-i18next";
 import apiService from "../../services/apiService";
@@ -107,6 +107,10 @@ export default function AttendanceHistoryPage() {
 
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedStatus, setEditedStatus] = useState("");
+  const [editedRemarks, setEditedRemarks] = useState("");
+  const [editLoading, setEditLoading] = useState(false);
 
   useEffect(() => {
     loadClasses();
@@ -233,7 +237,67 @@ export default function AttendanceHistoryPage() {
 
   const closeModal = () => {
     setShowDetailsModal(false);
+    setIsEditMode(false);
     setTimeout(() => setSelectedRecord(null), 300);
+  };
+
+  const startEdit = () => {
+    if (selectedRecord && selectedRecord.records && selectedRecord.records.length > 0) {
+      // Get the first student record for editing
+      const firstRecord = selectedRecord.records[0];
+      setEditedStatus(firstRecord.status || 'present');
+      setEditedRemarks(firstRecord.remarks || '');
+      setIsEditMode(true);
+    }
+  };
+
+  const cancelEdit = () => {
+    setIsEditMode(false);
+    setEditedStatus("");
+    setEditedRemarks("");
+  };
+
+  const saveAttendanceEdit = async () => {
+    if (!selectedRecord || !selectedRecord.records || selectedRecord.records.length === 0) {
+      return;
+    }
+
+    setEditLoading(true);
+    try {
+      const firstRecord = selectedRecord.records[0];
+      
+      // Call API to update attendance
+      const result = await apiService.updateAttendance(firstRecord.id, {
+        status: editedStatus,
+        remarks: editedRemarks
+      });
+
+      if (result.success) {
+        // Update the local state
+        const updatedRecord = { ...selectedRecord };
+        updatedRecord.records[0] = {
+          ...firstRecord,
+          status: editedStatus,
+          remarks: editedRemarks
+        };
+        
+        // Update the attendance history
+        setAttendanceHistory(attendanceHistory.map(r => 
+          r.id === updatedRecord.id ? updatedRecord : r
+        ));
+        
+        setSelectedRecord(updatedRecord);
+        setIsEditMode(false);
+        setMessage({ type: 'success', text: 'Attendance updated successfully!' });
+      } else {
+        setMessage({ type: 'error', text: result.error || 'Failed to update attendance' });
+      }
+    } catch (error) {
+      console.error('Error updating attendance:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to update attendance' });
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   const exportToExcel = () => {
@@ -479,6 +543,7 @@ export default function AttendanceHistoryPage() {
                       <div className="flex items-center justify-between">
                         <h3 className="text-xl font-semibold" style={{ fontFamily: 'var(--font-heading)', color: 'var(--text-dark)' }}>
                           {t("teacher_attendance.attendance_details", "Attendance Details")}
+                          {isEditMode && <span style={{ fontSize: '14px', fontWeight: 'normal', marginLeft: '8px', color: 'var(--gray)' }}>(Editing)</span>}
                         </h3>
                         <button 
                           onClick={closeModal}
@@ -491,76 +556,174 @@ export default function AttendanceHistoryPage() {
 
                     {/* Modal Content */}
                     <div className="p-6 space-y-6">
-                      <div className="grid grid-cols-2 gap-4 p-4 rounded-lg" style={{ background: 'var(--light-bg)' }}>
-                        <div>
-                          <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.date", "Date")}</p>
-                          <p className="text-sm font-semibold mt-2" style={{ color: 'var(--text-dark)' }}>
-                            {new Date(selectedRecord.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
-                          </p>
-                        </div>
-                        <div>
-                          <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.class", "Class")}</p>
-                          <p className="text-sm font-semibold mt-2" style={{ color: 'var(--text-dark)' }}>{selectedRecord.className}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.total_students", "Total Students")}</p>
-                          <p className="text-sm font-semibold mt-2" style={{ color: 'var(--text-dark)' }}>{selectedRecord.totalStudents}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.rate", "Rate")}</p>
-                          <p className={`text-sm font-semibold mt-2 ${getAttendanceColor(selectedRecord.attendancePercentage).split(' ')[0]}`}>
-                            {selectedRecord.attendancePercentage}%
-                          </p>
-                        </div>
-                      </div>
-
-                      {selectedRecord.students && selectedRecord.students.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-dark)' }}>{t("teacher_attendance.student_attendance", "Student Attendance")}</h4>
-                          <div className="border rounded-lg overflow-hidden" style={{ borderColor: 'rgba(26, 111, 181, 0.12)' }}>
-                            <div className="overflow-y-auto max-h-80">
-                              <table className="w-full text-sm">
-                                <thead style={{ background: 'var(--light-bg)', borderBottom: '1px solid rgba(26, 111, 181, 0.08)' }}>
-                                  <tr>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.name", "Name")}</th>
-                                    <th className="text-left px-4 py-3 text-xs font-semibold" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.enrollment", "Enrollment")}</th>
-                                    <th className="text-center px-4 py-3 text-xs font-semibold" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.status", "Status")}</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {selectedRecord.students.map((student, idx) => (
-                                    <tr key={idx} style={{ borderBottom: '1px solid rgba(26, 111, 181, 0.06)' }}>
-                                      <td className="px-4 py-3" style={{ color: 'var(--text-dark)' }}>{student.name}</td>
-                                      <td className="px-4 py-3" style={{ color: 'var(--gray)' }}>{student.enrollmentNo}</td>
-                                      <td className="px-4 py-3 text-center">
-                                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
-                                          student.status === 'present' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
-                                        }`}>
-                                          {student.status === 'present' ? t("teacher_attendance.present", "Present") : t("teacher_attendance.absent", "Absent")}
-                                        </span>
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
+                      {isEditMode && selectedRecord.records && selectedRecord.records.length > 0 ? (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                          <h4 className="font-semibold text-sm mb-4 text-blue-900">Edit Attendance Record</h4>
+                          <div className="space-y-4">
+                            <div>
+                              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)' }}>
+                                Status
+                              </label>
+                              <select
+                                value={editedStatus}
+                                onChange={(e) => setEditedStatus(e.target.value)}
+                                style={{
+                                  width: '100%',
+                                  padding: '10px 12px',
+                                  border: '1.5px solid rgba(26, 111, 181, 0.2)',
+                                  borderRadius: '8px',
+                                  fontSize: '14px',
+                                  backgroundColor: 'white',
+                                  color: 'var(--text-dark)',
+                                  transition: 'border-color 0.2s'
+                                }}
+                              >
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                                <option value="late">Late</option>
+                                <option value="excused">Excused</option>
+                                <option value="leave">Leave</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label style={{ display: 'block', marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: 'var(--text-dark)' }}>
+                                Remarks (Optional)
+                              </label>
+                              <textarea
+                                value={editedRemarks}
+                                onChange={(e) => setEditedRemarks(e.target.value)}
+                                placeholder="Add any remarks about this attendance record..."
+                                style={{
+                                  width: '100%',
+                                  padding: '10px 12px',
+                                  border: '1.5px solid rgba(26, 111, 181, 0.2)',
+                                  borderRadius: '8px',
+                                  fontSize: '14px',
+                                  minHeight: '80px',
+                                  backgroundColor: 'white',
+                                  color: 'var(--text-dark)',
+                                  fontFamily: 'inherit',
+                                  transition: 'border-color 0.2s',
+                                  resize: 'vertical'
+                                }}
+                              />
                             </div>
                           </div>
                         </div>
-                      )}
+                      ) : (
+                        <>
+                          <div className="grid grid-cols-2 gap-4 p-4 rounded-lg" style={{ background: 'var(--light-bg)' }}>
+                            <div>
+                              <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.date", "Date")}</p>
+                              <p className="text-sm font-semibold mt-2" style={{ color: 'var(--text-dark)' }}>
+                                {new Date(selectedRecord.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.class", "Class")}</p>
+                              <p className="text-sm font-semibold mt-2" style={{ color: 'var(--text-dark)' }}>{selectedRecord.className}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.total_students", "Total Students")}</p>
+                              <p className="text-sm font-semibold mt-2" style={{ color: 'var(--text-dark)' }}>{selectedRecord.totalStudents}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.rate", "Rate")}</p>
+                              <p className={`text-sm font-semibold mt-2 ${getAttendanceColor(selectedRecord.attendancePercentage).split(' ')[0]}`}>
+                                {selectedRecord.attendancePercentage}%
+                              </p>
+                            </div>
+                          </div>
 
-                      <div className="pt-4 border-t" style={{ borderColor: 'rgba(26, 111, 181, 0.12)' }}>
-                        <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.marked_by", "Marked by")}: <span style={{ color: 'var(--text-dark)' }} className="font-medium">{selectedRecord.markedBy}</span></p>
-                      </div>
+                          {selectedRecord.students && selectedRecord.students.length > 0 && (
+                            <div>
+                              <h4 className="text-sm font-semibold mb-4" style={{ color: 'var(--text-dark)' }}>{t("teacher_attendance.student_attendance", "Student Attendance")}</h4>
+                              <div className="border rounded-lg overflow-hidden" style={{ borderColor: 'rgba(26, 111, 181, 0.12)' }}>
+                                <div className="overflow-y-auto max-h-80">
+                                  <table className="w-full text-sm">
+                                    <thead style={{ background: 'var(--light-bg)', borderBottom: '1px solid rgba(26, 111, 181, 0.08)' }}>
+                                      <tr>
+                                        <th className="text-left px-4 py-3 text-xs font-semibold" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.name", "Name")}</th>
+                                        <th className="text-left px-4 py-3 text-xs font-semibold" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.enrollment", "Enrollment")}</th>
+                                        <th className="text-center px-4 py-3 text-xs font-semibold" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.status", "Status")}</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {selectedRecord.students.map((student, idx) => (
+                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(26, 111, 181, 0.06)' }}>
+                                          <td className="px-4 py-3" style={{ color: 'var(--text-dark)' }}>{student.name}</td>
+                                          <td className="px-4 py-3" style={{ color: 'var(--gray)' }}>{student.enrollmentNo}</td>
+                                          <td className="px-4 py-3 text-center">
+                                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-semibold ${
+                                              student.status === 'present' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+                                            }`}>
+                                              {student.status === 'present' ? t("teacher_attendance.present", "Present") : t("teacher_attendance.absent", "Absent")}
+                                            </span>
+                                          </td>
+                                        </tr>
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          <div className="pt-4 border-t" style={{ borderColor: 'rgba(26, 111, 181, 0.12)' }}>
+                            <p className="text-xs" style={{ color: 'var(--gray)' }}>{t("teacher_attendance.marked_by", "Marked by")}: <span style={{ color: 'var(--text-dark)' }} className="font-medium">{selectedRecord.markedBy}</span></p>
+                          </div>
+                        </>
+                      )}
                     </div>
 
                     {/* Modal Footer */}
                     <div className="sticky bottom-0 bg-white border-t p-6 flex justify-end gap-3" style={{ borderColor: 'rgba(26, 111, 181, 0.12)' }}>
-                      <button 
-                        onClick={closeModal}
-                        className="horizon-btn-secondary px-6 py-2 text-sm"
-                      >
-                        {t("teacher_attendance.close", "Close")}
-                      </button>
+                      {isEditMode ? (
+                        <>
+                          <button 
+                            onClick={cancelEdit}
+                            disabled={editLoading}
+                            className="horizon-btn-secondary px-6 py-2 text-sm inline-flex items-center gap-2"
+                          >
+                            <FaTimes className="text-sm" />
+                            Cancel
+                          </button>
+                          <button 
+                            onClick={saveAttendanceEdit}
+                            disabled={editLoading}
+                            className="horizon-btn-primary px-6 py-2 text-sm inline-flex items-center gap-2"
+                            style={{ opacity: editLoading ? 0.6 : 1, cursor: editLoading ? 'not-allowed' : 'pointer' }}
+                          >
+                            {editLoading ? (
+                              <>
+                                <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />
+                                Saving...
+                              </>
+                            ) : (
+                              <>
+                                <FaSave className="text-sm" />
+                                Save Changes
+                              </>
+                            )}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button 
+                            onClick={startEdit}
+                            className="horizon-btn-primary px-6 py-2 text-sm inline-flex items-center gap-2"
+                          >
+                            <FaEdit className="text-sm" />
+                            Edit Record
+                          </button>
+                          <button 
+                            onClick={closeModal}
+                            className="horizon-btn-secondary px-6 py-2 text-sm"
+                          >
+                            {t("teacher_attendance.close", "Close")}
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
