@@ -23,8 +23,13 @@ import MyClassesPage from "../pages/teacher/MyClassesPage";
 import LoginPage from "../pages/teacher/LoginPage";
 import FacultyConnect from "../pages/teacher/FacultyConnect";
 import FacultyChat from "../pages/teacher/FacultyChat";
+import SuperAdminDashboard from "../pages/super-admin/SuperAdminDashboard";
+import SuperAdminSchoolsPage from "../pages/super-admin/SuperAdminSchoolsPage";
+import SuperAdminSchoolDetailPage from "../pages/super-admin/SuperAdminSchoolDetailPage";
+import SuperAdminProfile from "../pages/super-admin/SuperAdminProfile";
 
 import MainLayout from "../layouts/MainLayout";
+import SuperAdminLayout from "../layouts/SuperAdminLayout";
 
 // Admin
 import { AdminProvider } from "../context/AdminContext";
@@ -104,6 +109,33 @@ export default function AppRoutes() {
             : <LoginPage />
         } 
       />
+
+      <Route 
+        path="/super-admin/login" 
+        element={
+          isLoggedIn && userRole === "super_admin" 
+            ? <Navigate to="/super-admin/dashboard" replace /> 
+            : <LoginPage />
+        } 
+      />
+
+      {/* Super Admin Routes */}
+      {isLoggedIn && userRole === "super_admin" ? (
+        <Route path="/super-admin" element={<SuperAdminLayout />}>
+          <Route index element={<Navigate to="/super-admin/dashboard" replace />} />
+          <Route path="dashboard" element={<SuperAdminDashboard />} />
+          <Route path="schools" element={<SuperAdminSchoolsPage />} />
+          <Route path="schools/:schoolId" element={<SuperAdminSchoolDetailPage />} />
+          <Route path="profile" element={<SuperAdminProfile />} />
+        </Route>
+      ) : (
+        <>
+          <Route path="/super-admin/dashboard" element={<Navigate to="/super-admin/login" replace />} />
+          <Route path="/super-admin/schools" element={<Navigate to="/super-admin/login" replace />} />
+          <Route path="/super-admin/schools/:schoolId" element={<Navigate to="/super-admin/login" replace />} />
+          <Route path="/super-admin/profile" element={<Navigate to="/super-admin/login" replace />} />
+        </>
+      )}
 
       {/* Admin Routes */}
       {isLoggedIn && userRole === "admin" ? (

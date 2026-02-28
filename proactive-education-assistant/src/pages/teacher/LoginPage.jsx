@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiService from "../../services/apiService";
 
@@ -14,6 +14,14 @@ export default function LoginPage() {
   const [syncQueueCount] = useState(2);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const forcedLogoutMessage = sessionStorage.getItem("forcedLogoutMessage");
+    if (forcedLogoutMessage) {
+      setError(forcedLogoutMessage);
+      sessionStorage.removeItem("forcedLogoutMessage");
+    }
+  }, []);
 
   const handleLogin = async () => {
     // Validation
@@ -37,7 +45,9 @@ export default function LoginPage() {
         window.dispatchEvent(new Event("localStorageUpdate"));
         
         // Navigate based on role
-        if (actualRole === "admin") {
+        if (actualRole === "super_admin") {
+          navigate("/super-admin/dashboard");
+        } else if (actualRole === "admin") {
           navigate("/admin/dashboard");
         } else {
           navigate("/teacher/dashboard");
