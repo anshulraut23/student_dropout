@@ -580,7 +580,80 @@
     "collect_badges": "Collect Badges",
     "collect_badges_desc": "Earn special badges by achieving specific goals and milestones",
     "climb_leaderboard": "Climb Leaderboard",
-    "climb_leaderboard_desc": "Compete with colleagues and climb to the top of your school's leaderboard"
+    "climb_leaderboard_desc": "Compete with colleagues and climb to the top of your school's leaderboard",
+    "stats": {
+      "total_xp": "Total XP",
+      "achievements": "Achievements",
+      "day_streak": "Day Streak",
+      "students_helped": "Students Helped"
+    },
+    "levels": {
+      "newcomer": "Newcomer",
+      "helper": "Helper",
+      "student_champion": "Student Champion",
+      "mentor": "Mentor",
+      "master_educator": "Master Educator"
+    },
+    "level": {
+      "current_level": "Current Level",
+      "level_label": "Level",
+      "progress_to_next": "Progress to Next Level",
+      "xp_remaining": "{{count}} XP remaining",
+      "level_roadmap": "Level Roadmap",
+      "current": "Current",
+      "unlocked": "Unlocked"
+    },
+    "daily_tasks": {
+      "title": "Today's Bonus Tasks",
+      "xp_earned": "+{{xp}} XP earned",
+      "earn_xp": "Earn +{{xp}} XP",
+      "daily_progress": "Daily progress",
+      "completed_count": "{{done}} / {{total}} completed",
+      "all_tasks_completed": "All tasks completed! Great job!",
+      "this_week": "This Week",
+      "total_xp_earned": "Total XP Earned",
+      "tasks_completed": "Tasks Completed",
+      "students_updated": "Students Updated",
+      "next_milestone": "Next Milestone",
+      "day_streak_goal": "30 Day Streak",
+      "days_to_go": "{{count}} days to go",
+      "add_attendance_record": "Add attendance record",
+      "add_student_marks": "Add student marks",
+      "add_behaviour_note": "Add behaviour note",
+      "complete_intervention": "Complete intervention",
+      "daily_login": "Daily login"
+    },
+    "badges": {
+      "title_unlocked": "Achievements Unlocked",
+      "no_badges": "No badges earned yet. Keep working to unlock your first badge!",
+      "earned_on": "Earned",
+      "available_to_unlock": "Available to Unlock",
+      "recently": "Recently",
+      "first_10_students_title": "First 10 Students",
+      "first_10_students_desc": "Added your first 10 students",
+      "seven_day_streak_title": "7 Day Streak",
+      "seven_day_streak_desc": "Logged in for 7 consecutive days",
+      "hundred_records_title": "100 Attendance Records",
+      "hundred_records_desc": "Tracked 100 attendance records",
+      "risk_saver_title": "Student Supporter",
+      "risk_saver_desc": "Helped 5 high-risk students",
+      "consistency_star_title": "Consistency Star",
+      "consistency_star_desc": "Completed all daily tasks for a week"
+    },
+    "certificates": {
+      "title_rewards": "Certificates & Rewards",
+      "unlock_first": "Unlock your first certificate by reaching Level 2!",
+      "keep_earning": "Keep earning XP to advance levels",
+      "unlocked_at_level": "Unlocked at Level {{level}}",
+      "download": "Download",
+      "download_failed": "Failed to download certificate. Please try again.",
+      "next_certificate": "Next Certificate",
+      "unlock_at_level": "Unlock at Level {{level}}",
+      "cert_emerging_educator": "Emerging Educator",
+      "cert_student_champion": "Student Champion",
+      "cert_certified_mentor": "Certified Mentor",
+      "cert_master_educator": "Master Educator"
+    }
   },
   "teacher_faculty": {
     "title": "Faculty Connect",
