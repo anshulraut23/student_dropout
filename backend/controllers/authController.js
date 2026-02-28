@@ -69,7 +69,7 @@ export const registerAdmin = async (req, res) => {
       createdAt: new Date().toISOString()
     };
 
-    // Create admin user
+    // Create admin user (pending super admin approval)
     const userId = generateId();
     console.log('👤 Creating admin user with ID:', userId);
     const user = {
@@ -79,12 +79,12 @@ export const registerAdmin = async (req, res) => {
       fullName,
       role: 'admin',
       schoolId,
-      status: 'approved',
+      status: 'pending',
       createdAt: new Date().toISOString()
     };
 
-    // Update school with adminId
-    school.adminId = userId;
+    // Keep school unassigned until super admin approves this admin
+    school.adminId = null;
 
     // Save to data store
     console.log('💾 Saving school to database...');
@@ -95,19 +95,10 @@ export const registerAdmin = async (req, res) => {
     await dataStore.addUser(user);
     console.log('✅ User saved successfully');
 
-    // Generate JWT token
-    console.log('🔑 Generating JWT token...');
-    const token = jwt.sign(
-      { userId: user.id, email: user.email, role: user.role, schoolId: user.schoolId },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
     console.log('✅ Admin registration completed successfully');
     res.status(201).json({
       success: true,
-      message: 'Admin registered successfully',
-      token,
+      message: 'Admin registration submitted. Awaiting super admin approval.',
       user: {
         id: user.id,
         email: user.email,
@@ -179,6 +170,14 @@ export const registerTeacher = async (req, res) => {
       return res.status(400).json({ 
         success: false, 
         error: 'School not found' 
+      });
+    }
+
+    const isSchoolActive = school.isActive ?? school.is_active ?? true;
+    if (!isSchoolActive) {
+      return res.status(403).json({
+        success: false,
+        error: 'This school is currently deactivated. Registration is disabled.'
       });
     }
 
@@ -282,6 +281,23 @@ export const login = async (req, res) => {
     }
     console.log('✅ Password valid');
 
+    // Check approval status for admins and teachers
+    if (user.role === 'admin' && user.status === 'pending') {
+      console.log('⏳ Admin account pending approval');
+      return res.status(403).json({
+        success: false,
+        error: 'Your account is pending approval from the super admin'
+      });
+    }
+
+    if (user.role === 'admin' && user.status === 'rejected') {
+      console.log('❌ Admin account rejected');
+      return res.status(403).json({
+        success: false,
+        error: 'Your admin account request was rejected'
+      });
+    }
+
     // Check approval status for teachers
     if (user.role === 'teacher' && user.status === 'pending') {
       console.log('⏳ Teacher account pending approval');
@@ -299,9 +315,19 @@ export const login = async (req, res) => {
       });
     }
 
-    // Get school info
+    // Get school info (not required for super admin)
     console.log('🏫 Fetching school info...');
-    const school = await dataStore.getSchoolById(user.schoolId);
+    const school = user.schoolId ? await dataStore.getSchoolById(user.schoolId) : null;
+
+    if (['admin', 'teacher'].includes(user.role) && school) {
+      const isSchoolActive = school.isActive ?? school.is_active ?? true;
+      if (!isSchoolActive) {
+        return res.status(403).json({
+          success: false,
+          error: 'Your school is currently deactivated. Contact the super admin.'
+        });
+      }
+    }
 
     // Generate JWT token
     console.log('🔑 Generating JWT token...');
@@ -350,7 +376,7 @@ export const getCurrentUser = async (req, res) => {
       });
     }
 
-    const school = await dataStore.getSchoolById(user.schoolId);
+    const school = user.schoolId ? await dataStore.getSchoolById(user.schoolId) : null;
 
     res.json({
       success: true,

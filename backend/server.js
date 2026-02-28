@@ -19,6 +19,7 @@ import interventionRoutes from './routes/interventionRoutes.js';
 import gamificationRoutes from './routes/gamificationRoutes.js';
 import facultyRoutes from './routes/facultyRoutes.js';
 import aiAssistantRoutes from './routes/aiAssistantRoutes.js';
+import superAdminRoutes from './routes/superAdminRoutes.js';
 import mlRoutes from './ml-integration/routes.js';
 import dropoutRoutes from './routes/dropoutRoutes.js';
 import dataStore from './storage/dataStore.js';
@@ -62,6 +63,7 @@ app.use('/api/interventions', interventionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/faculty', facultyRoutes);
 app.use('/api/ai-assistant', aiAssistantRoutes);
+app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/ml', mlRoutes);
 app.use('/api/dropout', dropoutRoutes);
 
