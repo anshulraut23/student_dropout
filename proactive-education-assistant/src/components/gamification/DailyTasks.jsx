@@ -1,13 +1,27 @@
 // DailyTasks Component - Display daily tasks and XP rewards
 import { useGame } from '../../context/GamificationContext';
 import gamificationService from '../../services/gamificationService';
+import { useTranslation } from 'react-i18next';
 
 export default function DailyTasks() {
+  const { t } = useTranslation();
   const { gamificationData, markTaskCompleted, DAILY_TASKS, applyServerStats } = useGame();
 
   const tasksCompleted = Object.values(gamificationData.dailyTasksCompleted).filter(Boolean).length;
   const totalTasks = DAILY_TASKS.length;
   const completionPercentage = Math.round((tasksCompleted / totalTasks) * 100);
+
+  const getTaskDescription = (task) => {
+    const keyMap = {
+      attendance: 'add_attendance_record',
+      marks: 'add_student_marks',
+      behaviour: 'add_behaviour_note',
+      intervention: 'complete_intervention',
+      login: 'daily_login',
+    };
+
+    return t(`teacher_gamification.daily_tasks.${keyMap[task.type]}`, task.description);
+  };
 
   const handleTaskClick = async (task) => {
     if (!gamificationData.dailyTasksCompleted[task.type]) {
@@ -31,7 +45,7 @@ export default function DailyTasks() {
       {/* Today's Bonus Tasks */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
         <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-          <span>📋</span> Today's Bonus Tasks
+          <span>📋</span> {t('teacher_gamification.daily_tasks.title', "Today's Bonus Tasks")}
         </h3>
 
         <div className="space-y-3">
@@ -53,9 +67,11 @@ export default function DailyTasks() {
                   {isCompleted ? '✓' : '◻️'}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-slate-900">{task.description}</p>
+                  <p className="text-sm font-medium text-slate-900">{getTaskDescription(task)}</p>
                   <p className={`text-xs font-medium mt-1 ${isCompleted ? 'text-green-600' : 'text-blue-600'}`}>
-                    {isCompleted ? `+${task.xpReward} XP earned` : `Earn +${task.xpReward} XP`}
+                    {isCompleted
+                      ? t('teacher_gamification.daily_tasks.xp_earned', '+{{xp}} XP earned', { xp: task.xpReward })
+                      : t('teacher_gamification.daily_tasks.earn_xp', 'Earn +{{xp}} XP', { xp: task.xpReward })}
                   </p>
                 </div>
                 <div className="text-lg">{task.icon}</div>
@@ -66,9 +82,9 @@ export default function DailyTasks() {
 
         <div className="mt-4 pt-4 border-t border-slate-200">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-xs text-slate-500">Daily progress</span>
+            <span className="text-xs text-slate-500">{t('teacher_gamification.daily_tasks.daily_progress', 'Daily progress')}</span>
             <span className="text-xs font-semibold text-slate-900">
-              {tasksCompleted} / {totalTasks} completed
+              {t('teacher_gamification.daily_tasks.completed_count', '{{done}} / {{total}} completed', { done: tasksCompleted, total: totalTasks })}
             </span>
           </div>
           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
@@ -81,30 +97,30 @@ export default function DailyTasks() {
 
         {tasksCompleted === totalTasks && (
           <div className="mt-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-xs font-semibold text-green-700">🎉 All tasks completed! Great job!</p>
+            <p className="text-xs font-semibold text-green-700">🎉 {t('teacher_gamification.daily_tasks.all_tasks_completed', 'All tasks completed! Great job!')}</p>
           </div>
         )}
       </div>
 
       {/* This Week Stats */}
       <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
-        <h3 className="font-semibold text-slate-900 mb-4">🎯 This Week</h3>
+        <h3 className="font-semibold text-slate-900 mb-4">🎯 {t('teacher_gamification.daily_tasks.this_week', 'This Week')}</h3>
 
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-slate-700">Total XP Earned</span>
+            <span className="text-sm text-slate-700">{t('teacher_gamification.daily_tasks.total_xp_earned', 'Total XP Earned')}</span>
             <span className="text-lg font-bold text-purple-700">
               {gamificationData.totalXP}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-slate-700">Tasks Completed</span>
+            <span className="text-sm text-slate-700">{t('teacher_gamification.daily_tasks.tasks_completed', 'Tasks Completed')}</span>
             <span className="text-lg font-bold text-purple-700">
               {gamificationData.tasksCompleted}
             </span>
           </div>
           <div className="flex justify-between items-center">
-            <span className="text-sm text-slate-700">Students Updated</span>
+            <span className="text-sm text-slate-700">{t('teacher_gamification.daily_tasks.students_updated', 'Students Updated')}</span>
             <span className="text-lg font-bold text-purple-700">
               {gamificationData.studentsAdded}
             </span>
@@ -114,12 +130,12 @@ export default function DailyTasks() {
 
       {/* Next Achievement*/}
       <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6 border border-amber-200">
-        <h3 className="font-semibold text-slate-900 mb-3">🎁 Next Milestone</h3>
+        <h3 className="font-semibold text-slate-900 mb-3">🎁 {t('teacher_gamification.daily_tasks.next_milestone', 'Next Milestone')}</h3>
         <div className="text-center py-4">
           <div className="text-4xl mb-2 opacity-60">🌟</div>
-          <p className="font-semibold text-slate-900">30 Day Streak</p>
+          <p className="font-semibold text-slate-900">{t('teacher_gamification.daily_tasks.day_streak_goal', '30 Day Streak')}</p>
           <p className="text-xs text-slate-600 mt-1">
-            {Math.max(0, 30 - gamificationData.loginStreak)} days to go
+            {t('teacher_gamification.daily_tasks.days_to_go', '{{count}} days to go', { count: Math.max(0, 30 - gamificationData.loginStreak) })}
           </p>
           <div className="h-1.5 bg-amber-200 rounded-full mt-3 overflow-hidden">
             <div

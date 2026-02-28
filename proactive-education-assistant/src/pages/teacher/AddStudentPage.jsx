@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPlus, FaSpinner, FaUpload, FaDownload, FaUser, FaFileExcel, FaCheckCircle, FaExclamationTriangle, FaArrowLeft } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import apiService from "../../services/apiService";
+import BulkUploadValidationService from "../../services/bulkUploadValidationService";
+import ValidationResultsDisplay from "../../components/bulkUpload/ValidationResultsDisplay";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -129,10 +131,128 @@ export default function AddStudentPage() {
   const [bulkClassId, setBulkClassId] = useState(classIdFromUrl || "");
   const [parsedData, setParsedData] = useState([]);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [fieldWarnings, setFieldWarnings] = useState({
+    enrollmentNo: "",
+    contact: "",
+  });
+  const [fieldErrors, setFieldErrors] = useState({
+    classId: "",
+    name: "",
+    enrollmentNo: "",
+    dateOfBirth: "",
+    gender: "",
+    contact: "",
+    email: "",
+    address: "",
+    parentName: "",
+    parentContact: "",
+    parentEmail: "",
+  });
+  const [validationResults, setValidationResults] = useState(null);
+  const [showValidationModal, setShowValidationModal] = useState(false);
 
   useEffect(() => {
     loadClasses();
   }, []);
+
+  const validateSingleStudentForm = (studentData) => {
+    const errors = {
+      classId: "",
+      name: "",
+      enrollmentNo: "",
+      dateOfBirth: "",
+      gender: "",
+      contact: "",
+      email: "",
+      address: "",
+      parentName: "",
+      parentContact: "",
+      parentEmail: "",
+    };
+
+    const trimmedData = {
+      ...studentData,
+      name: studentData.name?.trim() || "",
+      enrollmentNo: studentData.enrollmentNo?.trim() || "",
+      classId: studentData.classId?.trim() || "",
+      contact: studentData.contact?.trim() || "",
+      email: studentData.email?.trim() || "",
+      address: studentData.address?.trim() || "",
+      parentName: studentData.parentName?.trim() || "",
+      parentContact: studentData.parentContact?.trim() || "",
+      parentEmail: studentData.parentEmail?.trim() || "",
+    };
+
+    if (!trimmedData.classId) {
+      errors.classId = "Please select a class";
+    }
+
+    if (!trimmedData.name) {
+      errors.name = "Full name is required";
+    } else if (!/^[A-Za-z][A-Za-z\s.'-]{1,99}$/.test(trimmedData.name)) {
+      errors.name = "Full name can contain only letters and spaces";
+    }
+
+    if (!trimmedData.enrollmentNo) {
+      errors.enrollmentNo = "Enrollment number is required";
+    } else if (!/^\d{1,20}$/.test(trimmedData.enrollmentNo)) {
+      errors.enrollmentNo = "Enrollment number must contain only digits";
+    }
+
+    if (!trimmedData.dateOfBirth) {
+      errors.dateOfBirth = "Date of birth is required";
+    } else {
+      const today = new Date();
+      const dob = new Date(trimmedData.dateOfBirth);
+      if (Number.isNaN(dob.getTime())) {
+        errors.dateOfBirth = "Please enter a valid date of birth";
+      } else if (dob > today) {
+        errors.dateOfBirth = "Date of birth cannot be in the future";
+      }
+    }
+
+    if (!trimmedData.gender) {
+      errors.gender = "Gender is required";
+    } else if (!["Male", "Female", "Other"].includes(trimmedData.gender)) {
+      errors.gender = "Please select a valid gender";
+    }
+
+    if (!trimmedData.contact) {
+      errors.contact = "Contact number is required";
+    } else if (!/^\d{10}$/.test(trimmedData.contact)) {
+      errors.contact = "Contact number must be exactly 10 digits";
+    }
+
+    if (!trimmedData.email) {
+      errors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedData.email)) {
+      errors.email = "Please enter a valid email address";
+    }
+
+    if (!trimmedData.address) {
+      errors.address = "Address is required";
+    }
+
+    if (!trimmedData.parentName) {
+      errors.parentName = "Parent/Guardian name is required";
+    } else if (!/^[A-Za-z][A-Za-z\s.'-]{1,99}$/.test(trimmedData.parentName)) {
+      errors.parentName = "Parent/Guardian name can contain only letters and spaces";
+    }
+
+    if (!trimmedData.parentContact) {
+      errors.parentContact = "Parent contact is required";
+    } else if (!/^\d{10}$/.test(trimmedData.parentContact)) {
+      errors.parentContact = "Parent contact must be exactly 10 digits";
+    }
+
+    if (!trimmedData.parentEmail) {
+      errors.parentEmail = "Parent email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedData.parentEmail)) {
+      errors.parentEmail = "Please enter a valid parent email address";
+    }
+
+    return errors;
+  };
 
   const loadClasses = async () => {
     try {
@@ -152,48 +272,110 @@ export default function AddStudentPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: "" }));
+    }
+
+    let sanitizedValue = value;
+
+    if (name === "enrollmentNo") {
+      if (/\D/.test(value)) {
+        setFieldWarnings(prev => ({
+          ...prev,
+          enrollmentNo: "Enrollment number accepts digits only",
+        }));
+      } else {
+        setFieldWarnings(prev => ({
+          ...prev,
+          enrollmentNo: "",
+        }));
+      }
+    }
+
+    if (name === "contact") {
+      if (/\D/.test(value)) {
+        setFieldWarnings(prev => ({
+          ...prev,
+          contact: "Contact number accepts digits only",
+        }));
+      } else {
+        setFieldWarnings(prev => ({
+          ...prev,
+          contact: "",
+        }));
+      }
+    }
+
+    if (["enrollmentNo", "contact", "parentContact"].includes(name)) {
+      sanitizedValue = value.replace(/\D/g, "");
+    }
+
+    setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.name || !formData.enrollmentNo || !formData.classId) {
-      setMessage({ type: "error", text: "Please fill in all required fields" });
+
+    const normalizedFormData = {
+      ...formData,
+      name: formData.name.trim(),
+      enrollmentNo: formData.enrollmentNo.trim(),
+      classId: formData.classId.trim(),
+      contact: formData.contact.trim(),
+      email: formData.email.trim(),
+      address: formData.address.trim(),
+      parentName: formData.parentName.trim(),
+      parentContact: formData.parentContact.trim(),
+      parentEmail: formData.parentEmail.trim(),
+    };
+
+    const validationErrors = validateSingleStudentForm(normalizedFormData);
+    const hasValidationErrors = Object.values(validationErrors).some(Boolean);
+
+    if (hasValidationErrors) {
+      setFieldErrors(validationErrors);
+      setMessage({ type: "error", text: "Please fill all fields correctly." });
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+
+    setFieldErrors({
+      classId: "",
+      name: "",
+      enrollmentNo: "",
+      dateOfBirth: "",
+      gender: "",
+      contact: "",
+      email: "",
+      address: "",
+      parentName: "",
+      parentContact: "",
+      parentEmail: "",
+    });
 
     setLoading(true);
     setMessage({ type: "", text: "" });
 
     try {
-      const result = await apiService.createStudent(formData);
+      const result = await apiService.createStudent(normalizedFormData);
       
       if (result.success) {
         setMessage({ type: "success", text: "✓ Student added successfully!" });
+        window.scrollTo({ top: 0, behavior: "smooth" });
         
         setTimeout(() => {
-          setFormData({
-            name: "",
-            enrollmentNo: "",
-            classId: classIdFromUrl || "",
-            dateOfBirth: "",
-            gender: "",
-            contact: "",
-            email: "",
-            address: "",
-            parentName: "",
-            parentContact: "",
-            parentEmail: "",
-          });
-          setMessage({ type: "", text: "" });
-        }, 2000);
+          window.scrollTo({ top: 0, behavior: "auto" });
+          window.location.reload();
+        }, 1200);
       } else {
         setMessage({ type: "error", text: result.error || "Failed to add student" });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (error) {
       console.error('Add student error:', error);
       setMessage({ type: "error", text: error.message || "Failed to add student" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } finally {
       setLoading(false);
     }
@@ -270,12 +452,35 @@ export default function AddStudentPage() {
 
           setParsedData(validData);
           
-          let successMsg = `✓ File parsed successfully! Found ${validData.length} valid student(s).`;
+          let successMsg = `File parsed! Found ${validData.length} student(s). Review validation results.`;
           if (errors.length > 0) {
-            successMsg += ` ${errors.length} row(s) skipped.`;
+            successMsg += ` ${errors.length} row(s) skipped (missing required fields).`;
           }
           
-          setMessage({ type: "success", text: successMsg });
+          setMessage({ type: "info", text: successMsg });
+
+          // Immediately validate the parsed data
+          if (!bulkClassId) {
+            setMessage({ type: "error", text: "Please select a class first before uploading file" });
+            setBulkFile(null);
+            setParsedData([]);
+            return;
+          }
+
+          // Fetch existing students and validate
+          (async () => {
+            try {
+              const existingResult = await apiService.getStudents(bulkClassId);
+              const existingEnrollments = (existingResult?.students || []).map(s => s.enrollmentNo);
+              const validation = BulkUploadValidationService.validateStudentData(validData, existingEnrollments);
+              setValidationResults(validation);
+              setShowValidationModal(true);
+            } catch (error) {
+              const validation = BulkUploadValidationService.validateStudentData(validData, []);
+              setValidationResults(validation);
+              setShowValidationModal(true);
+            }
+          })();
           
         } catch (error) {
           console.error('Parse error:', error);
@@ -316,6 +521,25 @@ export default function AddStudentPage() {
       return;
     }
 
+    try {
+      const existingResult = await apiService.getStudents(bulkClassId);
+      const existingEnrollments = (existingResult?.students || []).map(s => s.enrollmentNo);
+      const validation = BulkUploadValidationService.validateStudentData(parsedData, existingEnrollments);
+      setValidationResults(validation);
+      setShowValidationModal(true);
+    } catch (error) {
+      const validation = BulkUploadValidationService.validateStudentData(parsedData, []);
+      setValidationResults(validation);
+      setShowValidationModal(true);
+    }
+  };
+
+  const confirmBulkUpload = async () => {
+    if (!validationResults || validationResults.valid.length === 0) {
+      setMessage({ type: "error", text: "No valid student records to upload" });
+      return;
+    }
+
     setLoading(true);
     setMessage({ type: "", text: "" });
 
@@ -339,7 +563,7 @@ export default function AddStudentPage() {
         return null;
       };
 
-      const students = parsedData.map((row) => {
+      const students = validationResults.valid.map((row) => {
         const student = {
           name: String(row.Name || row.name || "").trim(),
           enrollmentNo: String(row['Enrollment No'] || row.enrollmentNo || row['Enrollment Number'] || "").trim(),
@@ -375,6 +599,8 @@ export default function AddStudentPage() {
         }
         
         setMessage({ type: "success", text: msg });
+        setShowValidationModal(false);
+        setValidationResults(null);
         
         setTimeout(() => {
           setBulkFile(null);
@@ -576,6 +802,11 @@ export default function AddStudentPage() {
                         ))}
                       </select>
                     )}
+                    {fieldErrors.classId && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.classId}
+                      </p>
+                    )}
                   </div>
 
                   {/* Name */}
@@ -590,8 +821,14 @@ export default function AddStudentPage() {
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
                       placeholder="e.g., John Doe"
+                      maxLength={100}
                       required
                     />
+                    {fieldErrors.name && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.name}
+                      </p>
+                    )}
                   </div>
 
                   {/* Enrollment No */}
@@ -606,14 +843,27 @@ export default function AddStudentPage() {
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
                       placeholder="e.g., 2024001"
+                      inputMode="numeric"
+                      pattern="[0-9]+"
+                      maxLength={20}
                       required
                     />
+                    {fieldWarnings.enrollmentNo && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldWarnings.enrollmentNo}
+                      </p>
+                    )}
+                    {fieldErrors.enrollmentNo && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.enrollmentNo}
+                      </p>
+                    )}
                   </div>
 
                   {/* Date of Birth */}
                   <div>
                     <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>
-                      Date of Birth
+                      Date of Birth <span style={{ color: 'var(--accent-gold)' }}>*</span>
                     </label>
                     <input
                       type="date"
@@ -621,31 +871,43 @@ export default function AddStudentPage() {
                       value={formData.dateOfBirth}
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
+                      required
                     />
+                    {fieldErrors.dateOfBirth && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.dateOfBirth}
+                      </p>
+                    )}
                   </div>
 
                   {/* Gender */}
                   <div>
                     <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>
-                      Gender
+                      Gender <span style={{ color: 'var(--accent-gold)' }}>*</span>
                     </label>
                     <select
                       name="gender"
                       value={formData.gender}
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
+                      required
                     >
                       <option value="">Select Gender</option>
                       <option value="Male">Male</option>
                       <option value="Female">Female</option>
                       <option value="Other">Other</option>
                     </select>
+                    {fieldErrors.gender && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.gender}
+                      </p>
+                    )}
                   </div>
 
                   {/* Contact */}
                   <div>
                     <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>
-                      Contact Number
+                      Contact Number <span style={{ color: 'var(--accent-gold)' }}>*</span>
                     </label>
                     <input
                       type="tel"
@@ -654,13 +916,27 @@ export default function AddStudentPage() {
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
                       placeholder="e.g., 9876543210"
+                      inputMode="numeric"
+                      pattern="[0-9]{10}"
+                      maxLength={10}
+                      required
                     />
+                    {fieldWarnings.contact && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldWarnings.contact}
+                      </p>
+                    )}
+                    {fieldErrors.contact && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.contact}
+                      </p>
+                    )}
                   </div>
 
                   {/* Email */}
                   <div>
                     <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>
-                      Email
+                      Email <span style={{ color: 'var(--accent-gold)' }}>*</span>
                     </label>
                     <input
                       type="email"
@@ -669,13 +945,19 @@ export default function AddStudentPage() {
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
                       placeholder="e.g., student@example.com"
+                      required
                     />
+                    {fieldErrors.email && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.email}
+                      </p>
+                    )}
                   </div>
 
                   {/* Address */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>
-                      Address
+                      Address <span style={{ color: 'var(--accent-gold)' }}>*</span>
                     </label>
                     <textarea
                       name="address"
@@ -684,13 +966,19 @@ export default function AddStudentPage() {
                       rows="2"
                       className="w-full horizon-input px-4 py-2.5 text-sm resize-none"
                       placeholder="Enter full address"
+                      required
                     />
+                    {fieldErrors.address && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.address}
+                      </p>
+                    )}
                   </div>
 
                   {/* Parent Name */}
                   <div>
                     <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>
-                      Parent/Guardian Name
+                      Parent/Guardian Name <span style={{ color: 'var(--accent-gold)' }}>*</span>
                     </label>
                     <input
                       type="text"
@@ -699,13 +987,20 @@ export default function AddStudentPage() {
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
                       placeholder="e.g., Jane Doe"
+                      maxLength={100}
+                      required
                     />
+                    {fieldErrors.parentName && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.parentName}
+                      </p>
+                    )}
                   </div>
 
                   {/* Parent Contact */}
                   <div>
                     <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>
-                      Parent Contact
+                      Parent Contact <span style={{ color: 'var(--accent-gold)' }}>*</span>
                     </label>
                     <input
                       type="tel"
@@ -714,13 +1009,22 @@ export default function AddStudentPage() {
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
                       placeholder="e.g., 9876543211"
+                      inputMode="numeric"
+                      pattern="[0-9]{10}"
+                      maxLength={10}
+                      required
                     />
+                    {fieldErrors.parentContact && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.parentContact}
+                      </p>
+                    )}
                   </div>
 
                   {/* Parent Email */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>
-                      Parent Email
+                      Parent Email <span style={{ color: 'var(--accent-gold)' }}>*</span>
                     </label>
                     <input
                       type="email"
@@ -729,7 +1033,13 @@ export default function AddStudentPage() {
                       onChange={handleInputChange}
                       className="w-full horizon-input px-4 py-2.5 text-sm"
                       placeholder="e.g., parent@example.com"
+                      required
                     />
+                    {fieldErrors.parentEmail && (
+                      <p className="mt-1 text-xs" style={{ color: '#dc2626' }}>
+                        {fieldErrors.parentEmail}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -926,29 +1236,43 @@ export default function AddStudentPage() {
                   >
                     Cancel
                   </button>
-                  <button
-                    onClick={handleBulkUpload}
-                    disabled={loading || !bulkClassId || parsedData.length === 0}
-                    className="horizon-btn-primary px-6 py-2.5 text-sm inline-flex items-center gap-2"
-                  >
-                    {loading ? (
-                      <>
-                        <FaSpinner className="animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <FaUpload />
-                        Upload {parsedData.length} Student{parsedData.length !== 1 ? 's' : ''}
-                      </>
-                    )}
-                  </button>
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {showValidationModal && validationResults && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            maxWidth: '900px',
+            width: '95%',
+            maxHeight: '90vh'
+          }}>
+            <ValidationResultsDisplay
+              validationResults={validationResults}
+              loading={loading}
+              onCancel={() => setShowValidationModal(false)}
+              onConfirm={confirmBulkUpload}
+              type="students"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }
