@@ -55,13 +55,13 @@ class DropoutTrackingController {
       const updateQuery = `
         UPDATE students 
         SET 
-          dropout_status = $1,
-          dropout_date = $2,
-          dropout_reason = $3,
-          dropout_notes = $4,
+          dropout_status = $1::VARCHAR,
+          dropout_date = $2::DATE,
+          dropout_reason = $3::TEXT,
+          dropout_notes = $4::TEXT,
           status = CASE 
-            WHEN $1::VARCHAR = 'active' THEN 'active'::VARCHAR
-            ELSE 'inactive'::VARCHAR
+            WHEN $1 = 'active' THEN 'active'
+            ELSE 'inactive'
           END
         WHERE id = $5 AND school_id = $6
         RETURNING *
