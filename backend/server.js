@@ -18,10 +18,13 @@ import behaviorRoutes from './routes/behaviorRoutes.js';
 import interventionRoutes from './routes/interventionRoutes.js';
 import gamificationRoutes from './routes/gamificationRoutes.js';
 import facultyRoutes from './routes/facultyRoutes.js';
+import aiAssistantRoutes from './routes/aiAssistantRoutes.js';
 import superAdminRoutes from './routes/superAdminRoutes.js';
 import mlRoutes from './ml-integration/routes.js';
+import dropoutRoutes from './routes/dropoutRoutes.js';
 import dataStore from './storage/dataStore.js';
 import { connectPostgres } from './database/connection.js';
+import modelRetrainingService from './services/modelRetrainingService.js';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -59,8 +62,10 @@ app.use('/api/behavior', behaviorRoutes);
 app.use('/api/interventions', interventionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/faculty', facultyRoutes);
+app.use('/api/ai-assistant', aiAssistantRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/ml', mlRoutes);
+app.use('/api/dropout', dropoutRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -174,6 +179,9 @@ async function startServer() {
       console.log(`Server running on port ${PORT}`);
       console.log(`API available at http://localhost:${PORT}/api`);
       console.log(`✨ Database is clean - Register your school to get started`);
+      
+      // Start automated model retraining scheduler
+      modelRetrainingService.startScheduler();
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
