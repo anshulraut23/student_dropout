@@ -6,6 +6,7 @@ import apiService from "../../services/apiService";
 
 const ROLE_ADMIN = "admin";
 const ROLE_TEACHER = "teacher";
+const ROLE_SUPER_ADMIN = "super_admin";
 
 function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
   const { t } = useTranslation();
@@ -18,15 +19,17 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
 
   if (!isOpen) return null;
 
-  const getDashboardRoute = (userRole) =>
-    userRole === ROLE_ADMIN ? "/admin/dashboard" : "/teacher/dashboard";
+  const getDashboardRoute = (userRole) => {
+    if (userRole === ROLE_SUPER_ADMIN) return "/super-admin/dashboard";
+    return userRole === ROLE_ADMIN ? "/admin/dashboard" : "/teacher/dashboard";
+  };
 
   const storeAuthSession = ({ token, role, school_id, school_name }) => {
-    const storage = rememberMe ? localStorage : sessionStorage;
-    storage.setItem("token", token);
-    storage.setItem("role", role);
-    storage.setItem("school_id", school_id || "");
-    storage.setItem("school_name", school_name || "");
+    // Always use localStorage for consistent authentication
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", role);
+    localStorage.setItem("school_id", school_id || "");
+    localStorage.setItem("school_name", school_name || "");
   };
 
   const handleLogin = async (event) => {
@@ -50,7 +53,7 @@ function LoginModal({ isOpen, onClose, onSwitchToRegister }) {
       const { token, user, school } = response;
       const role = user.role;
 
-      if (role !== ROLE_ADMIN && role !== ROLE_TEACHER) {
+      if (role !== ROLE_ADMIN && role !== ROLE_TEACHER && role !== ROLE_SUPER_ADMIN) {
         throw new Error("Invalid role from server.");
       }
 

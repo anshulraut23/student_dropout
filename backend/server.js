@@ -18,6 +18,7 @@ import behaviorRoutes from './routes/behaviorRoutes.js';
 import interventionRoutes from './routes/interventionRoutes.js';
 import gamificationRoutes from './routes/gamificationRoutes.js';
 import facultyRoutes from './routes/facultyRoutes.js';
+import superAdminRoutes from './routes/superAdminRoutes.js';
 import mlRoutes from './ml-integration/routes.js';
 import dataStore from './storage/dataStore.js';
 import { connectPostgres } from './database/connection.js';
@@ -58,6 +59,7 @@ app.use('/api/behavior', behaviorRoutes);
 app.use('/api/interventions', interventionRoutes);
 app.use('/api/gamification', gamificationRoutes);
 app.use('/api/faculty', facultyRoutes);
+app.use('/api/super-admin', superAdminRoutes);
 app.use('/api/ml', mlRoutes);
 
 // Health check

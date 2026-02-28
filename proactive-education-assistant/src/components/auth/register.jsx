@@ -176,8 +176,11 @@ function RegisterModal({ isOpen, onClose, onSwitchToLogin }) {
         onClose();
         navigate(targetRoute);
       } else {
-        // For teacher, show success message and redirect to login
-        alert(response.message || "Registration successful! Please wait for admin approval.");
+        // For pending-approval flows, show success message and redirect to login
+        const defaultMessage = role === ROLE_ADMIN
+          ? "Registration successful! Please wait for super admin approval."
+          : "Registration successful! Please wait for admin approval.";
+        alert(response.message || defaultMessage);
         onClose();
         onSwitchToLogin();
       }
