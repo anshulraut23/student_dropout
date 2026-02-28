@@ -833,6 +833,8 @@ import { FaCheck, FaTimes, FaSpinner, FaUpload, FaDownload, FaCheckCircle, FaExc
 import * as XLSX from "xlsx";
 import apiService from "../../../services/apiService";
 import { useGameification } from "../../../hooks/useGameification";
+import BulkUploadValidationService from "../../../services/bulkUploadValidationService";
+import ValidationResultsDisplay from "../../bulkUpload/ValidationResultsDisplay";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -1006,6 +1008,8 @@ export default function AttendanceTab() {
 
     return attendanceDate < tomorrow && attendanceDate >= thirtyDaysAgo;
   };
+  const [validationResults, setValidationResults] = useState(null);
+  const [showValidationModal, setShowValidationModal] = useState(false);
 
   useEffect(() => {
     loadClasses();
@@ -1295,6 +1299,7 @@ export default function AttendanceTab() {
     setBulkFile(file);
     setMessage({ type: "", text: "" });
     setParsedData([]);
+    setValidationResults(null);
 
     try {
       const reader = new FileReader();
@@ -1313,7 +1318,24 @@ export default function AttendanceTab() {
           }
 
           setParsedData(jsonData);
-          setMessage({ type: "success", text: `✓ File parsed! Found ${jsonData.length} records.` });
+          
+          // Immediately validate the uploaded data
+          if (!selectedClass) {
+            setMessage({ type: "error", text: "Please select a class first before uploading file" });
+            setBulkFile(null);
+            setParsedData([]);
+            return;
+          }
+
+          const validation = BulkUploadValidationService.validateAttendanceData(
+            jsonData,
+            students,
+            selectedClass
+          );
+          setValidationResults(validation);
+          setShowValidationModal(true);
+          
+          setMessage({ type: "info", text: `File parsed! Review validation results before uploading.` });
         } catch (error) {
           console.error('Parse error:', error);
           setMessage({ type: "error", text: "Failed to parse file" });
@@ -1788,25 +1810,72 @@ export default function AttendanceTab() {
             )}
           </div>
 
-          {parsedData.length > 0 && (
-            <div className="flex justify-end">
-              <button
-                onClick={handleBulkUpload}
-                disabled={loading || !selectedClass}
-                className="horizon-btn-primary px-6 py-2.5 text-sm inline-flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <FaSpinner className="animate-spin" />
-                    Uploading...
-                  </>
-                ) : (
-                  <>
-                    <FaUpload />
-                    Upload Attendance
-                  </>
-                )}
-              </button>
+          {showValidationModal && validationResults && (
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000
+            }}>
+              <div style={{
+                background: 'white',
+                borderRadius: '12px',
+                maxWidth: '900px',
+                width: '95%',
+                maxHeight: '90vh'
+              }}>
+                <ValidationResultsDisplay
+                  validationResults={validationResults}
+                  loading={loading}
+                  onCancel={() => setShowValidationModal(false)}
+                  onConfirm={async () => {
+                    // Check for subject selection if in subject mode
+                    if ((attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') && !selectedSubject) {
+                      setMessage({ type: "error", text: "Please select a subject before uploading" });
+                      return;
+                    }
+
+                    setLoading(true);
+                    try {
+                      const attendanceArray = validationResults.valid.map(v => ({
+                        studentId: v.studentId,
+                        status: v.status,
+                        remarks: v.remarks
+                      }));
+
+                      const result = await apiService.markBulkAttendance({
+                        classId: selectedClass,
+                        subjectId: (attendanceMode === 'subject' || attendanceMode === 'subject-wise' || attendanceMode === 'subject_wise') ? selectedSubject : null,
+                        date: selectedDate,
+                        attendance: attendanceArray
+                      });
+
+                      if (result.success) {
+                        setMessage({ type: 'success', text: `✓ Uploaded ${attendanceArray.length} records successfully!` });
+                        setBulkFile(null);
+                        setParsedData([]);
+                        setValidationResults(null);
+                        setShowValidationModal(false);
+                        const input = document.getElementById('bulk-file-input');
+                        if (input) input.value = '';
+                      } else {
+                        setMessage({ type: 'error', text: result.error || 'Upload failed' });
+                      }
+                    } catch (error) {
+                      setMessage({ type: 'error', text: error.message || 'Upload failed' });
+                    } finally {
+                      setLoading(false);
+                    }
+                  }}
+                  type="attendance"
+                />
+              </div>
             </div>
           )}
         </>

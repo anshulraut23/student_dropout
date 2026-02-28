@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { FaPlus, FaSpinner, FaUpload, FaDownload, FaUser, FaFileExcel, FaCheckCircle, FaExclamationTriangle, FaArrowLeft } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import apiService from "../../services/apiService";
+import BulkUploadValidationService from "../../services/bulkUploadValidationService";
+import ValidationResultsDisplay from "../../components/bulkUpload/ValidationResultsDisplay";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -129,6 +131,8 @@ export default function AddStudentPage() {
   const [bulkClassId, setBulkClassId] = useState(classIdFromUrl || "");
   const [parsedData, setParsedData] = useState([]);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [validationResults, setValidationResults] = useState(null);
+  const [showValidationModal, setShowValidationModal] = useState(false);
 
   useEffect(() => {
     loadClasses();
@@ -270,12 +274,35 @@ export default function AddStudentPage() {
 
           setParsedData(validData);
           
-          let successMsg = `✓ File parsed successfully! Found ${validData.length} valid student(s).`;
+          let successMsg = `File parsed! Found ${validData.length} student(s). Review validation results.`;
           if (errors.length > 0) {
-            successMsg += ` ${errors.length} row(s) skipped.`;
+            successMsg += ` ${errors.length} row(s) skipped (missing required fields).`;
           }
           
-          setMessage({ type: "success", text: successMsg });
+          setMessage({ type: "info", text: successMsg });
+
+          // Immediately validate the parsed data
+          if (!bulkClassId) {
+            setMessage({ type: "error", text: "Please select a class first before uploading file" });
+            setBulkFile(null);
+            setParsedData([]);
+            return;
+          }
+
+          // Fetch existing students and validate
+          (async () => {
+            try {
+              const existingResult = await apiService.getStudents(bulkClassId);
+              const existingEnrollments = (existingResult?.students || []).map(s => s.enrollmentNo);
+              const validation = BulkUploadValidationService.validateStudentData(validData, existingEnrollments);
+              setValidationResults(validation);
+              setShowValidationModal(true);
+            } catch (error) {
+              const validation = BulkUploadValidationService.validateStudentData(validData, []);
+              setValidationResults(validation);
+              setShowValidationModal(true);
+            }
+          })();
           
         } catch (error) {
           console.error('Parse error:', error);
@@ -316,6 +343,25 @@ export default function AddStudentPage() {
       return;
     }
 
+    try {
+      const existingResult = await apiService.getStudents(bulkClassId);
+      const existingEnrollments = (existingResult?.students || []).map(s => s.enrollmentNo);
+      const validation = BulkUploadValidationService.validateStudentData(parsedData, existingEnrollments);
+      setValidationResults(validation);
+      setShowValidationModal(true);
+    } catch (error) {
+      const validation = BulkUploadValidationService.validateStudentData(parsedData, []);
+      setValidationResults(validation);
+      setShowValidationModal(true);
+    }
+  };
+
+  const confirmBulkUpload = async () => {
+    if (!validationResults || validationResults.valid.length === 0) {
+      setMessage({ type: "error", text: "No valid student records to upload" });
+      return;
+    }
+
     setLoading(true);
     setMessage({ type: "", text: "" });
 
@@ -339,7 +385,7 @@ export default function AddStudentPage() {
         return null;
       };
 
-      const students = parsedData.map((row) => {
+      const students = validationResults.valid.map((row) => {
         const student = {
           name: String(row.Name || row.name || "").trim(),
           enrollmentNo: String(row['Enrollment No'] || row.enrollmentNo || row['Enrollment Number'] || "").trim(),
@@ -375,6 +421,8 @@ export default function AddStudentPage() {
         }
         
         setMessage({ type: "success", text: msg });
+        setShowValidationModal(false);
+        setValidationResults(null);
         
         setTimeout(() => {
           setBulkFile(null);
@@ -926,29 +974,43 @@ export default function AddStudentPage() {
                   >
                     Cancel
                   </button>
-                  <button
-                    onClick={handleBulkUpload}
-                    disabled={loading || !bulkClassId || parsedData.length === 0}
-                    className="horizon-btn-primary px-6 py-2.5 text-sm inline-flex items-center gap-2"
-                  >
-                    {loading ? (
-                      <>
-                        <FaSpinner className="animate-spin" />
-                        Uploading...
-                      </>
-                    ) : (
-                      <>
-                        <FaUpload />
-                        Upload {parsedData.length} Student{parsedData.length !== 1 ? 's' : ''}
-                      </>
-                    )}
-                  </button>
                 </div>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {showValidationModal && validationResults && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            maxWidth: '900px',
+            width: '95%',
+            maxHeight: '90vh'
+          }}>
+            <ValidationResultsDisplay
+              validationResults={validationResults}
+              loading={loading}
+              onCancel={() => setShowValidationModal(false)}
+              onConfirm={confirmBulkUpload}
+              type="students"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 }
