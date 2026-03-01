@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Admin Token</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .step {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .token-display {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            display: none;
+        }
+        .token-display.show {
+            display: block;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .copy-btn {
+            background: #28a745;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background: #218838;
+        }
+        .instructions {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .code {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        .code pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Get Admin Authentication Token</h1>
+        <p class="subtitle">Follow these steps to get your admin token for ML performance tracking</p>
+
+        <div class="step">
+            <span class="step-number">1</span>
+            <strong>Login as Admin</strong>
+            <p>First, make sure you're logged in as an admin user.</p>
+            <button onclick="openAdminLogin()">Open Admin Login</button>
+        </div>
+
+        <div class="step">
+            <span class="step-number">2</span>
+            <strong>Extract Token</strong>
+            <p>Click the button below to extract your authentication token from browser storage.</p>
+            <button onclick="getToken()" id="getTokenBtn">Get My Token</button>
+            <span id="status"></span>
+        </div>
+
+        <div class="token-display" id="tokenDisplay">
+            <strong>Your Admin Token:</strong>
+            <div id="tokenValue" style="margin-top: 10px;"></div>
+            <button class="copy-btn" onclick="copyToken()">📋 Copy Token</button>
+        </div>
+
+        <div class="step">
+            <span class="step-number">3</span>
+            <strong>Add Token to Configuration</strong>
+            <p>Open the file <code>ml-service/.env</code> and update the ADMIN_AUTH_TOKEN:</p>
+            <div class="code">
+                <pre>ADMIN_AUTH_TOKEN=<span id="tokenPreview">your_token_here</span></pre>
+            </div>
+        </div>
+
+        <div class="step">
+            <span class="step-number">4</span>
+            <strong>Run Sync Script</strong>
+            <p>Now run the sync script to save performance metrics to database:</p>
+            <div class="code">
+                <pre>cd ml-service
+sync_performance_to_db.bat</pre>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <strong>📝 Alternative Method (Manual):</strong>
+            <ol>
+                <li>Press <kbd>F12</kbd> to open DevTools</li>
+                <li>Go to <strong>Application</strong> tab (Chrome) or <strong>Storage</strong> tab (Firefox)</li>
+                <li>Click <strong>Local Storage</strong> → <code>http://localhost:3000</code></li>
+                <li>Find the <code>token</code> entry</li>
+                <li>Copy the value (long string starting with "eyJ...")</li>
+                <li>Paste into <code>ml-service/.env</code></li>
+            </ol>
+        </div>
+
+        <div class="warning">
+            <strong>⚠️ Important:</strong> Make sure you're logged in as an <strong>admin</strong> user, not a teacher. 
+            Only admin tokens have permission to save model performance metrics.
+        </div>
+    </div>
+
+    <script>
+        function openAdminLogin() {
+            window.open('http://localhost:3000/admin/login', '_blank');
+        }
+
+        function getToken() {
+            const token = localStorage.getItem('token');
+            const statusEl = document.getElementById('status');
+            const tokenDisplay = document.getElementById('tokenDisplay');
+            const tokenValue = document.getElementById('tokenValue');
+            const tokenPreview = document.getElementById('tokenPreview');
+
+            if (token) {
+                tokenValue.textContent = token;
+                tokenPreview.textContent = token;
+                tokenDisplay.classList.add('show');
+                statusEl.innerHTML = '<span class="success">✓ Token found!</span>';
+                
+                // Store for copy function
+                window.currentToken = token;
+            } else {
+                statusEl.innerHTML = '<span class="error">✗ No token found. Please login first.</span>';
+                tokenDisplay.classList.remove('show');
+            }
+        }
+
+        function copyToken() {
+            const token = window.currentToken;
+            if (token) {
+                navigator.clipboard.writeText(token).then(() => {
+                    alert('✓ Token copied to clipboard!\n\nNow paste it into ml-service/.env file');
+                }).catch(err => {
+                    // Fallback for older browsers
+                    const textarea = document.createElement('textarea');
+                    textarea.value = token;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert('✓ Token copied to clipboard!\n\nNow paste it into ml-service/.env file');
+                });
+            }
+        }
+
+        // Auto-check for token on page load
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                document.getElementById('status').innerHTML = 
+                    '<span class="success">✓ Already logged in! Click "Get My Token" to extract it.</span>';
+            }
+        });
+    </script>
+</body>
+</html>

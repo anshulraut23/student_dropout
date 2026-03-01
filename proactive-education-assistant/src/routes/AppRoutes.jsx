@@ -15,13 +15,6 @@ import DataEntryPage from "../pages/teacher/DataEntryPage";
 import AttendanceHistoryPage from "../pages/teacher/AttendanceHistoryPage";
 import InterventionsHistoryPage from "../pages/teacher/InterventionsHistoryPage";
 import MarksEntryPage from "../pages/teacher/MarksEntryPage";
-import ScoreHistoryPage from "../pages/teacher/ScoreHistoryPage";
-import GamificationPage from "../pages/teacher/GamificationPage";
-import LeaderboardPage from "../pages/teacher/LeaderboardPage";
-import AddStudentPage from "../pages/teacher/AddStudentPage";
-import MyClassesPage from "../pages/teacher/MyClassesPage";
-import LoginPage from "../pages/teacher/LoginPage";
-import FacultyConnect from "../pages/teacher/FacultyConnect";
 import FacultyChat from "../pages/teacher/FacultyChat";
 import AIAssistantPage from "../pages/teacher/AIAssistantPage";
 import SuperAdminDashboard from "../pages/super-admin/SuperAdminDashboard";
@@ -94,34 +87,6 @@ export default function AppRoutes() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/about" element={<AboutPage />} />
       
-      {/* Login Routes - Always Accessible */}
-      <Route 
-        path="/teacher/login" 
-        element={
-          isLoggedIn && userRole === "teacher" 
-            ? <Navigate to="/teacher/dashboard" replace /> 
-            : <LoginPage />
-        } 
-      />
-      
-      <Route 
-        path="/admin/login" 
-        element={
-          isLoggedIn && userRole === "admin" 
-            ? <Navigate to="/admin/dashboard" replace /> 
-            : <LoginPage />
-        } 
-      />
-
-      <Route 
-        path="/super-admin/login" 
-        element={
-          isLoggedIn && userRole === "super_admin" 
-            ? <Navigate to="/super-admin/dashboard" replace /> 
-            : <LoginPage />
-        } 
-      />
-
       {/* Super Admin Routes */}
       {isLoggedIn && userRole === "super_admin" ? (
         <Route path="/super-admin" element={<SuperAdminLayout />}>
@@ -133,10 +98,10 @@ export default function AppRoutes() {
         </Route>
       ) : (
         <>
-          <Route path="/super-admin/dashboard" element={<Navigate to="/super-admin/login" replace />} />
-          <Route path="/super-admin/schools" element={<Navigate to="/super-admin/login" replace />} />
-          <Route path="/super-admin/schools/:schoolId" element={<Navigate to="/super-admin/login" replace />} />
-          <Route path="/super-admin/profile" element={<Navigate to="/super-admin/login" replace />} />
+          <Route path="/super-admin/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/super-admin/schools" element={<Navigate to="/" replace />} />
+          <Route path="/super-admin/schools/:schoolId" element={<Navigate to="/" replace />} />
+          <Route path="/super-admin/profile" element={<Navigate to="/" replace />} />
         </>
       )}
 
@@ -163,7 +128,7 @@ export default function AppRoutes() {
           <Route path="profile" element={<AdminProfile />} />
         </Route>
       ) : (
-        <Route path="/admin/*" element={<Navigate to="/admin/login" replace />} />
+        <Route path="/admin/*" element={<Navigate to="/" replace />} />
       )}
 
       {/* Teacher Routes */}
@@ -172,18 +137,12 @@ export default function AppRoutes() {
           <Route element={<MainLayout />}>
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/teacher/dashboard" element={<DashboardPage />} />
-            <Route path="/my-classes" element={<MyClassesPage />} />
             <Route path="/students" element={<StudentListPage />} />
             <Route path="/students/:id" element={<StudentProfilePage />} />
-            <Route path="/add-student" element={<AddStudentPage />} />
             <Route path="/teacher/marks/entry/:examId" element={<MarksEntryPage />} />
             <Route path="/data-entry" element={<DataEntryPage />} />
             <Route path="/attendance-history" element={<AttendanceHistoryPage />} />
             <Route path="/interventions-history" element={<InterventionsHistoryPage />} />
-            <Route path="/score-history" element={<ScoreHistoryPage />} />
-            <Route path="/gamification" element={<GamificationPage />} />
-            <Route path="/leaderboard" element={<LeaderboardPage />} />
-            <Route path="/faculty-connect" element={<FacultyConnect />} />
             <Route path="/faculty-chat" element={<FacultyChat />} />
             <Route path="/ai-assistant" element={<AIAssistantPage />} />
             <Route path="/profile" element={<ProfilePage />} />
@@ -192,23 +151,17 @@ export default function AppRoutes() {
         </>
       ) : (
         <>
-          <Route path="/dashboard" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/teacher/dashboard" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/my-classes" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/students" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/students/:id" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/add-student" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/teacher/marks/entry/:examId" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/data-entry" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/attendance-history" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/interventions-history" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/score-history" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/gamification" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/leaderboard" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/faculty-connect" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/faculty-chat" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/ai-assistant" element={<Navigate to="/teacher/login" replace />} />
-          <Route path="/profile" element={<Navigate to="/teacher/login" replace />} />
+          <Route path="/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/teacher/dashboard" element={<Navigate to="/" replace />} />
+          <Route path="/students" element={<Navigate to="/" replace />} />
+          <Route path="/students/:id" element={<Navigate to="/" replace />} />
+          <Route path="/teacher/marks/entry/:examId" element={<Navigate to="/" replace />} />
+          <Route path="/data-entry" element={<Navigate to="/" replace />} />
+          <Route path="/attendance-history" element={<Navigate to="/" replace />} />
+          <Route path="/interventions-history" element={<Navigate to="/" replace />} />
+          <Route path="/faculty-chat" element={<Navigate to="/" replace />} />
+          <Route path="/ai-assistant" element={<Navigate to="/" replace />} />
+          <Route path="/profile" element={<Navigate to="/" replace />} />
         </>
       )}
 

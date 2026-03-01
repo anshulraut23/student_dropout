@@ -37,6 +37,15 @@ def main():
         logger.info("Starting training process...")
         train_main()
         
+        # Save performance metrics to database
+        logger.info("\n📊 Saving performance metrics to database...")
+        from save_performance_to_db import save_performance_to_database
+        
+        if save_performance_to_database():
+            logger.info("✅ Performance metrics saved to database")
+        else:
+            logger.warning("⚠️  Failed to save metrics to database (training still successful)")
+        
         logger.info("="*60)
         logger.info("✅ AUTOMATED RETRAINING COMPLETED SUCCESSFULLY")
         logger.info("="*60)

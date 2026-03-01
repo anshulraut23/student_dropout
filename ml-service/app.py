@@ -258,10 +258,10 @@ def retrain_model():
         if not training_data:
             return jsonify({'error': 'No training data provided'}), 400
         
-        if len(training_data) < 50:
+        if len(training_data) < 10:
             return jsonify({
                 'error': 'Insufficient training data',
-                'message': 'Need at least 50 samples to retrain the model'
+                'message': 'Need at least 10 samples to retrain the model'
             }), 400
         
         logger.info(f"Retraining model with {len(training_data)} samples...")
