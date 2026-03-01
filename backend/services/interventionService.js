@@ -1,6 +1,7 @@
 import dataStore from '../storage/dataStore.js';
 import { generateId } from '../utils/helpers.js';
 import { sendInterventionEmail } from './emailService.js';
+import { sendWhatsApp } from './whatsappService.js';
 
 const mapRiskToPriority = (riskLevel = 'medium') => {
   const normalized = String(riskLevel).toLowerCase();
@@ -40,6 +41,8 @@ export const triggerInterventionEmail = async ({
   interventionType = 'dropout_risk',
   riskLevel = 'medium',
   recipientEmail,
+  recipientPhone,
+  messageChannel = 'email',
   subject,
   customMessage,
   sendToParentAndStudent = false
@@ -66,37 +69,56 @@ export const triggerInterventionEmail = async ({
     throw new Error('Student not found');
   }
 
-  // Determine recipient(s)
-  let recipients = [];
-  
+  const normalizedChannel = String(messageChannel || 'email').toLowerCase();
+  const shouldSendEmail = normalizedChannel === 'email';
+  const shouldSendWhatsApp = normalizedChannel === 'whatsapp' || normalizedChannel === 'sms';
+
+  if (!shouldSendEmail && !shouldSendWhatsApp) {
+    throw new Error('Invalid messageChannel. Use "email", "whatsapp", or "sms"');
+  }
+
+  let emailRecipients = [];
+  let whatsappRecipients = [];
+
   console.log('\n📋 Determining recipients:');
+  console.log('   messageChannel:', normalizedChannel);
   console.log('   recipientEmail:', recipientEmail || '(not provided)');
+  console.log('   recipientPhone:', recipientPhone || '(not provided)');
   console.log('   student.parentEmail:', student.parentEmail || '(not set)');
   console.log('   student.email:', student.email || '(not set)');
-  
-  if (recipientEmail) {
-    // Explicit email provided
-    console.log('   ✅ Using provided recipientEmail:', recipientEmail);
-    recipients = [recipientEmail];
-  } else if (sendToParentAndStudent) {
-    // Send to both parent and student
-    console.log('   ✅ Sending to both parent and student');
-    if (student.parentEmail) recipients.push(student.parentEmail);
-    if (student.email) recipients.push(student.email);
-  } else {
-    // Default: try parent first, then student, then guardian
-    console.log('   ✅ Using default logic (parent or student)');
-    const email = student.parentEmail || student.email;
-    if (email) recipients.push(email);
+  console.log('   student.parentPhone:', student.parentPhone || '(not set)');
+
+  if (shouldSendEmail) {
+    if (recipientEmail) {
+      emailRecipients = [recipientEmail];
+    } else if (sendToParentAndStudent) {
+      if (student.parentEmail) emailRecipients.push(student.parentEmail);
+      if (student.email) emailRecipients.push(student.email);
+    } else {
+      const email = student.parentEmail || student.email;
+      if (email) emailRecipients.push(email);
+    }
+
+    if (emailRecipients.length === 0) {
+      throw new Error('No recipient email found. Provide recipientEmail in request body or ensure student has parent/student email in database.');
+    }
   }
 
-  console.log('   Final recipients:', recipients);
+  if (shouldSendWhatsApp) {
+    if (recipientPhone) {
+      whatsappRecipients = [recipientPhone];
+    } else {
+      const phone = student.parentPhone;
+      if (phone) whatsappRecipients.push(phone);
+    }
 
-  if (recipients.length === 0) {
-    const errorMsg = 'No recipient email found. Provide recipientEmail in request body or ensure student has parent/student email in database.';
-    console.error('❌', errorMsg);
-    throw new Error(errorMsg);
+    if (whatsappRecipients.length === 0) {
+      throw new Error('No recipient phone found. Provide recipientPhone in request body or ensure student has parent phone in database.');
+    }
   }
+
+  console.log('   Final email recipients:', emailRecipients);
+  console.log('   Final WhatsApp recipients:', whatsappRecipients);
 
   const nowIso = new Date().toISOString();
   const currentDate = nowIso.split('T')[0];
@@ -139,82 +161,135 @@ export const triggerInterventionEmail = async ({
     customMessage
   });
 
-  console.log('\n📧 Preparing to send emails:');
-  console.log('   Subject:', emailSubject);
-  console.log('   Recipients count:', recipients.length);
+  const messageText = customMessage || 'Please review this student and take suitable follow-up action.';
 
-  // Send emails to all recipients
   const emailResults = [];
-  
-  for (const recipient of recipients) {
-    console.log(`\n📨 Sending email to: ${recipient}`);
-    
-    const messageLogBase = {
-      id: generateId(),
-      interventionId: createdIntervention.id,
-      type: 'email',
-      recipient,
-      subject: emailSubject,
-      body: html,
-      sentDate: new Date().toISOString()
-    };
+  const whatsappResults = [];
 
-    try {
-      const emailResult = await sendInterventionEmail(recipient, emailSubject, html);
+  if (shouldSendEmail) {
+    console.log('\n📧 Preparing to send emails:');
+    console.log('   Subject:', emailSubject);
+    console.log('   Recipients count:', emailRecipients.length);
 
-      console.log(`   ✅ Email sent with ID: ${emailResult.id}`);
+    for (const recipient of emailRecipients) {
+      console.log(`\n📨 Sending email to: ${recipient}`);
 
-      if (typeof dataStore.addInterventionMessage === 'function') {
-        await dataStore.addInterventionMessage({
-          ...messageLogBase,
-          deliveryStatus: 'sent'
-        });
-        console.log(`   ✅ Email logged in database`);
-      }
-
-      emailResults.push({
+      const messageLogBase = {
+        id: generateId(),
+        interventionId: createdIntervention.id,
+        type: 'email',
         recipient,
-        status: 'sent',
-        emailProviderId: emailResult.id
-      });
-    } catch (error) {
-      console.error(`   ❌ Failed to send to ${recipient}: ${error.message}`);
-      
-      if (typeof dataStore.addInterventionMessage === 'function') {
-        await dataStore.addInterventionMessage({
-          ...messageLogBase,
-          deliveryStatus: 'failed'
+        subject: emailSubject,
+        body: html,
+        sentDate: new Date().toISOString()
+      };
+
+      try {
+        const emailResult = await sendInterventionEmail(recipient, emailSubject, html);
+
+        if (typeof dataStore.addInterventionMessage === 'function') {
+          await dataStore.addInterventionMessage({
+            ...messageLogBase,
+            deliveryStatus: 'sent'
+          });
+        }
+
+        emailResults.push({
+          channel: 'email',
+          recipient,
+          status: 'sent',
+          providerId: emailResult.id
+        });
+      } catch (error) {
+        if (typeof dataStore.addInterventionMessage === 'function') {
+          await dataStore.addInterventionMessage({
+            ...messageLogBase,
+            deliveryStatus: 'failed'
+          });
+        }
+
+        emailResults.push({
+          channel: 'email',
+          recipient,
+          status: 'failed',
+          error: error.message
         });
       }
-
-      emailResults.push({
-        recipient,
-        status: 'failed',
-        error: error.message
-      });
     }
   }
 
-  console.log('\n📊 Email results:', emailResults);
+  if (shouldSendWhatsApp) {
+    console.log('\n💬 Preparing to send WhatsApp messages:');
+    console.log('   Recipients count:', whatsappRecipients.length);
 
-  // Update intervention status
-  const allFailed = emailResults.every(r => r.status === 'failed');
-  const anySent = emailResults.some(r => r.status === 'sent');
+    for (const recipient of whatsappRecipients) {
+      console.log(`\n📲 Sending WhatsApp to: ${recipient}`);
+
+      const messageLogBase = {
+        id: generateId(),
+        interventionId: createdIntervention.id,
+        type: 'sms',
+        recipient,
+        subject: `WhatsApp: ${subject || `Intervention Alert for ${student.name}`}`,
+        body: messageText,
+        sentDate: new Date().toISOString()
+      };
+
+      try {
+        const whatsappResult = await sendWhatsApp(recipient, messageText);
+
+        if (typeof dataStore.addInterventionMessage === 'function') {
+          await dataStore.addInterventionMessage({
+            ...messageLogBase,
+            deliveryStatus: 'sent'
+          });
+        }
+
+        whatsappResults.push({
+          channel: 'whatsapp',
+          recipient,
+          status: 'sent',
+          providerId: whatsappResult.sid
+        });
+      } catch (error) {
+        if (typeof dataStore.addInterventionMessage === 'function') {
+          await dataStore.addInterventionMessage({
+            ...messageLogBase,
+            deliveryStatus: 'failed'
+          });
+        }
+
+        whatsappResults.push({
+          channel: 'whatsapp',
+          recipient,
+          status: 'failed',
+          error: error.message
+        });
+      }
+    }
+  }
+
+  const allResults = [...emailResults, ...whatsappResults];
+
+  console.log('\n📊 Message results:', allResults);
+
+  const allFailed = allResults.every(r => r.status === 'failed');
+  const anySent = allResults.some(r => r.status === 'sent');
 
   await dataStore.updateIntervention(createdIntervention.id, {
     status: allFailed ? 'failed' : anySent ? 'sent' : 'pending',
     updatedAt: new Date().toISOString(),
-    outcome: allFailed ? `All emails failed: ${emailResults.map(r => r.error).join(', ')}` : null
+    outcome: allFailed ? `All messages failed: ${allResults.map(r => r.error).filter(Boolean).join(', ')}` : null
   });
 
   if (allFailed) {
-    throw new Error(`Failed to send intervention emails to all recipients: ${emailResults.map(r => r.error).join(', ')}`);
+    throw new Error(`Failed to send intervention messages to all recipients: ${allResults.map(r => r.error).filter(Boolean).join(', ')}`);
   }
 
   return {
     interventionId: createdIntervention.id,
     studentId,
-    recipients: emailResults,
+    recipients: allResults,
     status: anySent ? 'sent' : 'partial'
   };
 };

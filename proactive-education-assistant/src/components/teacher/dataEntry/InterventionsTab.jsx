@@ -409,6 +409,7 @@ export default function InterventionsTab() {
     contactTarget: "Parent",
     message: "",
     emailAddress: "",
+    phoneNumber: "",
     followUpDate: "",
     status: "Pending",
   });
@@ -489,7 +490,7 @@ export default function InterventionsTab() {
     setCommunicationForm({
       classId: "", studentId: "", interventionType: "Parent Communication",
       channel: "Phone Call", contactTarget: "Parent", message: "",
-      emailAddress: "", followUpDate: "", status: "Pending",
+      emailAddress: "", phoneNumber: "", followUpDate: "", status: "Pending",
     });
     setEditingId(null);
     setShowCommunicationForm(false);
@@ -505,6 +506,24 @@ export default function InterventionsTab() {
     setShowActionsForm(false);
   };
 
+  // Handle opening new communication form - reset if not already showing
+  const handleNewCommunication = () => {
+    if (!showCommunicationForm) {
+      // Opening new form - reset everything
+      resetCommunicationForm();
+    }
+    setShowCommunicationForm(!showCommunicationForm);
+  };
+
+  // Handle opening new actions form - reset if not already showing
+  const handleNewActions = () => {
+    if (!showActionsForm) {
+      // Opening new form - reset everything
+      resetActionsForm();
+    }
+    setShowActionsForm(!showActionsForm);
+  };
+
   const handleCommunicationSubmit = async (e) => {
     e.preventDefault();
     if (!communicationForm.classId || !communicationForm.studentId) {
@@ -517,6 +536,10 @@ export default function InterventionsTab() {
     }
     if (communicationForm.channel === "Email" && !communicationForm.emailAddress) {
       setMessage({ type: "error", text: "Please enter the recipient email address" });
+      return;
+    }
+    if (communicationForm.channel === "SMS" && !communicationForm.phoneNumber) {
+      setMessage({ type: "error", text: "Please enter the recipient WhatsApp number" });
       return;
     }
     setLoading(true);
@@ -545,6 +568,7 @@ export default function InterventionsTab() {
           try {
             const emailResult = await apiService.triggerInterventionEmail(communicationForm.studentId, {
               interventionType: communicationForm.interventionType,
+              messageChannel: 'email',
               riskLevel: 'medium',
               recipientEmail: communicationForm.emailAddress || undefined,
               subject: `${communicationForm.interventionType} - ${communicationForm.contactTarget}`,
@@ -568,6 +592,42 @@ export default function InterventionsTab() {
             setMessage({ 
               type: "success", 
               text: editingId ? "✓ Communication updated! (Email failed)" : "✓ Communication logged! (Email failed)" 
+            });
+          }
+        } else if (communicationForm.channel === "SMS") {
+          try {
+            const whatsappResult = await apiService.triggerInterventionEmail(communicationForm.studentId, {
+              interventionType: communicationForm.interventionType,
+              messageChannel: 'whatsapp',
+              riskLevel: 'medium',
+              recipientPhone: communicationForm.phoneNumber || undefined,
+              subject: `${communicationForm.interventionType} - ${communicationForm.contactTarget}`,
+              message: communicationForm.message,
+              sendToParentAndStudent: false
+            });
+
+            if (whatsappResult.success) {
+              setMessage({
+                type: "success",
+                text: editingId
+                  ? "✓ Communication updated & WhatsApp sent to " + communicationForm.phoneNumber + "!"
+                  : "✓ Communication logged & WhatsApp sent to " + communicationForm.phoneNumber + "!"
+              });
+            } else {
+              setMessage({
+                type: "success",
+                text: editingId
+                  ? "✓ Communication updated! (WhatsApp delivery pending)"
+                  : "✓ Communication logged! (WhatsApp delivery pending)"
+              });
+            }
+          } catch (whatsappError) {
+            console.error('WhatsApp send error:', whatsappError);
+            setMessage({
+              type: "success",
+              text: editingId
+                ? "✓ Communication updated! (WhatsApp failed)"
+                : "✓ Communication logged! (WhatsApp failed)"
             });
           }
         } else {
@@ -630,6 +690,8 @@ export default function InterventionsTab() {
         channel: intervention.channel || "Phone Call",
         contactTarget: intervention.contactTarget || "Parent",
         message: intervention.message || "",
+        emailAddress: intervention.emailAddress || "",
+        phoneNumber: intervention.phoneNumber || "",
         followUpDate: intervention.followUpDate || "",
         status: intervention.status,
       });
@@ -716,7 +778,7 @@ export default function InterventionsTab() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
             <h4 className="section-title">⚡ Quick Communication Intervention</h4>
             <button
-              onClick={() => setShowCommunicationForm(!showCommunicationForm)}
+              onClick={handleNewCommunication}
               className="horizon-btn-primary px-4 py-2 text-sm inline-flex items-center gap-2"
             >
               <FaPlus style={{ fontSize: "0.7rem" }} />
@@ -786,13 +848,30 @@ export default function InterventionsTab() {
                         type="email"
                         name="emailAddress"
                         placeholder="e.g., parent@gmail.com"
-                        defaultValue={communicationForm.emailAddress || ""}
+                        value={communicationForm.emailAddress || ""}
                         onChange={(e) => setCommunicationForm(p => ({ ...p, emailAddress: e.target.value }))}
                         className="horizon-input px-4 py-2.5 text-sm"
                         required
                       />
                       <p style={{ fontSize: "0.75rem", color: "var(--gray)", marginTop: "0.3rem" }}>
                         💡 Enter the email address where you want to send this {communicationForm.contactTarget === "Parent" ? "parent" : "student"} communication
+                      </p>
+                    </div>
+                  )}
+                  {communicationForm.channel === "SMS" && (
+                    <div className="form-group" style={{ marginBottom: "1rem" }}>
+                      <label className="form-label">💬 WhatsApp Number <span className="form-required">*</span></label>
+                      <input
+                        type="tel"
+                        name="phoneNumber"
+                        placeholder="e.g., +919876543210"
+                        value={communicationForm.phoneNumber || ""}
+                        onChange={(e) => setCommunicationForm(p => ({ ...p, phoneNumber: e.target.value }))}
+                        className="horizon-input px-4 py-2.5 text-sm"
+                        required
+                      />
+                      <p style={{ fontSize: "0.75rem", color: "var(--gray)", marginTop: "0.3rem" }}>
+                        💡 Enter number in international format with country code (example: +919876543210)
                       </p>
                     </div>
                   )}
@@ -849,7 +928,7 @@ export default function InterventionsTab() {
         <div className="section-card">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "0.5rem" }}>
             <h4 className="section-title">📝 Action &amp; Follow-up Notes</h4>
-            <button onClick={() => setShowActionsForm(!showActionsForm)} className="horizon-btn-primary px-4 py-2 text-sm inline-flex items-center gap-2">
+            <button onClick={handleNewActions} className="horizon-btn-primary px-4 py-2 text-sm inline-flex items-center gap-2">
               <FaPlus style={{ fontSize: "0.7rem" }} />
               {showActionsForm ? "Cancel" : "New Action"}
             </button>

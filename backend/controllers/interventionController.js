@@ -418,7 +418,9 @@ export const triggerInterventionByStudent = async (req, res) => {
     const {
       interventionType,
       riskLevel,
+      messageChannel,
       recipientEmail,
+      recipientPhone,
       subject,
       message
     } = req.body || {};
@@ -431,7 +433,9 @@ export const triggerInterventionByStudent = async (req, res) => {
     console.log('   Body:', {
       interventionType,
       riskLevel,
+      messageChannel,
       recipientEmail,
+      recipientPhone,
       subject,
       message
     });
@@ -482,7 +486,9 @@ export const triggerInterventionByStudent = async (req, res) => {
       initiatedBy: userId,
       interventionType: interventionType || 'dropout_risk',
       riskLevel: riskLevel || 'medium',
+      messageChannel: messageChannel || 'email',
       recipientEmail,
+      recipientPhone,
       subject,
       customMessage: message
     });
@@ -491,7 +497,7 @@ export const triggerInterventionByStudent = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Intervention triggered and email processed',
+      message: 'Intervention triggered and message processed',
       data: result
     });
   } catch (error) {
