@@ -194,8 +194,8 @@ ORDER BY created_at DESC;
 **Problem 3:** Backend error in console
 **Solution:** Check `.env` file has Twilio credentials:
 ```
-TWILIO_ACCOUNT_SID=ACbbff41edbf8b5be8003967323b264267
-TWILIO_AUTH_TOKEN=ec55eee357c6403ecdee03c472ddb56e
+TWILIO_ACCOUNT_SID=your_twilio_account_sid_here
+TWILIO_AUTH_TOKEN=your_twilio_auth_token_here
 TWILIO_WHATSAPP_FROM_NUMBER=whatsapp:+14155238886
 ```
 
