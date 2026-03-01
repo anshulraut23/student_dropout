@@ -9,7 +9,7 @@ import json
 import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import roc_auc_score, classification_report
+from sklearn.metrics import roc_auc_score, classification_report, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 class MLPredictor:
     """
@@ -169,8 +169,21 @@ def train_new_model(df, model_path='models/dropout_model.pkl'):
     model.fit(X_train, y_train)
     
     # Evaluate
+    y_pred = model.predict(X_test)
     y_pred_proba = model.predict_proba(X_test)[:, 1]
+    
+    # Calculate metrics
+    accuracy = accuracy_score(y_test, y_pred)
+    precision = precision_score(y_test, y_pred, zero_division=0)
+    recall = recall_score(y_test, y_pred, zero_division=0)
+    f1 = f1_score(y_test, y_pred, zero_division=0)
     roc_auc = roc_auc_score(y_test, y_pred_proba)
+    
+    # Confusion matrix
+    tn, fp, fn, tp = confusion_matrix(y_test, y_pred).ravel()
+    
+    # Feature importance
+    feature_importance = dict(zip(feature_columns, model.feature_importances_))
     
     # Save model
     joblib.dump(model, model_path)
@@ -182,14 +195,36 @@ def train_new_model(df, model_path='models/dropout_model.pkl'):
         'training_samples': len(X_train),
         'test_samples': len(X_test),
         'dropout_rate': float(y.mean()),
-        'roc_auc': float(roc_auc)
+        'accuracy': float(accuracy),
+        'precision': float(precision),
+        'recall': float(recall),
+        'f1_score': float(f1),
+        'roc_auc': float(roc_auc),
+        'confusion_matrix': {
+            'tn': int(tn),
+            'fp': int(fp),
+            'fn': int(fn),
+            'tp': int(tp)
+        },
+        'feature_importance': {k: float(v) for k, v in feature_importance.items()}
     }
     
     with open('models/model_metadata.json', 'w') as f:
         json.dump(metadata, f, indent=2)
     
     return {
+        'accuracy': float(accuracy),
+        'precision': float(precision),
+        'recall': float(recall),
+        'f1_score': float(f1),
         'roc_auc': float(roc_auc),
+        'confusion_matrix': {
+            'tn': int(tn),
+            'fp': int(fp),
+            'fn': int(fn),
+            'tp': int(tp)
+        },
+        'feature_importance': {k: float(v) for k, v in feature_importance.items()},
         'training_samples': len(X_train),
         'test_samples': len(X_test),
         'dropout_rate': float(y.mean())

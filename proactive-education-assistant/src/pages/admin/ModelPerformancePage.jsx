@@ -7,6 +7,8 @@ const ModelPerformancePage = () => {
   const [latestMetrics, setLatestMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [retraining, setRetraining] = useState(false);
+  const [retrainMessage, setRetrainMessage] = useState(null);
 
   useEffect(() => {
     fetchModelPerformance();
@@ -27,6 +29,44 @@ const ModelPerformancePage = () => {
       setError(err.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRetrain = async () => {
+    if (!window.confirm('Are you sure you want to retrain the model? This will take 1-2 minutes.')) {
+      return;
+    }
+
+    try {
+      setRetraining(true);
+      setRetrainMessage({ type: 'info', text: 'Retraining model... This may take 1-2 minutes.' });
+      
+      const response = await apiService.retrainModel();
+      
+      if (response.success) {
+        setRetrainMessage({
+          type: 'success',
+          text: `Model retrained successfully! Accuracy: ${(response.metrics.accuracy * 100).toFixed(2)}% (${response.improvement} improvement)`
+        });
+        
+        // Refresh performance history
+        setTimeout(() => {
+          fetchModelPerformance();
+          setRetrainMessage(null);
+        }, 3000);
+      } else {
+        setRetrainMessage({
+          type: 'error',
+          text: response.message || 'Retraining failed'
+        });
+      }
+    } catch (err) {
+      setRetrainMessage({
+        type: 'error',
+        text: err.message || 'Failed to retrain model'
+      });
+    } finally {
+      setRetraining(false);
     }
   };
 
@@ -87,11 +127,45 @@ const ModelPerformancePage = () => {
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">ML Model Performance</h1>
-        <p className="text-gray-600 mt-2">Monitor dropout prediction model accuracy and metrics</p>
+      {/* Header with Retrain Button */}
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">ML Model Performance</h1>
+          <p className="text-gray-600 mt-2">Monitor dropout prediction model accuracy and metrics</p>
+        </div>
+        <button
+          onClick={handleRetrain}
+          disabled={retraining}
+          className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            retraining
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
+        >
+          {retraining ? (
+            <span className="flex items-center gap-2">
+              <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              Retraining...
+            </span>
+          ) : (
+            '🔄 Retrain Model'
+          )}
+        </button>
       </div>
+
+      {/* Retrain Message */}
+      {retrainMessage && (
+        <div className={`mb-6 p-4 rounded-lg ${
+          retrainMessage.type === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
+          retrainMessage.type === 'error' ? 'bg-red-50 border border-red-200 text-red-800' :
+          'bg-blue-50 border border-blue-200 text-blue-800'
+        }`}>
+          <p className="font-semibold">{retrainMessage.text}</p>
+        </div>
+      )}
 
       {/* Latest Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -182,22 +256,22 @@ const ModelPerformancePage = () => {
         <div className="grid grid-cols-2 gap-4 max-w-md">
           <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4 text-center">
             <p className="text-sm text-gray-600 mb-2">True Negatives</p>
-            <p className="text-3xl font-bold text-green-700">{confusionMatrix.tp || 0}</p>
+            <p className="text-3xl font-bold text-green-700">{confusionMatrix.true_negatives || 0}</p>
             <p className="text-xs text-gray-500 mt-1">Correctly predicted no dropout</p>
           </div>
           <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 text-center">
             <p className="text-sm text-gray-600 mb-2">False Positives</p>
-            <p className="text-3xl font-bold text-yellow-700">{confusionMatrix.fp || 0}</p>
+            <p className="text-3xl font-bold text-yellow-700">{confusionMatrix.false_positives || 0}</p>
             <p className="text-xs text-gray-500 mt-1">Incorrectly predicted dropout</p>
           </div>
           <div className="bg-red-50 border-2 border-red-200 rounded-lg p-4 text-center">
             <p className="text-sm text-gray-600 mb-2">False Negatives</p>
-            <p className="text-3xl font-bold text-red-700">{confusionMatrix.fn || 0}</p>
+            <p className="text-3xl font-bold text-red-700">{confusionMatrix.false_negatives || 0}</p>
             <p className="text-xs text-gray-500 mt-1">Missed actual dropouts</p>
           </div>
           <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 text-center">
             <p className="text-sm text-gray-600 mb-2">True Positives</p>
-            <p className="text-3xl font-bold text-blue-700">{confusionMatrix.tn || 0}</p>
+            <p className="text-3xl font-bold text-blue-700">{confusionMatrix.true_positives || 0}</p>
             <p className="text-xs text-gray-500 mt-1">Correctly predicted dropout</p>
           </div>
         </div>
@@ -205,7 +279,7 @@ const ModelPerformancePage = () => {
 
       {/* Performance Trends */}
       {chartData.length > 1 && (
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">Performance Trends</h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={chartData}>
@@ -220,6 +294,121 @@ const ModelPerformancePage = () => {
               <Line type="monotone" dataKey="f1" stroke="#F59E0B" name="F1-Score" />
             </LineChart>
           </ResponsiveContainer>
+        </div>
+      )}
+
+      {/* Performance History Table */}
+      {performanceHistory.length > 0 && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold mb-4">Training History</h2>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Training Date
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Model Version
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Samples
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Accuracy
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Precision
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Recall
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    F1-Score
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Notes
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {performanceHistory.map((record, index) => (
+                  <tr key={record.id} className={index === 0 ? 'bg-blue-50' : ''}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatDate(record.training_date)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {record.model_version}
+                      {index === 0 && (
+                        <span className="ml-2 px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                          Latest
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {record.training_samples}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <span className={`${
+                        record.accuracy >= 0.80 ? 'text-green-600' :
+                        record.accuracy >= 0.70 ? 'text-blue-600' :
+                        record.accuracy >= 0.60 ? 'text-yellow-600' :
+                        'text-red-600'
+                      }`}>
+                        {formatPercentage(record.accuracy)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatPercentage(record.precision_score)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatPercentage(record.recall_score)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {formatPercentage(record.f1_score)}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500">
+                      {record.notes || '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          {performanceHistory.length > 1 && (
+            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+              <h3 className="font-semibold text-gray-900 mb-2">Performance Comparison</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                  <p className="text-gray-600">First Training</p>
+                  <p className="font-semibold text-gray-900">
+                    {formatPercentage(performanceHistory[performanceHistory.length - 1].accuracy)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Latest Training</p>
+                  <p className="font-semibold text-gray-900">
+                    {formatPercentage(performanceHistory[0].accuracy)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Improvement</p>
+                  <p className={`font-semibold ${
+                    (performanceHistory[0].accuracy - performanceHistory[performanceHistory.length - 1].accuracy) > 0
+                      ? 'text-green-600'
+                      : 'text-red-600'
+                  }`}>
+                    {((performanceHistory[0].accuracy - performanceHistory[performanceHistory.length - 1].accuracy) * 100).toFixed(2)}%
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-600">Total Trainings</p>
+                  <p className="font-semibold text-gray-900">{performanceHistory.length}</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

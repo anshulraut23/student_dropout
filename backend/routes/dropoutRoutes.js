@@ -47,4 +47,11 @@ router.get(
   dropoutTrackingController.getModelPerformance.bind(dropoutTrackingController)
 );
 
+// Trigger manual model retraining (admin only)
+router.post(
+  '/retrain',
+  requireRole('admin'),
+  dropoutTrackingController.triggerRetrain.bind(dropoutTrackingController)
+);
+
 export default router;

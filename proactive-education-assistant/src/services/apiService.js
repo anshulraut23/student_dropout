@@ -1093,6 +1093,13 @@ class ApiService {
       auth: true,
     });
   }
+
+  async retrainModel() {
+    return this.request('/dropout/retrain', {
+      method: 'POST',
+      auth: true,
+    });
+  }
 }
 
 export default new ApiService();

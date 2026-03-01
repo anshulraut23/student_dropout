@@ -350,6 +350,18 @@ def main():
     print("   - Mark students who dropped out in the admin panel")
     print("   - Retrain the model periodically with updated outcomes")
     print("   - Monitor model performance metrics in the dashboard")
+    
+    # Optionally save to database if environment variable is set
+    if os.getenv('SAVE_TO_DB', 'false').lower() == 'true':
+        print("\n📊 Saving performance metrics to database...")
+        try:
+            from save_performance_to_db import save_performance_to_database
+            if save_performance_to_database():
+                print("✅ Performance metrics saved to database")
+            else:
+                print("⚠️  Failed to save metrics to database")
+        except Exception as e:
+            print(f"⚠️  Error saving to database: {e}")
 
 if __name__ == "__main__":
     main()
