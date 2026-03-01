@@ -5,7 +5,8 @@ import {
   createIntervention,
   updateIntervention,
   deleteIntervention,
-  getInterventionsByStudent
+  getInterventionsByStudent,
+  triggerInterventionByStudent
 } from '../controllers/interventionController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -19,6 +20,9 @@ router.get('/', getInterventions);
 
 // Get interventions for a specific student
 router.get('/student/:studentId', getInterventionsByStudent);
+
+// Trigger automated intervention email for a student
+router.post('/trigger/:studentId', triggerInterventionByStudent);
 
 // Get intervention by ID
 router.get('/:interventionId', getInterventionById);

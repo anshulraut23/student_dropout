@@ -199,6 +199,8 @@ CREATE TABLE IF NOT EXISTS interventions (
     school_id TEXT NOT NULL REFERENCES schools(id) ON DELETE CASCADE,
     initiated_by TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     intervention_type VARCHAR(100) NOT NULL,
+    risk_level VARCHAR(20),
+    trigger_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
     title VARCHAR(255) NOT NULL,
     description TEXT NOT NULL,
@@ -207,10 +209,23 @@ CREATE TABLE IF NOT EXISTS interventions (
     start_date DATE NOT NULL,
     target_date DATE,
     end_date DATE,
-    status VARCHAR(20) DEFAULT 'planned' CHECK (status IN ('planned', 'in_progress', 'completed', 'cancelled')),
+    status VARCHAR(20) DEFAULT 'planned' CHECK (status IN ('planned', 'in_progress', 'completed', 'cancelled', 'pending', 'sent', 'failed')),
     outcome TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Intervention Messages Table
+CREATE TABLE IF NOT EXISTS intervention_messages (
+    id TEXT PRIMARY KEY,
+    intervention_id TEXT NOT NULL REFERENCES interventions(id) ON DELETE CASCADE,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('email', 'sms', 'push', 'in_app')),
+    recipient VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    sent_date TIMESTAMP,
+    delivery_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (delivery_status IN ('pending', 'sent', 'failed', 'read')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create indexes for better performance
@@ -248,6 +263,8 @@ CREATE INDEX IF NOT EXISTS idx_behaviors_type ON behaviors(behavior_type);
 CREATE INDEX IF NOT EXISTS idx_interventions_student_id ON interventions(student_id);
 CREATE INDEX IF NOT EXISTS idx_interventions_school_id ON interventions(school_id);
 CREATE INDEX IF NOT EXISTS idx_interventions_initiated_by ON interventions(initiated_by);
+CREATE INDEX IF NOT EXISTS idx_intervention_messages_intervention_id ON intervention_messages(intervention_id);
+CREATE INDEX IF NOT EXISTS idx_intervention_messages_delivery_status ON intervention_messages(delivery_status);
 CREATE INDEX IF NOT EXISTS idx_interventions_status ON interventions(status);
 CREATE INDEX IF NOT EXISTS idx_interventions_start_date ON interventions(start_date);
 

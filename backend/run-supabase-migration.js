@@ -31,30 +31,39 @@ async function runMigration() {
     console.log('✅ Connected to database');
     console.log('   Current time:', testResult.rows[0].now);
 
-    // Read the migration file
-    const migrationPath = path.join(__dirname, 'supabase', 'migrations', '20260225150000_add_behavior_interventions.sql');
-    console.log('\n📄 Reading migration file:', migrationPath);
-    
-    const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
-    
-    console.log('\n🚀 Running migration...');
-    await pool.query(migrationSQL);
-    
-    console.log('✅ Migration completed successfully!');
+    const migrationFiles = (process.env.MIGRATION_FILES
+      ? process.env.MIGRATION_FILES.split(',').map(name => name.trim()).filter(Boolean)
+      : ['20260228120000_add_intervention_email_tables.sql']);
+
+    for (const migrationFile of migrationFiles) {
+      const migrationPath = path.join(__dirname, 'supabase', 'migrations', migrationFile);
+      console.log('\n📄 Reading migration file:', migrationPath);
+
+      const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
+
+      console.log(`🚀 Running migration: ${migrationFile}`);
+      await pool.query(migrationSQL);
+    }
+
+    console.log('✅ Migrations completed successfully!');
     
     // Verify tables were created
     console.log('\n🔍 Verifying tables...');
+    const expectedTables = migrationFiles.includes('20260225150000_add_behavior_interventions.sql')
+      ? ['behaviors', 'interventions', 'intervention_messages']
+      : ['interventions', 'intervention_messages'];
+
     const tablesResult = await pool.query(`
       SELECT table_name 
       FROM information_schema.tables 
       WHERE table_schema = 'public' 
-      AND table_name IN ('behaviors', 'interventions')
+      AND table_name = ANY($1::text[])
       ORDER BY table_name
-    `);
+    `, [expectedTables]);
     
     console.log('   Tables found:', tablesResult.rows.map(r => r.table_name).join(', '));
     
-    if (tablesResult.rows.length === 2) {
+    if (tablesResult.rows.length === expectedTables.length) {
       console.log('\n✨ All tables created successfully!');
     } else {
       console.log('\n⚠️  Warning: Not all tables were created');

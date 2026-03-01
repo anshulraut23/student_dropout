@@ -284,6 +284,8 @@ CREATE TABLE IF NOT EXISTS interventions (
     student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
     initiated_by TEXT NOT NULL REFERENCES users(id),
     intervention_type VARCHAR(100) NOT NULL,
+    risk_level VARCHAR(20),
+    trigger_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     priority VARCHAR(20) DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'urgent')),
     title VARCHAR(255),
     description TEXT NOT NULL,
@@ -292,10 +294,23 @@ CREATE TABLE IF NOT EXISTS interventions (
     start_date DATE,
     target_date DATE,
     end_date DATE,
-    status VARCHAR(20) DEFAULT 'planned' CHECK (status IN ('planned', 'in_progress', 'completed', 'cancelled')),
+    status VARCHAR(20) DEFAULT 'planned' CHECK (status IN ('planned', 'in_progress', 'completed', 'cancelled', 'pending', 'sent', 'failed')),
     outcome TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Intervention Messages Table
+CREATE TABLE IF NOT EXISTS intervention_messages (
+    id TEXT PRIMARY KEY,
+    intervention_id TEXT NOT NULL REFERENCES interventions(id) ON DELETE CASCADE,
+    type VARCHAR(20) NOT NULL CHECK (type IN ('email', 'sms', 'push', 'in_app')),
+    recipient VARCHAR(255) NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    body TEXT NOT NULL,
+    sent_date TIMESTAMP,
+    delivery_status VARCHAR(20) NOT NULL DEFAULT 'pending' CHECK (delivery_status IN ('pending', 'sent', 'failed', 'read')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ============================================================================
