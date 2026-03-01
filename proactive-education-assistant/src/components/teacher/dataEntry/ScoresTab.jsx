@@ -492,6 +492,8 @@ import { useState, useEffect, useRef } from "react";
 import { FaSpinner, FaCheck, FaEdit, FaCheckCircle, FaExclamationTriangle, FaDownload, FaUpload, FaFileExcel } from "react-icons/fa";
 import apiService from "../../../services/apiService";
 import { useGameification } from "../../../hooks/useGameification";
+import BulkUploadValidationService from "../../../services/bulkUploadValidationService";
+import ValidationResultsDisplay from "../../bulkUpload/ValidationResultsDisplay";
 
 const HORIZON_STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -582,6 +584,8 @@ export default function ScoresTab() {
   const [existingMarks, setExistingMarks] = useState([]);
   const [isEditMode, setIsEditMode] = useState(false);
   const [marksStats, setMarksStats] = useState(null);
+  const [validationResults, setValidationResults] = useState(null);
+  const [showValidationModal, setShowValidationModal] = useState(false);
 
   useEffect(() => {
     loadExams();
@@ -734,18 +738,45 @@ export default function ScoresTab() {
       return;
     }
 
+    const marksData = Object.entries(scores)
+      .filter(([_, score]) => score.obtainedMarks !== "")
+      .map(([studentId, score]) => {
+        const student = students.find(s => s.id === studentId);
+        return {
+          "Enrollment No": student?.enrollmentNo,
+          "Student Name": student?.name,
+          "Marks Obtained": score.obtainedMarks,
+          Status: 'submitted',
+          Remarks: score.remarks || ""
+        };
+      });
+
+    const validation = BulkUploadValidationService.validateMarksData(
+      marksData,
+      students,
+      selectedExam
+    );
+
+    setValidationResults(validation);
+    setShowValidationModal(true);
+  };
+
+  const confirmMarksUpload = async () => {
+    if (!validationResults || validationResults.valid.length === 0) {
+      setMessage({ type: "error", text: "No valid records to upload" });
+      return;
+    }
+
     setLoading(true);
     setMessage({ type: "", text: "" });
 
     try {
-      const marksRecords = Object.entries(scores)
-        .filter(([_, score]) => score.obtainedMarks !== "")
-        .map(([studentId, score]) => ({
-          studentId,
-          marksObtained: parseFloat(score.obtainedMarks),
-          status: 'submitted',
-          remarks: score.remarks || ""
-        }));
+      const marksRecords = validationResults.valid.map(v => ({
+        studentId: v.studentId,
+        marksObtained: v.marksObtained,
+        status: v.status,
+        remarks: v.remarks || ""
+      }));
 
       const result = await apiService.enterBulkMarks({
         examId: selectedExam.id,
@@ -766,6 +797,8 @@ export default function ScoresTab() {
           type: "success", 
           text: `✓ ${isEditMode ? 'Updated' : 'Saved'} marks! ${result.entered} student${result.entered !== 1 ? 's' : ''} processed.${result.failed > 0 ? ` (${result.failed} failed)` : ''} +30 XP earned!` 
         });
+        setShowValidationModal(false);
+        setValidationResults(null);
         
         await checkExistingMarks();
         
@@ -905,12 +938,40 @@ export default function ScoresTab() {
     
     if (imported > 0) {
       setMessage({ 
-        type: "success", 
-        text: `✓ Imported marks for ${imported} student${imported !== 1 ? 's' : ''}!${errors.length > 0 ? ` ${errors.length} error(s) - check console` : ''}` 
+        type: "info", 
+        text: `CSV parsed! Found marks for ${imported} student${imported !== 1 ? 's' : ''}. Review validation results.${errors.length > 0 ? ` ${errors.length} error(s) - check console` : ''}` 
       });
       if (errors.length > 0) {
         console.error('CSV import errors:', errors);
       }
+
+      // Immediately validate the imported data
+      if (!selectedExam) {
+        setMessage({ type: "error", text: "Please select an exam first before uploading CSV" });
+        return;
+      }
+
+      const marksData = Object.entries(newScores)
+        .filter(([_, score]) => score.obtainedMarks !== "")
+        .map(([studentId, score]) => {
+          const student = students.find(s => s.id === studentId);
+          return {
+            "Enrollment No": student?.enrollmentNo,
+            "Student Name": student?.name,
+            "Marks Obtained": score.obtainedMarks,
+            Status: 'submitted',
+            Remarks: score.remarks || ""
+          };
+        });
+
+      const validation = BulkUploadValidationService.validateMarksData(
+        marksData,
+        students,
+        selectedExam
+      );
+
+      setValidationResults(validation);
+      setShowValidationModal(true);
     } else {
       setMessage({ type: "error", text: "No valid marks found in CSV. " + (errors.length > 0 ? errors[0] : '') });
     }
@@ -1201,6 +1262,37 @@ export default function ScoresTab() {
       {!selectedExam && (
         <div className="text-center py-12" style={{ color: 'var(--gray)' }}>
           Please select an exam to enter marks
+        </div>
+      )}
+
+      {showValidationModal && validationResults && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            borderRadius: '12px',
+            maxWidth: '900px',
+            width: '95%',
+            maxHeight: '90vh'
+          }}>
+            <ValidationResultsDisplay
+              validationResults={validationResults}
+              loading={loading}
+              onCancel={() => setShowValidationModal(false)}
+              onConfirm={confirmMarksUpload}
+              type="marks"
+            />
+          </div>
         </div>
       )}
     </>

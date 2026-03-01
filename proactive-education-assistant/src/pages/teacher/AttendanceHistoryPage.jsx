@@ -1,7 +1,7 @@
 
 
 import { useState, useEffect } from "react";
-import { FaCalendarAlt, FaFilter, FaDownload, FaEye, FaSearch, FaCheckCircle, FaExclamationTriangle, FaSpinner } from "react-icons/fa";
+import { FaCalendarAlt, FaFilter, FaDownload, FaEye, FaCheckCircle, FaExclamationTriangle, FaSpinner } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import { useTranslation } from "react-i18next";
 import apiService from "../../services/apiService";
@@ -322,15 +322,14 @@ export default function AttendanceHistoryPage() {
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-5">
                 <div>
                   <label className="block text-xs font-semibold mb-2" style={{ color: 'var(--text-dark)' }}>{t("teacher_attendance.search", "Search")}</label>
-                  <div className="relative">
-                    <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style={{ color: 'var(--gray)' }} />
+                  <div>
                     <input
                       type="text"
                       name="searchQuery"
                       value={filters.searchQuery}
                       onChange={handleFilterChange}
                       placeholder={t("teacher_attendance.search_placeholder", "Search by class or date...")}
-                      className="w-full pl-9 pr-4 py-2.5 text-sm horizon-input"
+                      className="w-full px-4 py-2.5 text-sm horizon-input"
                     />
                   </div>
                 </div>

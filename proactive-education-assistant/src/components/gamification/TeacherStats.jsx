@@ -1,30 +1,32 @@
 // TeacherStats Component - Display top stats cards
 import { useGame } from '../../context/GamificationContext';
+import { useTranslation } from 'react-i18next';
 
 export default function TeacherStats() {
+  const { t } = useTranslation();
   const { gamificationData } = useGame();
 
   const stats = [
     {
-      label: 'Total XP',
+      label: t('teacher_gamification.stats.total_xp', 'Total XP'),
       value: gamificationData.totalXP,
       icon: '⭐',
       color: 'blue',
     },
     {
-      label: 'Achievements',
+      label: t('teacher_gamification.stats.achievements', 'Achievements'),
       value: gamificationData.badges.length,
       icon: '🏆',
       color: 'green',
     },
     {
-      label: 'Day Streak',
+      label: t('teacher_gamification.stats.day_streak', 'Day Streak'),
       value: gamificationData.loginStreak,
       icon: '🔥',
       color: 'orange',
     },
     {
-      label: 'Students Helped',
+      label: t('teacher_gamification.stats.students_helped', 'Students Helped'),
       value: gamificationData.studentsHelped,
       icon: '👥',
       color: 'purple',
