@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { FaSpinner, FaEye, FaFilter, FaUserGraduate } from "react-icons/fa";
+import { FaSpinner, FaSearch, FaEye, FaFilter, FaUserGraduate, FaTrash } from "react-icons/fa";
 import apiService from "../../services/apiService";
 import loadingGif from "../../assets/loading.gif";
 
@@ -25,6 +25,11 @@ export default function StudentListPage() {
   const [filterClass, setFilterClass] = useState(classIdFromUrl || "all");
   const [filterRisk, setFilterRisk] = useState("all");
   const [groupBy, setGroupBy] = useState("none");
+  
+  // Delete modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -100,6 +105,29 @@ export default function StudentListPage() {
       console.error('Error loading risk predictions:', err);
     } finally {
       setLoadingRisk(false);
+    }
+  };
+
+  // Delete student function
+  const handleDeleteStudent = async () => {
+    if (!studentToDelete) return;
+
+    setDeleteLoading(true);
+    try {
+      const result = await apiService.deleteStudent(studentToDelete.id);
+      
+      if (result.success) {
+        setStudents(students.filter(s => s.id !== studentToDelete.id));
+        setShowDeleteModal(false);
+        setStudentToDelete(null);
+      } else {
+        alert(result.error || 'Failed to delete student');
+      }
+    } catch (error) {
+      console.error('Error deleting student:', error);
+      alert(error.message || 'Failed to delete student');
+    } finally {
+      setDeleteLoading(false);
     }
   };
 
@@ -382,13 +410,26 @@ export default function StudentListPage() {
                             {getRiskBadge(getRiskLevel(student))}
                           </td>
                           <td className="px-4 md:px-6 py-3 md:py-4 text-right">
-                            <button
-                              onClick={() => navigate(`/students/${student.id}`)}
-                              className="inline-flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors font-medium"
-                            >
-                              <FaEye className="text-xs" />
-                              <span className="hidden sm:inline">{t("students.view", "View")}</span>
-                            </button>
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => navigate(`/students/${student.id}`)}
+                                className="inline-flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors font-medium"
+                              >
+                                <FaEye className="text-xs" />
+                                <span className="hidden sm:inline">{t("students.view", "View")}</span>
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setStudentToDelete(student);
+                                  setShowDeleteModal(true);
+                                }}
+                                className="inline-flex items-center gap-1 px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded transition-colors font-medium"
+                                title={t("students.delete", "Delete")}
+                              >
+                                <FaTrash className="text-xs" />
+                                <span className="hidden sm:inline">{t("students.delete", "Delete")}</span>
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -421,6 +462,16 @@ export default function StudentListPage() {
                           title={t("students.view_profile", "View Profile")}
                         >
                           <FaEye className="text-sm" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setStudentToDelete(student);
+                            setShowDeleteModal(true);
+                          }}
+                          className="ml-2 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
+                          title={t("students.delete", "Delete")}
+                        >
+                          <FaTrash className="text-sm" />
                         </button>
                       </div>
                       
@@ -458,7 +509,107 @@ export default function StudentListPage() {
             </button>
           </div>
         )}
-      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && studentToDelete && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px'
+          }}
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '12px',
+              padding: '24px',
+              maxWidth: '400px',
+              width: '100%',
+              boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '12px', color: '#1e2c3a' }}>
+              Delete Student?
+            </h2>
+            <p style={{ color: '#6b7a8d', marginBottom: '20px', fontSize: '14px', lineHeight: '1.6' }}>
+              Are you sure you want to delete <strong>{studentToDelete.name}</strong> (Enrollment: {studentToDelete.enrollmentNo})? This action cannot be undone.
+            </p>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setStudentToDelete(null);
+                }}
+                disabled={deleteLoading}
+                style={{
+                  padding: '8px 16px',
+                  border: '1.5px solid #1a6fb5',
+                  color: '#1a6fb5',
+                  background: 'transparent',
+                  borderRadius: '8px',
+                  cursor: deleteLoading ? 'not-allowed' : 'pointer',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  transition: 'all 0.2s',
+                  opacity: deleteLoading ? 0.6 : 1
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteStudent}
+                disabled={deleteLoading}
+                style={{
+                  padding: '8px 16px',
+                  background: '#dc2626',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: deleteLoading ? 'not-allowed' : 'pointer',
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  transition: 'all 0.2s',
+                  opacity: deleteLoading ? 0.6 : 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+              >
+                {deleteLoading ? (
+                  <>
+                    <FaSpinner style={{ animation: 'spin 1s linear infinite' }} />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <FaTrash style={{ fontSize: '12px' }} />
+                    Delete Student
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
+  </div>
   );
 }

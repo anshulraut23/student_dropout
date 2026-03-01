@@ -1,6 +1,7 @@
 import dataStore from '../storage/dataStore.js';
 import { generateId } from '../utils/helpers.js';
 import { getTeacherAccessibleClassIds, canTeacherAccessStudent } from '../utils/teacherAccessControl.js';
+import { triggerInterventionEmail } from '../services/interventionService.js';
 
 /**
  * Get all interventions with filters
@@ -402,6 +403,110 @@ export const getInterventionsByStudent = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Failed to get student interventions'
+    });
+  }
+};
+
+/**
+ * Trigger automated intervention email for a student
+ * POST /api/interventions/trigger/:studentId
+ */
+export const triggerInterventionByStudent = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { userId, schoolId, role } = req.user;
+    const {
+      interventionType,
+      riskLevel,
+      messageChannel,
+      recipientEmail,
+      recipientPhone,
+      subject,
+      message
+    } = req.body || {};
+
+    console.log('\n🚀 TRIGGER INTERVENTION API RECEIVED');
+    console.log('   POST /api/interventions/trigger/:studentId');
+    console.log('   studentId:', studentId);
+    console.log('   userId:', userId);
+    console.log('   role:', role);
+    console.log('   Body:', {
+      interventionType,
+      riskLevel,
+      messageChannel,
+      recipientEmail,
+      recipientPhone,
+      subject,
+      message
+    });
+
+    if (role !== 'teacher' && role !== 'admin') {
+      console.log('   ❌ Access denied - user role:', role);
+      return res.status(403).json({
+        success: false,
+        error: 'Only teachers and admins can trigger interventions'
+      });
+    }
+
+    const student = await dataStore.getStudentById(studentId);
+    if (!student) {
+      console.log('   ❌ Student not found:', studentId);
+      return res.status(404).json({
+        success: false,
+        error: 'Student not found'
+      });
+    }
+
+    console.log('   ✅ Student found:', student.name);
+
+    const classData = await dataStore.getClassById(student.classId);
+    if (!classData || classData.schoolId !== schoolId) {
+      console.log('   ❌ Class not found or school mismatch');
+      return res.status(403).json({
+        success: false,
+        error: 'You do not have access to this student'
+      });
+    }
+
+    if (role === 'teacher') {
+      const hasAccess = await canTeacherAccessStudent(dataStore, userId, studentId, schoolId);
+      if (!hasAccess) {
+        console.log('   ❌ Teacher access denied for student:', studentId);
+        return res.status(403).json({
+          success: false,
+          error: 'You do not have access to this student'
+        });
+      }
+    }
+
+    console.log('   ✅ All permission checks passed');
+
+    const result = await triggerInterventionEmail({
+      studentId,
+      initiatedBy: userId,
+      interventionType: interventionType || 'dropout_risk',
+      riskLevel: riskLevel || 'medium',
+      messageChannel: messageChannel || 'email',
+      recipientEmail,
+      recipientPhone,
+      subject,
+      customMessage: message
+    });
+
+    console.log('   ✅ Intervention trigger completed');
+
+    res.status(201).json({
+      success: true,
+      message: 'Intervention triggered and message processed',
+      data: result
+    });
+  } catch (error) {
+    console.error('❌ Trigger intervention email error:', error);
+    console.error('   Message:', error.message);
+    console.error('   Stack:', error.stack);
+    res.status(500).json({
+      success: false,
+      error: error.message || 'Failed to trigger intervention email'
     });
   }
 };
